@@ -10,6 +10,8 @@
 #include "Lights.h"
 #include "Sky.h"
 
+#include "Input.h"//not sure if this is safe here but i need this for the HandleGuiUpdate method. probably a safer way to do this with a using statement or whatever cpp equivalent
+
 #include <DirectXMath.h>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
 #include <vector>
@@ -27,7 +29,10 @@ public:
 	void Init();
 	void OnResize();
 	void Update(float deltaTime, float totalTime);
+	void HandleGuiUpdate(float deltaTime, Input& input); //for ImGui
 	void Draw(float deltaTime, float totalTime);
+
+	//void HandleGuiUpdate(float deltaTime);
 
 private:
 

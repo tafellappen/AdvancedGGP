@@ -4,12 +4,13 @@
 
 #include "Game.h"
 #include "Vertex.h"
-#include "Input.h"
 
 #include "WICTextureLoader.h"
 
 #include "imgui/imgui.h"
 
+#include "imgui/imgui_impl_dx11.h" //visual studio wanted me to have these too, why did just the first one not work?
+#include "imgui/imgui_impl_win32.h"
 
 // Needed for a helper function to read compiled shader files from the hard drive
 #pragma comment(lib, "d3dcompiler.lib")
@@ -440,17 +441,32 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
+	
+	Input& input = Input::GetInstance();
+	HandleGuiUpdate(deltaTime, input);
+
+	// Update the camera
+	camera->Update(deltaTime);
+
+	// Check individual input
+	if (input.KeyDown(VK_ESCAPE)) Quit();
+	if (input.KeyPress(VK_TAB)) GenerateLights();
+
+}
+
+void Game::HandleGuiUpdate(float deltaTime, Input& input)
+{
 	// Reset input manager's gui state so we don’t
 		// taint our own input (you’ll uncomment later)
-		//   input.SetGuiKeyboardCapture(false);
-	//   input.SetGuiMouseCapture(false);
+	input.SetGuiKeyboardCapture(false);
+	input.SetGuiMouseCapture(false);
 	// Set io info
 	ImGuiIO& io = ImGui::GetIO();
 	io.DeltaTime = deltaTime;
 	io.DisplaySize.x = (float)this->width;
 	io.DisplaySize.y = (float)this->height;
 	io.KeyCtrl = input.KeyDown(VK_CONTROL);
-	io.KeyShift	= input.KeyDown(VK_SHIFT);
+	io.KeyShift = input.KeyDown(VK_SHIFT);
 	io.KeyAlt = input.KeyDown(VK_MENU);
 	io.MousePos.x = (float)input.GetMouseX();
 	io.MousePos.y = (float)input.GetMouseY();
@@ -464,19 +480,10 @@ void Game::Update(float deltaTime, float totalTime)
 	ImGui_ImplWin32_NewFrame();
 	ImGui::NewFrame();
 	// Determine new input capture (you’ll uncomment later)
-	//   input.SetGuiKeyboardCapture(io.WantCaptureKeyboard);
-	//   input.SetGuiMouseCapture(io.WantCaptureMouse);
+	input.SetGuiKeyboardCapture(io.WantCaptureKeyboard);
+	input.SetGuiMouseCapture(io.WantCaptureMouse);
 	// Show the demo window
 	ImGui::ShowDemoWindow();
-
-	// Update the camera
-	camera->Update(deltaTime);
-
-	// Check individual input
-	Input& input = Input::GetInstance();
-	if (input.KeyDown(VK_ESCAPE)) Quit();
-	if (input.KeyPress(VK_TAB)) GenerateLights();
-
 }
 
 // --------------------------------------------------------
@@ -526,8 +533,8 @@ void Game::Draw(float deltaTime, float totalTime)
 	DrawUI();
 
 	//draw ImGUI
-	ImGui::Render();
-	ImGui_ImplDX11_RenderRawData(ImGui::GetDrawData());
+	ImGui::Render();;
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
 	// Present the back buffer to the user
 	//  - Puts the final frame we're drawing into the window so the user can see it
