@@ -484,6 +484,30 @@ void Game::HandleGuiUpdate(float deltaTime, Input& input)
 	input.SetGuiMouseCapture(io.WantCaptureMouse);
 	// Show the demo window
 	ImGui::ShowDemoWindow();
+
+
+	ImGui::Begin("Engine Stats");
+
+	//display FPS
+	std::string fps = std::to_string(DXCore::GetFrameCount());
+	std::string fpsDisplay = "FPS: " + fps;
+	ImGui::Text(fpsDisplay.c_str());
+
+	//display window dimensions
+	std::string heightStr = std::to_string(height);
+	std::string widthStr = std::to_string(width);
+	std::string windowHeight = "Window Height: " + heightStr;
+	std::string windowWidth = "Window Width: " + widthStr;
+	ImGui::Text(windowHeight.c_str());
+	ImGui::Text(windowWidth.c_str());
+
+	//display entities
+	std::string entitiesCount = std::to_string(entities.size());
+	std::string entitiesDisplay = "Entities: " + entitiesCount;
+	ImGui::Text(entitiesDisplay.c_str());
+
+	ImGui::End();
+
 }
 
 // --------------------------------------------------------
