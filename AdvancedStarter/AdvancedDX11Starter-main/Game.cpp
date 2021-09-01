@@ -486,6 +486,13 @@ void Game::HandleGuiUpdate(float deltaTime, Input& input)
 	ImGui::ShowDemoWindow();
 
 
+	ShowEngineStats();
+
+
+}
+
+void Game::ShowEngineStats()
+{
 	ImGui::Begin("Engine Stats");
 
 	//display FPS
@@ -506,8 +513,12 @@ void Game::HandleGuiUpdate(float deltaTime, Input& input)
 	std::string entitiesDisplay = "Entities: " + entitiesCount;
 	ImGui::Text(entitiesDisplay.c_str());
 
-	ImGui::End();
+	//display lights
+	std::string lightsCt = std::to_string(lightCount);
+	std::string lightsDisplay = "Lights: " + lightsCt;
+	ImGui::Text(lightsDisplay.c_str());
 
+	ImGui::End();
 }
 
 // --------------------------------------------------------

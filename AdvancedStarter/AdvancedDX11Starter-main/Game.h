@@ -30,6 +30,7 @@ public:
 	void OnResize();
 	void Update(float deltaTime, float totalTime);
 	void HandleGuiUpdate(float deltaTime, Input& input); //for ImGui
+	void ShowEngineStats();
 	void Draw(float deltaTime, float totalTime);
 
 	//void HandleGuiUpdate(float deltaTime);
