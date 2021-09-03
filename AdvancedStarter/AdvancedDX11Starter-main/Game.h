@@ -54,6 +54,16 @@ private:
 	std::vector<Light> lights;
 	int lightCount;
 
+	//GUI things for lights
+	int maxLights;
+	float minPointLightRange;
+	float maxPointLightRange;
+	float minPointLightIntensity;
+	float maxPointLightIntensity;
+
+	bool allLightsSameColor;
+	DirectX::XMFLOAT3 everyLightColor;
+
 	// These will be loaded along with other assets and
 	// saved to these variables for ease of access
 	Mesh* lightMesh;
@@ -72,6 +82,7 @@ private:
 
 	// General helpers for setup and drawing
 	void GenerateLights();
+	void CreateRandomPointLight();
 	void DrawPointLights();
 	void DrawUI();
 
@@ -81,6 +92,12 @@ private:
 	//GUI stuff
 	void HandleGuiUpdate(float deltaTime, Input& input); //for ImGui
 	void ShowEngineStats(float framerate);
+
+	void AddLabeledFloat(std::string label, float value);
+
+	void ConcatAndCreateText(std::string& label, std::string& valueStr);
+
+	void AddLabeledInt(std::string label, int value);
 
 	//int currentFPS;
 };

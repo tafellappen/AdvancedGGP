@@ -108,6 +108,11 @@ void Game::Init()
 
 	// Set up lights initially
 	lightCount = 64;
+	maxLights = 100;
+	minPointLightRange = 5.0f;
+	maxPointLightRange = 10.0f;
+	minPointLightIntensity = 0.1f;
+	maxPointLightIntensity = 3.0f;
 	GenerateLights();
 
 	// Make our camera
@@ -407,17 +412,22 @@ void Game::GenerateLights()
 	// Create the rest of the lights
 	while (lights.size() < lightCount)
 	{
-		Light point = {};
-		point.Type = LIGHT_TYPE_POINT;
-		point.Position = XMFLOAT3(RandomRange(-10.0f, 10.0f), RandomRange(-5.0f, 5.0f), RandomRange(-10.0f, 10.0f));
-		point.Color = XMFLOAT3(RandomRange(0, 1), RandomRange(0, 1), RandomRange(0, 1));
-		point.Range = RandomRange(5.0f, 10.0f);
-		point.Intensity = RandomRange(0.1f, 3.0f);
-
-		// Add to the list
-		lights.push_back(point);
+		CreateRandomPointLight();
 	}
 
+}
+
+void Game::CreateRandomPointLight()
+{
+	Light point = {};
+	point.Type = LIGHT_TYPE_POINT;
+	point.Position = XMFLOAT3(RandomRange(-10.0f, 10.0f), RandomRange(-5.0f, 5.0f), RandomRange(-10.0f, 10.0f));
+	point.Color = XMFLOAT3(RandomRange(0, 1), RandomRange(0, 1), RandomRange(0, 1));
+	point.Range = RandomRange(minPointLightRange, maxPointLightRange);
+	point.Intensity = RandomRange(minPointLightIntensity, maxPointLightIntensity);
+
+	// Add to the list
+	lights.push_back(point);
 }
 
 
@@ -451,6 +461,12 @@ void Game::Update(float deltaTime, float totalTime)
 	// Check individual input
 	if (input.KeyDown(VK_ESCAPE)) Quit();
 	if (input.KeyPress(VK_TAB)) GenerateLights();
+
+	//If lightCount was increased by user, create more random lights
+	while (lights.size() < lightCount)
+	{
+		CreateRandomPointLight();
+	}
 
 }
 
@@ -491,18 +507,37 @@ void Game::HandleGuiUpdate(float deltaTime, Input& input)
 	//lights editor
 	ImGui::Begin("Lights");
 
-	//display max lights
-	std::string lightsCt = std::to_string(lightCount);
-	std::string lightsDisplay = "Max Lights: " + lightsCt;
-	ImGui::Text(lightsDisplay.c_str());
-
-	////display max number of lights to render
-	//std::string lightsCt = std::to_string(lightCount);
-	//std::string lightsDisplay = "Max # Rendered Lights: " + lightsCt;
-	//ImGui::Text(lightsDisplay.c_str());
-
 	//slider to change how many of them actually render
-	ImGui::SliderInt("Lights in Scene (0 -> 64", &lightCount, 0, 64, "%d");
+	ImGui::SliderInt("Lights in Scene", &lightCount, 0, maxLights, "%d");
+
+
+	//display lights info as tree
+	if (ImGui::CollapsingHeader("Lights"))
+	{
+		for (int i = 0; i < lightCount; i++)
+		{
+			if (ImGui::TreeNode((void*)(intptr_t)i, "Light %d", i))
+			{
+				AddLabeledInt("Type: ", lights[i].Type); //id how to convert that to the actual text right now
+				if (lights[i].Type == LIGHT_TYPE_DIRECTIONAL) //if its not directional, then theres no direction to display (unless maybe spotlight but shhh)
+				{
+					ImGui::DragFloat3("Direction: ", &lights[i].Direction.x);
+				}
+				if (lights[i].Type != LIGHT_TYPE_DIRECTIONAL) //Directional lights have no position
+				{
+					ImGui::SliderFloat("Range", &lights[i].Range, minPointLightRange, maxPointLightRange);
+					ImGui::DragFloat3("Position: ", &lights[i].Position.x);
+					ImGui::SliderFloat("Intensity", &lights[i].Intensity, minPointLightIntensity, maxPointLightIntensity);
+					//AddLabeledFloat("SpotFalloff: ", lights[i].SpotFalloff); //isnt this just for spotlights? we dont have any of those right now
+				}
+				ImGui::DragFloat3("Color: ", &lights[i].Color.x);
+
+				/*ImGui::SameLine();
+				if (ImGui::SmallButton("button")) {}*/
+				ImGui::TreePop();
+			}
+		}
+	}
 
 	ImGui::End();
 }
@@ -512,24 +547,35 @@ void Game::ShowEngineStats(float framerate)
 	ImGui::Begin("Engine Stats");
 
 	//display FPS
-	std::string fpsStr = std::to_string(framerate);
-	std::string fpsDisplay = "FPS: " + fpsStr;
-	ImGui::Text(fpsDisplay.c_str());
+	AddLabeledInt("FPS: ", framerate); //automatically truncate the decimal part, makes this less of an eyesore
 
 	//display window dimensions
-	std::string heightStr = std::to_string(height);
-	std::string widthStr = std::to_string(width);
-	std::string windowHeight = "Window Height: " + heightStr;
-	std::string windowWidth = "Window Width: " + widthStr;
-	ImGui::Text(windowHeight.c_str());
-	ImGui::Text(windowWidth.c_str());
+	AddLabeledInt("Window Height: ", height);
+	AddLabeledInt("Window Width: ", width);
 
 	//display entities
-	std::string entitiesCount = std::to_string(entities.size());
-	std::string entitiesDisplay = "Entities: " + entitiesCount;
-	ImGui::Text(entitiesDisplay.c_str());
+	AddLabeledInt("Entities: ", entities.size());
 
 	ImGui::End();
+}
+
+//there must be a cleaner way than having two methods that are basically the same other than the parameters, right?
+void Game::AddLabeledFloat(std::string label, float value)
+{
+	std::string valueStr = std::to_string(value);
+	ConcatAndCreateText(label, valueStr);
+}
+
+void Game::AddLabeledInt(std::string label, int value)
+{
+	std::string valueStr = std::to_string(value);
+	ConcatAndCreateText(label, valueStr);
+}
+
+void Game::ConcatAndCreateText(std::string& label, std::string& valueStr)
+{
+	std::string valueDisplay = label + valueStr;
+	ImGui::Text(valueDisplay.c_str());
 }
 
 // --------------------------------------------------------
