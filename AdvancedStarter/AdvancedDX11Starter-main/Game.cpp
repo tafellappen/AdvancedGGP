@@ -484,20 +484,36 @@ void Game::HandleGuiUpdate(float deltaTime, Input& input)
 	input.SetGuiMouseCapture(io.WantCaptureMouse);
 	// Show the demo window
 	ImGui::ShowDemoWindow();
+	
 
+	ShowEngineStats(io.Framerate);
 
-	ShowEngineStats();
+	//lights editor
+	ImGui::Begin("Lights");
 
+	//display max lights
+	std::string lightsCt = std::to_string(lightCount);
+	std::string lightsDisplay = "Max Lights: " + lightsCt;
+	ImGui::Text(lightsDisplay.c_str());
 
+	////display max number of lights to render
+	//std::string lightsCt = std::to_string(lightCount);
+	//std::string lightsDisplay = "Max # Rendered Lights: " + lightsCt;
+	//ImGui::Text(lightsDisplay.c_str());
+
+	//slider to change how many of them actually render
+	ImGui::SliderInt("Lights in Scene (0 -> 64", &lightCount, 0, 64, "%d");
+
+	ImGui::End();
 }
 
-void Game::ShowEngineStats()
+void Game::ShowEngineStats(float framerate)
 {
 	ImGui::Begin("Engine Stats");
 
 	//display FPS
-	std::string fps = std::to_string(DXCore::GetFrameCount());
-	std::string fpsDisplay = "FPS: " + fps;
+	std::string fpsStr = std::to_string(framerate);
+	std::string fpsDisplay = "FPS: " + fpsStr;
 	ImGui::Text(fpsDisplay.c_str());
 
 	//display window dimensions
@@ -512,11 +528,6 @@ void Game::ShowEngineStats()
 	std::string entitiesCount = std::to_string(entities.size());
 	std::string entitiesDisplay = "Entities: " + entitiesCount;
 	ImGui::Text(entitiesDisplay.c_str());
-
-	//display lights
-	std::string lightsCt = std::to_string(lightCount);
-	std::string lightsDisplay = "Lights: " + lightsCt;
-	ImGui::Text(lightsDisplay.c_str());
 
 	ImGui::End();
 }

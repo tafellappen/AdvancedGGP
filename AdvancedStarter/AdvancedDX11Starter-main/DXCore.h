@@ -77,8 +77,6 @@ protected:
 	std::string GetFullPathTo(std::string relativeFilePath);
 	std::wstring GetFullPathTo_Wide(std::wstring relativeFilePath);
 
-	//for stats in GUI
-	int GetFrameCount() { return fpsFrameCount; } //is doing this here even proper practice
 
 private:
 	// Timing related data

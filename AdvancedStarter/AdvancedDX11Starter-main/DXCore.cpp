@@ -464,6 +464,7 @@ void DXCore::UpdateTitleBarStats()
 	fpsFrameCount++;
 
 	// Only calc FPS and update title bar once per second
+	//if (!ShouldUpdateFPS())
 	float timeDiff = totalTime - fpsTimeElapsed;
 	if (timeDiff < 1.0f)
 		return;
@@ -498,6 +499,7 @@ void DXCore::UpdateTitleBarStats()
 	fpsFrameCount = 0;
 	fpsTimeElapsed += 1.0f;
 }
+
 
 // --------------------------------------------------------
 // Allocates a console window we can print to for debugging
