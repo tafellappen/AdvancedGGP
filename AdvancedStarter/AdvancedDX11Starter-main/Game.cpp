@@ -504,6 +504,11 @@ void Game::HandleGuiUpdate(float deltaTime, Input& input)
 
 	ShowEngineStats(io.Framerate);
 
+	ShowLightsEditor();
+}
+
+void Game::ShowLightsEditor()
+{
 	//lights editor
 	ImGui::Begin("Lights");
 

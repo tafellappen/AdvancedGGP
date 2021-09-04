@@ -91,6 +91,7 @@ private:
 
 	//GUI stuff
 	void HandleGuiUpdate(float deltaTime, Input& input); //for ImGui
+	void ShowLightsEditor();
 	void ShowEngineStats(float framerate);
 
 	void AddLabeledFloat(std::string label, float value);
