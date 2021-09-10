@@ -15,6 +15,7 @@ Transform::Transform()
 
 	// No need to recalc yet
 	matricesDirty = false;
+	parent = 0;
 }
 
 void Transform::MoveAbsolute(float x, float y, float z)
@@ -98,6 +99,11 @@ DirectX::XMFLOAT4X4 Transform::GetWorldInverseTransposeMatrix()
 	UpdateMatrices();
 	return worldMatrix;
 }
+//
+//void Transform::markTransformDirty()
+//{
+//	matricesDirty = true;
+//}
 
 void Transform::UpdateMatrices()
 {
@@ -118,5 +124,81 @@ void Transform::UpdateMatrices()
 
 		// All set
 		matricesDirty = false;
+	}
+}
+
+int Transform::ChildCount()
+{
+	return children.size();
+}
+
+void Transform::AddChild(Transform* child)
+{
+	if (!child) return; //verify pointer
+	if (GetIndexOfChild(child) <= -1) return; //prevent adding duplicates
+
+	// Add child to list
+	children.push_back(child);
+	child->parent = this;
+
+	//mark child transforms out of date
+	child->matricesDirty = true;
+}
+
+void Transform::RemoveChild(Transform* child)
+{
+	if (!child) return; //verify pointer
+
+	auto childToRemove = std::find(children.begin(), children.end(), child);
+	if (childToRemove != children.end())
+	{
+		children.erase(childToRemove);
+		child->parent = 0;
+
+		child->matricesDirty = true;
+		child->MarkChildTransformsDirty();
+	}
+}
+
+void Transform::SetParent(Transform* newParent)
+{
+	if (this->parent)
+	{
+		this->parent->RemoveChild(this);
+	}
+	if (newParent) 
+	{
+		parent->AddChild(this); //yeah this is big brain time
+
+	}
+}
+
+Transform* Transform::GetChild(int index)
+{
+	return children[index];
+}
+
+int Transform::GetIndexOfChild(Transform* child)
+{
+	for (int i = 0; i < children.size(); i++)
+	{
+		if (child == children[i])
+		{
+			return i;
+		}
+	}
+	return -1; //return -1 if child is not found
+}
+
+Transform* Transform::GetParent()
+{
+	return parent;
+}
+
+void Transform::MarkChildTransformsDirty()
+{
+	for (int i = 0; i < children.size(); i++)
+	{
+		children[i]->matricesDirty = true;
 	}
 }
