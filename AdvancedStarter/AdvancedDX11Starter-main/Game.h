@@ -10,6 +10,8 @@
 #include "Lights.h"
 #include "Sky.h"
 
+#include "AssetManager.h"
+
 #include "Input.h"//not sure if this is safe here but i need this for the HandleGuiUpdate method. probably a safer way to do this with a using statement or whatever cpp equivalent
 
 #include <DirectXMath.h>
@@ -27,6 +29,7 @@ public:
 	// Overridden setup and game loop methods, which
 	// will be called automatically
 	void Init();
+	void CreateTransformHierarchies();
 	void OnResize();
 	void Update(float deltaTime, float totalTime);
 	void Draw(float deltaTime, float totalTime);
@@ -88,6 +91,8 @@ private:
 
 	// Initialization helper method
 	void LoadAssetsAndCreateEntities();
+
+	void UpdateEntitityTransforms();
 
 	//GUI stuff
 	void HandleGuiUpdate(float deltaTime, Input& input); //for ImGui

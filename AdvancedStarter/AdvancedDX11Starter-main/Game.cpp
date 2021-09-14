@@ -5,6 +5,7 @@
 #include "Game.h"
 #include "Vertex.h"
 
+
 #include "WICTextureLoader.h"
 
 #include "imgui/imgui.h"
@@ -107,7 +108,7 @@ void Game::Init()
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Set up lights initially
-	lightCount = 64;
+	lightCount = 30;
 	maxLights = 100;
 	minPointLightRange = 5.0f;
 	maxPointLightRange = 10.0f;
@@ -134,6 +135,22 @@ void Game::Init()
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hWnd);
 	ImGui_ImplDX11_Init(device.Get(), context.Get());
+
+	CreateTransformHierarchies();
+}
+
+void Game::CreateTransformHierarchies()
+{
+	entities[0]->GetTransform()->AddChild(entities[1]->GetTransform());
+	entities[1]->GetTransform()->AddChild(entities[2]->GetTransform());
+	entities[2]->GetTransform()->AddChild(entities[3]->GetTransform());
+	entities[3]->GetTransform()->AddChild(entities[4]->GetTransform());
+
+	entities[5]->GetTransform()->AddChild(entities[6]->GetTransform());
+	entities[6]->GetTransform()->AddChild(entities[7]->GetTransform());
+	entities[7]->GetTransform()->AddChild(entities[8]->GetTransform());
+	entities[8]->GetTransform()->AddChild(entities[9]->GetTransform());
+	entities[9]->GetTransform()->AddChild(entities[10]->GetTransform());
 }
 
 
@@ -142,6 +159,14 @@ void Game::Init()
 // --------------------------------------------------------
 void Game::LoadAssetsAndCreateEntities()
 {
+	//load using asset manager
+	AssetManager& assetManager = AssetManager::GetInstance();
+
+	assetManager.Initialize(GetFullPathTo("../../Assets"), GetFullPathTo_Wide(L"../../Assets"), device, context);
+	assetManager.LoadAllAssets();
+
+	assetManager.LoadVertexShader(L"VertexShader.cso", "VertexShader");
+
 	// Load shaders using our succinct LoadShader() macro
 	SimpleVertexShader* vertexShader	= LoadShader(SimpleVertexShader, L"VertexShader.cso");
 	SimplePixelShader* pixelShader		= LoadShader(SimplePixelShader, L"PixelShader.cso");
@@ -254,6 +279,8 @@ void Game::LoadAssetsAndCreateEntities()
 		samplerOptions,
 		device,
 		context);
+	//assetManager.GetVertexShader("VertexShader"),
+//	assetManager.GetPixelShader("PixelShader"),
 
 	// Create basic materials
 	Material* cobbleMat2x = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), cobbleA, cobbleN, cobbleR, cobbleM, samplerOptions);
@@ -366,6 +393,7 @@ void Game::LoadAssetsAndCreateEntities()
 	entities.push_back(woodSphere);
 
 
+
 	// Save assets needed for drawing point lights
 	// (Since these are just copies of the pointers,
 	//  we won't need to directly delete them as 
@@ -374,6 +402,8 @@ void Game::LoadAssetsAndCreateEntities()
 	lightVS = vertexShader;
 	lightPS = solidColorPS;
 }
+
+
 
 
 // --------------------------------------------------------
@@ -467,6 +497,17 @@ void Game::Update(float deltaTime, float totalTime)
 	{
 		CreateRandomPointLight();
 	}
+
+	UpdateEntitityTransforms();
+}
+
+void Game::UpdateEntitityTransforms()
+{
+	entities[0]->GetTransform()->MoveRelative(0.01f, 0.0f, 0.0f);
+	entities[0]->GetTransform()->Rotate(0.01f, 0.0f, 0.0f);
+
+	entities[6]->GetTransform()->Rotate(0.0f, 0.001f, 0.001f);
+	entities[6]->GetTransform()->SetScale(0.5f, 0.5f, 0.5f);
 
 }
 

@@ -24,7 +24,14 @@ public:
 	DirectX::XMFLOAT4X4 GetWorldMatrix();
 	DirectX::XMFLOAT4X4 GetWorldInverseTransposeMatrix();
 
-	//void markTransformDirty();
+	
+	int ChildCount();
+	void AddChild(Transform* child);
+	void RemoveChild(Transform* child);
+	void SetParent(Transform* parentTransform);
+	Transform* GetChild(unsigned int index);
+	int GetIndexOfChild(Transform* child);
+	Transform* GetParent();
 
 private:
 	// Raw transformation data
@@ -44,14 +51,7 @@ private:
 	std::vector<Transform*> children;
 	Transform* parent;
 
-	int ChildCount();
-	void AddChild(Transform* child);
-	void RemoveChild(Transform* child);
-	void SetParent(Transform* parentTransform);
-	Transform* GetChild(int index);
-	int GetIndexOfChild(Transform* child);
-	Transform* GetParent();
 
-	void MarkChildTransformsDirty();
+	void MarkChildrenTransformsDirty();
 };
 
