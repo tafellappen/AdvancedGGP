@@ -5,11 +5,12 @@
 using namespace DirectX;
 
 // Helper macros for making texture and shader loading code more succinct
-#define LoadTexture(file, srv) CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + "/Textures/cobblestone_albedo.png").c_str(), 0, srv.GetAddressOf())
+#define LoadTexture(file, srv) CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + file).c_str(), 0, srv.GetAddressOf())
 #define LoadShader(type, file) new type(device.Get(), context.Get(), filepath.c_str())
 
 // Singleton requirement
 AssetManager* AssetManager::instance;
+
 
 void AssetManager::Initialize(std::string filepath, std::wstring filepathW, Microsoft::WRL::ComPtr<ID3D11Device> device, Microsoft::WRL::ComPtr<ID3D11DeviceContext> context)
 {
@@ -17,6 +18,11 @@ void AssetManager::Initialize(std::string filepath, std::wstring filepathW, Micr
 	assetsFolderPath_Wide = filepathW;
 	this->device = device;
 	this->context = context;
+}
+
+AssetManager::~AssetManager()
+{
+
 }
 
 void AssetManager::LoadAllAssets()
@@ -43,44 +49,63 @@ void AssetManager::LoadAllAssets()
 
 	// Load the textures
 
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/cobblestone_albedo.png").c_str(), cobbleA.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/cobblestone_normals.png").c_str(), cobbleN.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/cobblestone_roughness.png").c_str(), cobbleR.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/cobblestone_metal.png").c_str(), cobbleM.GetAddressOf());
+	printf((assetsFolderPath + "/Textures/cobblestone_albedo.png").c_str());
+	printf("\n");
+	/*CreateWICTextureFromFile(
+		device.Get(), 
+		context.Get(), 
+		(assetsFolderPath_Wide + L"/Textures/cobblestone_albedo.png").c_str(), 
+		0,
+		cobbleA.GetAddressOf()
+	);*/
+	LoadTexture(L"/Textures/cobblestone_albedo.png", cobbleA);
+	LoadTexture(L"/Textures/cobblestone_normals.png", cobbleN);
+	LoadTexture(L"/Textures/cobblestone_roughness.png", cobbleR);
+	LoadTexture(L"/Textures/cobblestone_metal.png", cobbleM);
 
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/floor_albedo.png").c_str(), floorA.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/floor_normals.png").c_str(), floorN.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/floor_roughness.png").c_str(), floorR.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/floor_metal.png").c_str(), floorM.GetAddressOf());
+	LoadTexture(L"/Textures/floor_albedo.png", floorA);
+	LoadTexture(L"/Textures/floor_normals.png", floorN);
+	LoadTexture(L"/Textures/floor_roughness.png", floorR);
+	LoadTexture(L"/Textures/floor_metal.png", floorM);
 
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/paint_albedo.png").c_str(), paintA.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/paint_normals.png").c_str(), paintN.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/paint_roughness.png").c_str(), paintR.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/paint_metal.png").c_str(), paintM.GetAddressOf());
+	LoadTexture(L"/Textures/paint_albedo.png", paintA);
+	LoadTexture(L"/Textures/paint_normals.png", paintN);
+	LoadTexture(L"/Textures/paint_roughness.png", paintR);
+	LoadTexture(L"/Textures/paint_metal.png", paintM);
 
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/scratched_albedo.png").c_str(), scratchedA.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/scratched_normals.png").c_str(), scratchedN.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/scratched_roughness.png").c_str(), scratchedR.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/scratched_metal.png").c_str(), scratchedM.GetAddressOf());
+	LoadTexture(L"/Textures/scratched_albedo.png", scratchedA);
+	LoadTexture(L"/Textures/scratched_normals.png", scratchedN);
+	LoadTexture(L"/Textures/scratched_roughness.png", scratchedR);
+	LoadTexture(L"/Textures/scratched_metal.png", scratchedM);
 
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/bronze_albedo.png").c_str(), bronzeA.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/bronze_normals.png").c_str(), bronzeN.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/bronze_roughness.png").c_str(), bronzeR.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/bronze_metal.png").c_str(), bronzeM.GetAddressOf());
+	LoadTexture(L"/Textures/bronze_albedo.png", bronzeA);
+	LoadTexture(L"/Textures/bronze_normals.png", bronzeN);
+	LoadTexture(L"/Textures/bronze_roughness.png", bronzeR);
+	LoadTexture(L"/Textures/bronze_metal.png", bronzeM);
 
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/rough_albedo.png").c_str(), roughA.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/rough_normals.png").c_str(), roughN.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/rough_roughness.png").c_str(), roughR.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/rough_metal.png").c_str(), roughM.GetAddressOf());
+	LoadTexture(L"/Textures/rough_albedo.png", roughA);
+	LoadTexture(L"/Textures/rough_normals.png", roughN);
+	LoadTexture(L"/Textures/rough_roughness.png", roughR);
+	LoadTexture(L"/Textures/rough_metal.png", roughM);
 
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/wood_albedo.png").c_str(), woodA.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/wood_normals.png").c_str(), woodN.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/wood_roughness.png").c_str(), woodR.GetAddressOf());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), (assetsFolderPath_Wide + L"/Textures/wood_metal.png").c_str(), woodM.GetAddressOf());
+	LoadTexture(L"/Textures/wood_albedo.png", woodA);
+	LoadTexture(L"/Textures/wood_normals.png", woodN);
+	LoadTexture(L"/Textures/wood_roughness.png", woodR);
+	LoadTexture(L"/Textures/wood_metal.png", woodM);
 
+	//// Describe and create our sampler state
+	//D3D11_SAMPLER_DESC sampDesc = {};
+	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	//sampDesc.MaxAnisotropy = 16;
+	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	//device->CreateSamplerState(&sampDesc, samplerOptions.GetAddressOf());
 
 }
 
+//it may be word having these also return the pointer to the shader, since it would be nice to have the loading and "shortening" all in one
 void AssetManager::LoadVertexShader(std::wstring filepath, std::string shaderName)
 {
 	SimpleVertexShader* Shader = LoadShader(SimpleVertexShader, filepath);
@@ -95,7 +120,7 @@ void AssetManager::LoadPixelShader(std::wstring filepath, std::string shaderName
 
 Mesh* AssetManager::GetMesh(std::string name)
 {
-	return nullptr;
+	return meshes[name];
 }
 
 Material* AssetManager::GetMaterial(std::string name)

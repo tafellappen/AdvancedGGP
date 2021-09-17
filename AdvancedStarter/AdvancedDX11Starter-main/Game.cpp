@@ -141,16 +141,16 @@ void Game::Init()
 
 void Game::CreateTransformHierarchies()
 {
-	entities[0]->GetTransform()->AddChild(entities[1]->GetTransform());
-	entities[1]->GetTransform()->AddChild(entities[2]->GetTransform());
-	entities[2]->GetTransform()->AddChild(entities[3]->GetTransform());
-	entities[3]->GetTransform()->AddChild(entities[4]->GetTransform());
+	//entities[0]->GetTransform()->AddChild(entities[1]->GetTransform());
+	//entities[1]->GetTransform()->AddChild(entities[2]->GetTransform());
+	//entities[2]->GetTransform()->AddChild(entities[3]->GetTransform());
+	//entities[3]->GetTransform()->AddChild(entities[4]->GetTransform());
 
-	entities[5]->GetTransform()->AddChild(entities[6]->GetTransform());
-	entities[6]->GetTransform()->AddChild(entities[7]->GetTransform());
-	entities[7]->GetTransform()->AddChild(entities[8]->GetTransform());
-	entities[8]->GetTransform()->AddChild(entities[9]->GetTransform());
-	entities[9]->GetTransform()->AddChild(entities[10]->GetTransform());
+	//entities[5]->GetTransform()->AddChild(entities[6]->GetTransform());
+	//entities[6]->GetTransform()->AddChild(entities[7]->GetTransform());
+	//entities[7]->GetTransform()->AddChild(entities[8]->GetTransform());
+	//entities[8]->GetTransform()->AddChild(entities[9]->GetTransform());
+	//entities[9]->GetTransform()->AddChild(entities[10]->GetTransform());
 }
 
 
@@ -160,39 +160,82 @@ void Game::CreateTransformHierarchies()
 void Game::LoadAssetsAndCreateEntities()
 {
 	//load using asset manager
-	AssetManager& assetManager = AssetManager::GetInstance();
+	AssetManager& assetMngr = AssetManager::GetInstance();
 
-	assetManager.Initialize(GetFullPathTo("../../Assets"), GetFullPathTo_Wide(L"../../Assets"), device, context);
-	assetManager.LoadAllAssets();
+	assetMngr.Initialize(
+		GetFullPathTo("../../Assets"), 
+		GetFullPathTo_Wide(L"../../Assets"), 
+		device, 
+		context
+	);
+	assetMngr.LoadAllAssets();
 
-	assetManager.LoadVertexShader(L"VertexShader.cso", "VertexShader");
+	assetMngr.LoadVertexShader(
+		GetFullPathTo_Wide(L"VertexShader.cso"), 
+		"VertexShader"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"PixelShader.cso"),
+		"PixelShader"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"PixelShaderPBR.cso"),
+		"PixelShaderPBR"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"SolidColorPS.cso"),
+		"SolidColorPS"
+	);
 
-	// Load shaders using our succinct LoadShader() macro
-	SimpleVertexShader* vertexShader	= LoadShader(SimpleVertexShader, L"VertexShader.cso");
-	SimplePixelShader* pixelShader		= LoadShader(SimplePixelShader, L"PixelShader.cso");
-	SimplePixelShader* pixelShaderPBR	= LoadShader(SimplePixelShader, L"PixelShaderPBR.cso");
-	SimplePixelShader* solidColorPS		= LoadShader(SimplePixelShader, L"SolidColorPS.cso");
+	//sky shaders
+	assetMngr.LoadVertexShader(
+		GetFullPathTo_Wide(L"SkyVS.cso"),
+		"SkyVS"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"SkyPS.cso"),
+		"SkyPS"
+	);
 	
-	SimpleVertexShader* skyVS = LoadShader(SimpleVertexShader, L"SkyVS.cso");
-	SimplePixelShader* skyPS  = LoadShader(SimplePixelShader, L"SkyPS.cso");
 
-	shaders.push_back(vertexShader);
-	shaders.push_back(pixelShader);
-	shaders.push_back(pixelShaderPBR);
-	shaders.push_back(solidColorPS);
-	shaders.push_back(skyVS);
-	shaders.push_back(skyPS);
+	SimpleVertexShader* vertexShader	= assetMngr.GetVertexShader("VertexShader");
+	SimplePixelShader* pixelShader		= assetMngr.GetPixelShader("PixelShader");
+	SimplePixelShader* pixelShaderPBR	= assetMngr.GetPixelShader("PixelShaderPBR");
+	SimplePixelShader* solidColorPS		= assetMngr.GetPixelShader("SolidColorPS");
+	//SimpleVertexShader* vertexShader	= LoadShader(SimpleVertexShader, L"VertexShader.cso");
+	//SimplePixelShader* pixelShader		= LoadShader(SimplePixelShader, L"PixelShader.cso");
+	//SimplePixelShader* pixelShaderPBR	= LoadShader(SimplePixelShader, L"PixelShaderPBR.cso");
+	//SimplePixelShader* solidColorPS		= LoadShader(SimplePixelShader, L"SolidColorPS.cso");
+	
+	SimpleVertexShader* skyVS = assetMngr.GetVertexShader("SkyVS");
+	SimplePixelShader* skyPS = assetMngr.GetPixelShader("SkyPS");
+
+	//pretty sure I can just get rid of these
+	//shaders.push_back(vertexShader);
+	//shaders.push_back(pixelShader);
+	//shaders.push_back(pixelShaderPBR);
+	//shaders.push_back(solidColorPS);
+	//shaders.push_back(skyVS);
+	//shaders.push_back(skyPS);
 
 	// Set up the sprite batch and load the sprite font
 	spriteBatch = new SpriteBatch(context.Get());
 	arial = new SpriteFont(device.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/arial.spritefont").c_str());
 
 	// Make the meshes
-	Mesh* sphereMesh = new Mesh(GetFullPathTo("../../Assets/Models/sphere.obj").c_str(), device);
-	Mesh* helixMesh = new Mesh(GetFullPathTo("../../Assets/Models/helix.obj").c_str(), device);
-	Mesh* cubeMesh = new Mesh(GetFullPathTo("../../Assets/Models/cube.obj").c_str(), device);
-	Mesh* coneMesh = new Mesh(GetFullPathTo("../../Assets/Models/cone.obj").c_str(), device);
+	//Mesh* sphereMesh = new Mesh(GetFullPathTo("../../Assets/Models/sphere.obj").c_str(), device);
+	//Mesh* helixMesh =  new Mesh(GetFullPathTo("../../Assets/Models/helix.obj").c_str(), device);
+	//Mesh* cubeMesh =   new Mesh(GetFullPathTo("../../Assets/Models/cube.obj").c_str(), device);
+	//Mesh* coneMesh =   new Mesh(GetFullPathTo("../../Assets/Models/cone.obj").c_str(), device);
+	Mesh* sphereMesh = assetMngr.GetMesh("sphere");
+	Mesh* helixMesh = assetMngr.GetMesh("helix");
+	Mesh* cubeMesh = assetMngr.GetMesh("cube");
+	Mesh* coneMesh = assetMngr.GetMesh("cone");
 
+	//meshes.push_back(assetMngr.GetMesh("sphere"));
+	//meshes.push_back(assetMngr.GetMesh("helix"));
+	//meshes.push_back(assetMngr.GetMesh("cube"));
+	//meshes.push_back(assetMngr.GetMesh("cone"));
 	meshes.push_back(sphereMesh);
 	meshes.push_back(helixMesh);
 	meshes.push_back(cubeMesh);
@@ -209,6 +252,8 @@ void Game::LoadAssetsAndCreateEntities()
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodA,  woodN,  woodR,  woodM;
 
 	// Load the textures using our succinct LoadTexture() macro
+	printf(GetFullPathTo("../../Assets/Textures/cobblestone_albedo.png").c_str());
+	//CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/cobblestone_albedo.png").c_str(), 0, cobbleA.GetAddressOf());
 	LoadTexture(L"../../Assets/Textures/cobblestone_albedo.png", cobbleA);
 	LoadTexture(L"../../Assets/Textures/cobblestone_normals.png", cobbleN);
 	LoadTexture(L"../../Assets/Textures/cobblestone_roughness.png", cobbleR);

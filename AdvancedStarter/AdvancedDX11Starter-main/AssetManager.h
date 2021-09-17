@@ -40,6 +40,7 @@ private:
 #pragma endregion
 
 public:
+	~AssetManager();
 	void Initialize(std::string filepath, std::wstring filepathW, Microsoft::WRL::ComPtr<ID3D11Device> device, Microsoft::WRL::ComPtr<ID3D11DeviceContext> context);
 	void LoadAllAssets();
 	void LoadVertexShader(std::wstring filepath, std::string shaderName);
