@@ -168,7 +168,6 @@ void Game::LoadAssetsAndCreateEntities()
 		device, 
 		context
 	);
-	assetMngr.LoadAllAssets();
 
 	assetMngr.LoadVertexShader(
 		GetFullPathTo_Wide(L"VertexShader.cso"), 
@@ -197,6 +196,8 @@ void Game::LoadAssetsAndCreateEntities()
 		"SkyPS"
 	);
 	
+	//needs to happen after shaders are loaded right now because it relies on the shaders already existing to create the materials and everything
+	assetMngr.LoadAllAssets();
 
 	SimpleVertexShader* vertexShader	= assetMngr.GetVertexShader("VertexShader");
 	SimplePixelShader* pixelShader		= assetMngr.GetPixelShader("PixelShader");
@@ -243,63 +244,65 @@ void Game::LoadAssetsAndCreateEntities()
 
 	
 	// Declare the textures we'll need
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobbleA,  cobbleN,  cobbleR,  cobbleM;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorA,  floorN,  floorR,  floorM;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintA,  paintN,  paintR,  paintM;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedA,  scratchedN,  scratchedR,  scratchedM;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeA,  bronzeN,  bronzeR,  bronzeM;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughA,  roughN,  roughR,  roughM;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodA,  woodN,  woodR,  woodM;
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobbleA,  cobbleN,  cobbleR,  cobbleM;
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorA,  floorN,  floorR,  floorM;
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintA,  paintN,  paintR,  paintM;
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedA,  scratchedN,  scratchedR,  scratchedM;
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeA,  bronzeN,  bronzeR,  bronzeM;
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughA,  roughN,  roughR,  roughM;
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodA,  woodN,  woodR,  woodM;
 
-	// Load the textures using our succinct LoadTexture() macro
-	printf(GetFullPathTo("../../Assets/Textures/cobblestone_albedo.png").c_str());
-	//CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/cobblestone_albedo.png").c_str(), 0, cobbleA.GetAddressOf());
-	LoadTexture(L"../../Assets/Textures/cobblestone_albedo.png", cobbleA);
-	LoadTexture(L"../../Assets/Textures/cobblestone_normals.png", cobbleN);
-	LoadTexture(L"../../Assets/Textures/cobblestone_roughness.png", cobbleR);
-	LoadTexture(L"../../Assets/Textures/cobblestone_metal.png", cobbleM);
+	//// Load the textures using our succinct LoadTexture() macro
+	//printf(GetFullPathTo("../../Assets/Textures/cobblestone_albedo.png").c_str());
+	////CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/cobblestone_albedo.png").c_str(), 0, cobbleA.GetAddressOf());
+	//LoadTexture(L"../../Assets/Textures/cobblestone_albedo.png", cobbleA);
+	//LoadTexture(L"../../Assets/Textures/cobblestone_normals.png", cobbleN);
+	//LoadTexture(L"../../Assets/Textures/cobblestone_roughness.png", cobbleR);
+	//LoadTexture(L"../../Assets/Textures/cobblestone_metal.png", cobbleM);
 
-	LoadTexture(L"../../Assets/Textures/floor_albedo.png", floorA);
-	LoadTexture(L"../../Assets/Textures/floor_normals.png", floorN);
-	LoadTexture(L"../../Assets/Textures/floor_roughness.png", floorR);
-	LoadTexture(L"../../Assets/Textures/floor_metal.png", floorM);
-	
-	LoadTexture(L"../../Assets/Textures/paint_albedo.png", paintA);
-	LoadTexture(L"../../Assets/Textures/paint_normals.png", paintN);
-	LoadTexture(L"../../Assets/Textures/paint_roughness.png", paintR);
-	LoadTexture(L"../../Assets/Textures/paint_metal.png", paintM);
-	
-	LoadTexture(L"../../Assets/Textures/scratched_albedo.png", scratchedA);
-	LoadTexture(L"../../Assets/Textures/scratched_normals.png", scratchedN);
-	LoadTexture(L"../../Assets/Textures/scratched_roughness.png", scratchedR);
-	LoadTexture(L"../../Assets/Textures/scratched_metal.png", scratchedM);
-	
-	LoadTexture(L"../../Assets/Textures/bronze_albedo.png", bronzeA);
-	LoadTexture(L"../../Assets/Textures/bronze_normals.png", bronzeN);
-	LoadTexture(L"../../Assets/Textures/bronze_roughness.png", bronzeR);
-	LoadTexture(L"../../Assets/Textures/bronze_metal.png", bronzeM);
-	
-	LoadTexture(L"../../Assets/Textures/rough_albedo.png", roughA);
-	LoadTexture(L"../../Assets/Textures/rough_normals.png", roughN);
-	LoadTexture(L"../../Assets/Textures/rough_roughness.png", roughR);
-	LoadTexture(L"../../Assets/Textures/rough_metal.png", roughM);
-	
-	LoadTexture(L"../../Assets/Textures/wood_albedo.png", woodA);
-	LoadTexture(L"../../Assets/Textures/wood_normals.png", woodN);
-	LoadTexture(L"../../Assets/Textures/wood_roughness.png", woodR);
-	LoadTexture(L"../../Assets/Textures/wood_metal.png", woodM);
+	//LoadTexture(L"../../Assets/Textures/floor_albedo.png", floorA);
+	//LoadTexture(L"../../Assets/Textures/floor_normals.png", floorN);
+	//LoadTexture(L"../../Assets/Textures/floor_roughness.png", floorR);
+	//LoadTexture(L"../../Assets/Textures/floor_metal.png", floorM);
+	//
+	//LoadTexture(L"../../Assets/Textures/paint_albedo.png", paintA);
+	//LoadTexture(L"../../Assets/Textures/paint_normals.png", paintN);
+	//LoadTexture(L"../../Assets/Textures/paint_roughness.png", paintR);
+	//LoadTexture(L"../../Assets/Textures/paint_metal.png", paintM);
+	//
+	//LoadTexture(L"../../Assets/Textures/scratched_albedo.png", scratchedA);
+	//LoadTexture(L"../../Assets/Textures/scratched_normals.png", scratchedN);
+	//LoadTexture(L"../../Assets/Textures/scratched_roughness.png", scratchedR);
+	//LoadTexture(L"../../Assets/Textures/scratched_metal.png", scratchedM);
+	//
+	//LoadTexture(L"../../Assets/Textures/bronze_albedo.png", bronzeA);
+	//LoadTexture(L"../../Assets/Textures/bronze_normals.png", bronzeN);
+	//LoadTexture(L"../../Assets/Textures/bronze_roughness.png", bronzeR);
+	//LoadTexture(L"../../Assets/Textures/bronze_metal.png", bronzeM);
+	//
+	//LoadTexture(L"../../Assets/Textures/rough_albedo.png", roughA);
+	//LoadTexture(L"../../Assets/Textures/rough_normals.png", roughN);
+	//LoadTexture(L"../../Assets/Textures/rough_roughness.png", roughR);
+	//LoadTexture(L"../../Assets/Textures/rough_metal.png", roughM);
+	//
+	//LoadTexture(L"../../Assets/Textures/wood_albedo.png", woodA);
+	//LoadTexture(L"../../Assets/Textures/wood_normals.png", woodN);
+	//LoadTexture(L"../../Assets/Textures/wood_roughness.png", woodR);
+	//LoadTexture(L"../../Assets/Textures/wood_metal.png", woodM);
 
 	// Describe and create our sampler state
-	D3D11_SAMPLER_DESC sampDesc = {};
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	sampDesc.MaxAnisotropy = 16;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	device->CreateSamplerState(&sampDesc, samplerOptions.GetAddressOf());
+	//D3D11_SAMPLER_DESC sampDesc = {};
+	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	//sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	//sampDesc.MaxAnisotropy = 16;
+	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	//device->CreateSamplerState(&sampDesc, samplerOptions.GetAddressOf());
 
 
+	// grab the sky from the asset manager
+	sky = assetMngr.GetSky();
 	// Create the sky using a DDS cube map
 	/*sky = new Sky(
 		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\SunnyCubeMap.dds").c_str(),
@@ -311,30 +314,30 @@ void Game::LoadAssetsAndCreateEntities()
 		context);*/
 
 	// Create the sky using 6 images
-	sky = new Sky(
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\right.png").c_str(),
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\left.png").c_str(),
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\up.png").c_str(),
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\down.png").c_str(),
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\front.png").c_str(),
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\back.png").c_str(),
-		cubeMesh,
-		skyVS,
-		skyPS,
-		samplerOptions,
-		device,
-		context);
+	//sky = new Sky(
+	//	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\right.png").c_str(),
+	//	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\left.png").c_str(),
+	//	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\up.png").c_str(),
+	//	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\down.png").c_str(),
+	//	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\front.png").c_str(),
+	//	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\back.png").c_str(),
+	//	cubeMesh,
+	//	skyVS,
+	//	skyPS,
+	//	samplerOptions,
+	//	device,
+	//	context);
 	//assetManager.GetVertexShader("VertexShader"),
 //	assetManager.GetPixelShader("PixelShader"),
 
 	// Create basic materials
-	Material* cobbleMat2x = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), cobbleA, cobbleN, cobbleR, cobbleM, samplerOptions);
-	Material* floorMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), floorA, floorN, floorR, floorM, samplerOptions);
-	Material* paintMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), paintA, paintN, paintR, paintM, samplerOptions);
-	Material* scratchedMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), scratchedA, scratchedN, scratchedR, scratchedM, samplerOptions);
-	Material* bronzeMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), bronzeA, bronzeN, bronzeR, bronzeM, samplerOptions);
-	Material* roughMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), roughA, roughN, roughR, roughM, samplerOptions);
-	Material* woodMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), woodA, woodN, woodR, woodM, samplerOptions);
+	Material* cobbleMat2x  = assetMngr.GetMaterial("cobbleMat2x");
+	Material* floorMat =     assetMngr.GetMaterial("floorMat");
+	Material* paintMat =     assetMngr.GetMaterial("paintMat");
+	Material* scratchedMat = assetMngr.GetMaterial("scratchedMat");
+	Material* bronzeMat =    assetMngr.GetMaterial("bronzeMat");
+	Material* roughMat =     assetMngr.GetMaterial("roughMat");
+	Material* woodMat =      assetMngr.GetMaterial("woodMat");
 
 	materials.push_back(cobbleMat2x);
 	materials.push_back(floorMat);
@@ -345,13 +348,13 @@ void Game::LoadAssetsAndCreateEntities()
 	materials.push_back(woodMat);
 
 	// Create PBR materials
-	Material* cobbleMat2xPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), cobbleA, cobbleN, cobbleR, cobbleM, samplerOptions);
-	Material* floorMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), floorA, floorN, floorR, floorM, samplerOptions);
-	Material* paintMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), paintA, paintN, paintR, paintM, samplerOptions);
-	Material* scratchedMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), scratchedA, scratchedN, scratchedR, scratchedM, samplerOptions);
-	Material* bronzeMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), bronzeA, bronzeN, bronzeR, bronzeM, samplerOptions);
-	Material* roughMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), roughA, roughN, roughR, roughM, samplerOptions);
-	Material* woodMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), woodA, woodN, woodR, woodM, samplerOptions);
+	Material* cobbleMat2xPBR =  assetMngr.GetMaterial("cobbleMat2xPBR");
+	Material* floorMatPBR =     assetMngr.GetMaterial("floorMatPBR");
+	Material* paintMatPBR =     assetMngr.GetMaterial("paintMatPBR");
+	Material* scratchedMatPBR = assetMngr.GetMaterial("scratchedMatPBR");
+	Material* bronzeMatPBR =    assetMngr.GetMaterial("bronzeMatPBR");
+	Material* roughMatPBR =     assetMngr.GetMaterial("roughMatPBR");
+	Material* woodMatPBR =      assetMngr.GetMaterial("woodMatPBR");
 
 	materials.push_back(cobbleMat2xPBR);
 	materials.push_back(floorMatPBR);

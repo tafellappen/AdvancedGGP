@@ -41,7 +41,12 @@ private:
 
 public:
 	~AssetManager();
-	void Initialize(std::string filepath, std::wstring filepathW, Microsoft::WRL::ComPtr<ID3D11Device> device, Microsoft::WRL::ComPtr<ID3D11DeviceContext> context);
+	void Initialize(
+		std::string filepath, 
+		std::wstring filepathW, 
+		Microsoft::WRL::ComPtr<ID3D11Device> device, 
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext> context
+	);
 	void LoadAllAssets();
 	void LoadVertexShader(std::wstring filepath, std::string shaderName);
 	void LoadPixelShader(std::wstring filepath, std::string shaderName);
@@ -50,12 +55,16 @@ public:
 	Material* GetMaterial(std::string name);
 	SimpleVertexShader* GetVertexShader(std::string name);
 	SimplePixelShader* GetPixelShader(std::string name);
+	Sky* GetSky();
 
 private:
 	Microsoft::WRL::ComPtr<ID3D11Device>		device;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext>	context;
 	std::wstring assetsFolderPath_Wide;
 	std::string assetsFolderPath;
+
+	//important for textures
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerOptions;
 
 	//lookup maps for assets
 	std::unordered_map<std::string, Mesh*> meshes;

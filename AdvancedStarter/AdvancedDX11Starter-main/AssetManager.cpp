@@ -93,15 +93,83 @@ void AssetManager::LoadAllAssets()
 	LoadTexture(L"/Textures/wood_roughness.png", woodR);
 	LoadTexture(L"/Textures/wood_metal.png", woodM);
 
-	//// Describe and create our sampler state
-	//D3D11_SAMPLER_DESC sampDesc = {};
-	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	//sampDesc.MaxAnisotropy = 16;
-	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	//device->CreateSamplerState(&sampDesc, samplerOptions.GetAddressOf());
+	// Describe and create our sampler state
+	D3D11_SAMPLER_DESC sampDesc = {};
+	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	sampDesc.MaxAnisotropy = 16;
+	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	device->CreateSamplerState(&sampDesc, samplerOptions.GetAddressOf()); //todo: im pretty sure sampler state can just stay in this class and doesnt even need to be accessed in game
+	// emphasis on "pretty sure"
+
+	//for now assume that these already exist, aka assume that all shaders were loaded before this.
+	//todo: I'd really like to be able to put these both in their own method, and have this just automatically handle whether its a dds cube map or 6 images
+	SimpleVertexShader* skyVS = vertexShaders["SkyVS"];
+	SimplePixelShader* skyPS = pixelShaders["SkyPS"];
+	// Create the sky using a DDS cube map
+/*sky = new Sky(
+	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\SunnyCubeMap.dds").c_str(),
+	cubeMesh,
+	skyVS,
+	skyPS,
+	samplerOptions,
+	device,
+	context);*/
+
+	sky = new Sky(
+		(assetsFolderPath_Wide + L"\\Skies\\Night\\right.png").c_str(),
+		(assetsFolderPath_Wide + L"\\Skies\\Night\\left.png").c_str(),
+		(assetsFolderPath_Wide + L"\\Skies\\Night\\up.png").c_str(),
+		(assetsFolderPath_Wide + L"\\Skies\\Night\\down.png").c_str(),
+		(assetsFolderPath_Wide + L"\\Skies\\Night\\front.png").c_str(),
+		(assetsFolderPath_Wide + L"\\Skies\\Night\\back.png").c_str(),
+		cubeMesh,
+		skyVS,
+		skyPS,
+		samplerOptions,
+		device,
+		context
+	);
+
+	SimpleVertexShader* vertexShader = vertexShaders["VertexShader"];
+	SimplePixelShader* pixelShader	   = pixelShaders["PixelShader"];
+	SimplePixelShader* pixelShaderPBR = pixelShaders["PixelShader"];
+
+	// Create basic materials
+	Material* cobbleMat2x = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), cobbleA, cobbleN, cobbleR, cobbleM, samplerOptions);
+	Material* floorMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), floorA, floorN, floorR, floorM, samplerOptions);
+	Material* paintMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), paintA, paintN, paintR, paintM, samplerOptions);
+	Material* scratchedMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), scratchedA, scratchedN, scratchedR, scratchedM, samplerOptions);
+	Material* bronzeMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), bronzeA, bronzeN, bronzeR, bronzeM, samplerOptions);
+	Material* roughMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), roughA, roughN, roughR, roughM, samplerOptions);
+	Material* woodMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), woodA, woodN, woodR, woodM, samplerOptions);
+
+	materials.insert({ "cobbleMat2x", cobbleMat2x });
+	materials.insert({ "floorMat", floorMat });
+	materials.insert({ "paintMat", paintMat });
+	materials.insert({ "scratchedMat", scratchedMat });
+	materials.insert({ "bronzeMat", bronzeMat });
+	materials.insert({ "roughMat", roughMat });
+	materials.insert({ "woodMat", woodMat });
+
+	// Create PBR materials
+	Material* cobbleMat2xPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), cobbleA, cobbleN, cobbleR, cobbleM, samplerOptions);
+	Material* floorMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), floorA, floorN, floorR, floorM, samplerOptions);
+	Material* paintMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), paintA, paintN, paintR, paintM, samplerOptions);
+	Material* scratchedMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), scratchedA, scratchedN, scratchedR, scratchedM, samplerOptions);
+	Material* bronzeMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), bronzeA, bronzeN, bronzeR, bronzeM, samplerOptions);
+	Material* roughMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), roughA, roughN, roughR, roughM, samplerOptions);
+	Material* woodMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), woodA, woodN, woodR, woodM, samplerOptions);
+
+	materials.insert({ "cobbleMat2xPBR", cobbleMat2xPBR });
+	materials.insert({ "floorMatPBR", floorMatPBR });
+	materials.insert({ "paintMatPBR", paintMatPBR });
+	materials.insert({ "scratchedMatPBR", scratchedMatPBR });
+	materials.insert({ "bronzeMatPBR", bronzeMatPBR });
+	materials.insert({ "roughMatPBR", roughMatPBR });
+	materials.insert({ "woodMatPBR", woodMatPBR });
 
 }
 
@@ -125,7 +193,7 @@ Mesh* AssetManager::GetMesh(std::string name)
 
 Material* AssetManager::GetMaterial(std::string name)
 {
-	return nullptr;
+	return materials[name];
 }
 
 SimpleVertexShader* AssetManager::GetVertexShader(std::string name)
@@ -136,4 +204,9 @@ SimpleVertexShader* AssetManager::GetVertexShader(std::string name)
 SimplePixelShader* AssetManager::GetPixelShader(std::string name)
 {
 	return pixelShaders[name];
+}
+
+Sky* AssetManager::GetSky()
+{
+	return sky;
 }
