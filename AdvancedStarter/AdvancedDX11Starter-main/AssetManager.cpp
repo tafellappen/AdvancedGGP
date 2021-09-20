@@ -37,10 +37,6 @@ void AssetManager::LoadAllAssets()
 	// https://docs.w3cub.com/cpp/filesystem/recursive_directory_iterator
 	for (auto& p : std::filesystem::recursive_directory_iterator(assetsFolderPath))
 	{
-		//std::cout << p.path() << '\n';
-		//std::cout << p.path().filename().string() << '\n';
-		//std::cout << p.path().extension().string() << '\n';
-
 		std::string filepath = p.path().string();
 		std::wstring filepath_wide = p.path().wstring(); //need wstring for CreateWICTextureFromFile
 		std::string relativeFilepath = p.path().relative_path().string();
@@ -53,7 +49,7 @@ void AssetManager::LoadAllAssets()
 				fileName,
 				new Mesh(filepath.c_str(), device)
 				});
-			std::cout << "Loaded mesh " << relativeFilepath << '\n';
+			std::cout << "Loaded mesh " << fileName << std::endl;
 		}
 		else if (fileExtension == ".png")
 		{
@@ -73,7 +69,7 @@ void AssetManager::LoadAllAssets()
 				tex
 				});
 
-			std::cout << "Loaded texture " << relativeFilepath << '\n';
+			std::cout << "Loaded texture " << fileName << std::endl;
 		}
 
 
@@ -128,26 +124,20 @@ void AssetManager::LoadAllAssets()
 	//go through all the material definitions
 	for (auto& p : std::filesystem::recursive_directory_iterator(assetsFolderPath + "/ObjectDefinitions/Materials"))
 	{
-		//std::wstring filepath_wide = p.path().wstring(); //need wstring for CreateWICTextureFromFile
-		//std::string relativeFilepath = p.path().relative_path().string();
-		//std::string fileName = p.path().filename().string();
+		std::string fileName = p.path().filename().string();
 		std::string filepath = p.path().string();
 		std::string fileExtension = p.path().extension().string();
 
 		if (fileExtension == ".json")
 		{
-			std::cout << "Found material json file: " << filepath << std::endl;
+			//std::cout << "Found material json file: " << filepath << std::endl;
 			std::ifstream matDefFile = std::ifstream(filepath);
 			//https://stackoverflow.com/questions/2912520/read-file-contents-into-a-string-in-c
 			std::string matDefStr((std::istreambuf_iterator<char>(matDefFile)), (std::istreambuf_iterator<char>()));
-			//std::cout << "json file: " << std::endl;
-			////std::cout << matDefFile << std::endl;
-			json materialDefinition = json::parse(matDefStr);// nullptr, false);
-			//std::cout << materialDefinition << std::endl;
+			json materialDefinition = json::parse(matDefStr);
 
 			std::string matName = materialDefinition["name"];
 			std::vector<float> matColor = materialDefinition["color"];
-			//XMFLOAT4 matColor = XMFLOAT4(materialDefinition["color"]);
 
 			std::string texAlbedo = materialDefinition["textures"]["albedo"];//.value("albedo", undefinedDefault);
 			std::string texNorm = materialDefinition["textures"]["normal"];//.value("albedo", undefinedDefault);
@@ -159,19 +149,12 @@ void AssetManager::LoadAllAssets()
 			SimpleVertexShader* vertexShader = vertexShaders[materialDefinition["vertexShader"]];
 			SimplePixelShader* pixelShader = pixelShaders[materialDefinition["pixelShader"]];
 
-			/*json textureDefObj = json::parse(texturesStr);
-			std::string texAlbedo = textureDefObj.value("albedo", undefinedDefault);*/
-			std::cout << texAlbedo << std::endl;
-			std::cout << texNorm << std::endl;
-			std::cout << texRough << std::endl;
-			std::cout << texMetal << std::endl;
-
 			Material* thisMat = new Material(
 				vertexShader,
 				pixelShader,
-				XMFLOAT4(1, 1, 1, 1),
+				XMFLOAT4(matColor[0], matColor[1], matColor[2], matColor[3]),
 				256.0f,
-				XMFLOAT2(2, 2),
+				XMFLOAT2(matUvScale[0], matUvScale[1]),
 				textures[texAlbedo],
 				textures[texNorm],
 				textures[texRough],
@@ -179,7 +162,7 @@ void AssetManager::LoadAllAssets()
 				samplerOptions
 			);
 			materials.insert({ matName, thisMat });
-			std::cout << "Created material: " << matName << std::endl;
+			std::cout << "Created material \"" << matName << "\" from definition \"" << fileName << "\"" << std::endl;
 		}
 		
 	}
