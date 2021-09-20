@@ -171,166 +171,63 @@ void Game::LoadAssetsAndCreateEntities()
 
 	assetMngr.LoadVertexShader(
 		GetFullPathTo_Wide(L"VertexShader.cso"), 
-		"VertexShader"
+		"VertexShader.cso"
 	);
 	assetMngr.LoadPixelShader(
 		GetFullPathTo_Wide(L"PixelShader.cso"),
-		"PixelShader"
+		"PixelShader.cso"
 	);
 	assetMngr.LoadPixelShader(
 		GetFullPathTo_Wide(L"PixelShaderPBR.cso"),
-		"PixelShaderPBR"
+		"PixelShaderPBR.cso"
 	);
 	assetMngr.LoadPixelShader(
 		GetFullPathTo_Wide(L"SolidColorPS.cso"),
-		"SolidColorPS"
+		"SolidColorPS.cso"
 	);
 
 	//sky shaders
 	assetMngr.LoadVertexShader(
 		GetFullPathTo_Wide(L"SkyVS.cso"),
-		"SkyVS"
+		"SkyVS.cso"
 	);
 	assetMngr.LoadPixelShader(
 		GetFullPathTo_Wide(L"SkyPS.cso"),
-		"SkyPS"
+		"SkyPS.cso"
 	);
 	
 	//needs to happen after shaders are loaded right now because it relies on the shaders already existing to create the materials and everything
 	assetMngr.LoadAllAssets();
 
-	SimpleVertexShader* vertexShader	= assetMngr.GetVertexShader("VertexShader");
-	SimplePixelShader* pixelShader		= assetMngr.GetPixelShader("PixelShader");
-	SimplePixelShader* pixelShaderPBR	= assetMngr.GetPixelShader("PixelShaderPBR");
-	SimplePixelShader* solidColorPS		= assetMngr.GetPixelShader("SolidColorPS");
-	//SimpleVertexShader* vertexShader	= LoadShader(SimpleVertexShader, L"VertexShader.cso");
-	//SimplePixelShader* pixelShader		= LoadShader(SimplePixelShader, L"PixelShader.cso");
-	//SimplePixelShader* pixelShaderPBR	= LoadShader(SimplePixelShader, L"PixelShaderPBR.cso");
-	//SimplePixelShader* solidColorPS		= LoadShader(SimplePixelShader, L"SolidColorPS.cso");
-	
-	SimpleVertexShader* skyVS = assetMngr.GetVertexShader("SkyVS");
-	SimplePixelShader* skyPS = assetMngr.GetPixelShader("SkyPS");
+	SimpleVertexShader* vertexShader	= assetMngr.GetVertexShader("VertexShader.cso");
+	SimplePixelShader* pixelShader		= assetMngr.GetPixelShader("PixelShader.cso");
+	SimplePixelShader* pixelShaderPBR	= assetMngr.GetPixelShader("PixelShaderPBR.cso");
+	SimplePixelShader* solidColorPS		= assetMngr.GetPixelShader("SolidColorPS.cso");
 
-	//pretty sure I can just get rid of these
-	//shaders.push_back(vertexShader);
-	//shaders.push_back(pixelShader);
-	//shaders.push_back(pixelShaderPBR);
-	//shaders.push_back(solidColorPS);
-	//shaders.push_back(skyVS);
-	//shaders.push_back(skyPS);
+	SimpleVertexShader* skyVS = assetMngr.GetVertexShader("SkyVS.cso");
+	SimplePixelShader* skyPS = assetMngr.GetPixelShader("SkyPS.cso");
 
 	// Set up the sprite batch and load the sprite font
 	spriteBatch = new SpriteBatch(context.Get());
 	arial = new SpriteFont(device.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/arial.spritefont").c_str());
 
-	// Make the meshes
-	//Mesh* sphereMesh = new Mesh(GetFullPathTo("../../Assets/Models/sphere.obj").c_str(), device);
-	//Mesh* helixMesh =  new Mesh(GetFullPathTo("../../Assets/Models/helix.obj").c_str(), device);
-	//Mesh* cubeMesh =   new Mesh(GetFullPathTo("../../Assets/Models/cube.obj").c_str(), device);
-	//Mesh* coneMesh =   new Mesh(GetFullPathTo("../../Assets/Models/cone.obj").c_str(), device);
-	Mesh* sphereMesh = assetMngr.GetMesh("sphere");
-	Mesh* helixMesh = assetMngr.GetMesh("helix");
-	Mesh* cubeMesh = assetMngr.GetMesh("cube");
-	Mesh* coneMesh = assetMngr.GetMesh("cone");
+	// Grab the meshes from the asset manager
+	Mesh* sphereMesh = assetMngr.GetMesh("sphere.obj");
+	Mesh* helixMesh = assetMngr.GetMesh("helix.obj");
+	Mesh* cubeMesh = assetMngr.GetMesh("cube.obj");
+	Mesh* coneMesh = assetMngr.GetMesh("cone.obj");
 
-	//meshes.push_back(assetMngr.GetMesh("sphere"));
-	//meshes.push_back(assetMngr.GetMesh("helix"));
-	//meshes.push_back(assetMngr.GetMesh("cube"));
-	//meshes.push_back(assetMngr.GetMesh("cone"));
 	meshes.push_back(sphereMesh);
 	meshes.push_back(helixMesh);
 	meshes.push_back(cubeMesh);
 	meshes.push_back(coneMesh);
 
-	
-	// Declare the textures we'll need
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobbleA,  cobbleN,  cobbleR,  cobbleM;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorA,  floorN,  floorR,  floorM;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintA,  paintN,  paintR,  paintM;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedA,  scratchedN,  scratchedR,  scratchedM;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeA,  bronzeN,  bronzeR,  bronzeM;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughA,  roughN,  roughR,  roughM;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodA,  woodN,  woodR,  woodM;
-
-	//// Load the textures using our succinct LoadTexture() macro
-	//printf(GetFullPathTo("../../Assets/Textures/cobblestone_albedo.png").c_str());
-	////CreateWICTextureFromFile(device.Get(), context.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/cobblestone_albedo.png").c_str(), 0, cobbleA.GetAddressOf());
-	//LoadTexture(L"../../Assets/Textures/cobblestone_albedo.png", cobbleA);
-	//LoadTexture(L"../../Assets/Textures/cobblestone_normals.png", cobbleN);
-	//LoadTexture(L"../../Assets/Textures/cobblestone_roughness.png", cobbleR);
-	//LoadTexture(L"../../Assets/Textures/cobblestone_metal.png", cobbleM);
-
-	//LoadTexture(L"../../Assets/Textures/floor_albedo.png", floorA);
-	//LoadTexture(L"../../Assets/Textures/floor_normals.png", floorN);
-	//LoadTexture(L"../../Assets/Textures/floor_roughness.png", floorR);
-	//LoadTexture(L"../../Assets/Textures/floor_metal.png", floorM);
-	//
-	//LoadTexture(L"../../Assets/Textures/paint_albedo.png", paintA);
-	//LoadTexture(L"../../Assets/Textures/paint_normals.png", paintN);
-	//LoadTexture(L"../../Assets/Textures/paint_roughness.png", paintR);
-	//LoadTexture(L"../../Assets/Textures/paint_metal.png", paintM);
-	//
-	//LoadTexture(L"../../Assets/Textures/scratched_albedo.png", scratchedA);
-	//LoadTexture(L"../../Assets/Textures/scratched_normals.png", scratchedN);
-	//LoadTexture(L"../../Assets/Textures/scratched_roughness.png", scratchedR);
-	//LoadTexture(L"../../Assets/Textures/scratched_metal.png", scratchedM);
-	//
-	//LoadTexture(L"../../Assets/Textures/bronze_albedo.png", bronzeA);
-	//LoadTexture(L"../../Assets/Textures/bronze_normals.png", bronzeN);
-	//LoadTexture(L"../../Assets/Textures/bronze_roughness.png", bronzeR);
-	//LoadTexture(L"../../Assets/Textures/bronze_metal.png", bronzeM);
-	//
-	//LoadTexture(L"../../Assets/Textures/rough_albedo.png", roughA);
-	//LoadTexture(L"../../Assets/Textures/rough_normals.png", roughN);
-	//LoadTexture(L"../../Assets/Textures/rough_roughness.png", roughR);
-	//LoadTexture(L"../../Assets/Textures/rough_metal.png", roughM);
-	//
-	//LoadTexture(L"../../Assets/Textures/wood_albedo.png", woodA);
-	//LoadTexture(L"../../Assets/Textures/wood_normals.png", woodN);
-	//LoadTexture(L"../../Assets/Textures/wood_roughness.png", woodR);
-	//LoadTexture(L"../../Assets/Textures/wood_metal.png", woodM);
-
-	// Describe and create our sampler state
-	//D3D11_SAMPLER_DESC sampDesc = {};
-	//sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	//sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	//sampDesc.MaxAnisotropy = 16;
-	//sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	//device->CreateSamplerState(&sampDesc, samplerOptions.GetAddressOf());
-
 
 	// grab the sky from the asset manager
 	sky = assetMngr.GetSky();
-	// Create the sky using a DDS cube map
-	/*sky = new Sky(
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\SunnyCubeMap.dds").c_str(),
-		cubeMesh,
-		skyVS,
-		skyPS,
-		samplerOptions,
-		device,
-		context);*/
 
-	// Create the sky using 6 images
-	//sky = new Sky(
-	//	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\right.png").c_str(),
-	//	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\left.png").c_str(),
-	//	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\up.png").c_str(),
-	//	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\down.png").c_str(),
-	//	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\front.png").c_str(),
-	//	GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\back.png").c_str(),
-	//	cubeMesh,
-	//	skyVS,
-	//	skyPS,
-	//	samplerOptions,
-	//	device,
-	//	context);
-	//assetManager.GetVertexShader("VertexShader"),
-//	assetManager.GetPixelShader("PixelShader"),
 
-	// Create basic materials
+	// grab basic materials from asset manager
 	Material* cobbleMat2x  = assetMngr.GetMaterial("cobbleMat2x");
 	Material* floorMat =     assetMngr.GetMaterial("floorMat");
 	Material* paintMat =     assetMngr.GetMaterial("paintMat");
@@ -347,7 +244,7 @@ void Game::LoadAssetsAndCreateEntities()
 	materials.push_back(roughMat);
 	materials.push_back(woodMat);
 
-	// Create PBR materials
+	// grab PBR materials from asset manager
 	Material* cobbleMat2xPBR =  assetMngr.GetMaterial("cobbleMat2xPBR");
 	Material* floorMatPBR =     assetMngr.GetMaterial("floorMatPBR");
 	Material* paintMatPBR =     assetMngr.GetMaterial("paintMatPBR");

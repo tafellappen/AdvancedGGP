@@ -1,0 +1,21 @@
+{
+    "name": "scratchedMat",
+    "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "textures": {
+        "albedo": "scratched_albedo.png",
+        "normal": "scratched_normals.png",
+        "rough":  "scratched_roughness.png",
+        "metal":  "scratched_metal.png"
+    },
+    "uvScale": [
+        2.0,
+        2.0
+    ],
+    "vertexShader": "VertexShader.cso",
+    "pixelShader": "PixelShader.cso"
+}

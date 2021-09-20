@@ -1,0 +1,21 @@
+{
+    "name": "floorMatPBR",
+    "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "textures": {
+        "albedo": "floor_albedo.png",
+        "normal": "floor_normals.png",
+        "rough": "floor_roughness.png",
+        "metal": "floor_metal.png"
+    },
+    "uvScale": [
+        2.0,
+        2.0
+    ],
+    "vertexShader": "VertexShader.cso",
+    "pixelShader": "PixelShaderPBR.cso"
+}
