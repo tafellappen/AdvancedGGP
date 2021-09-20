@@ -23,11 +23,13 @@ public:
 		const std::vector<Light*>& lights		
 	);
 
+	~Renderer();
+
 	void PostResize(
 		unsigned int windowWidth,
 		unsigned int windowHeight,
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backBufferRTV,
-		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthBufferDS
+		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthBufferDSV
 	);
 
 	void Render(Camera* camera);
@@ -41,8 +43,8 @@ private:
 	unsigned int windowWidth;
 	unsigned int windowHeight;
 	Sky* sky;
-	const std::vector<GameEntity*>& entities;
-	const std::vector<Light*>& lights;
+	const std::vector<GameEntity*>* entities;
+	const std::vector<Light*>* lights;
 
 	void DrawPointLights(Camera* camera);
 };

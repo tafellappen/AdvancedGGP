@@ -9,6 +9,7 @@
 #include "SpriteBatch.h"
 #include "Lights.h"
 #include "Sky.h"
+#include "Renderer.h"
 
 #include "AssetManager.h"
 
@@ -52,6 +53,8 @@ private:
 	std::vector<GameEntity*> entitiesGradient;
 	std::vector<ISimpleShader*> shaders;
 	Camera* camera;
+
+	Renderer* renderer;
 
 	// Lights
 	std::vector<Light> lights;

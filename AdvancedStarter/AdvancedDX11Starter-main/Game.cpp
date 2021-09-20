@@ -137,6 +137,19 @@ void Game::Init()
 	ImGui_ImplDX11_Init(device.Get(), context.Get());
 
 	CreateTransformHierarchies();
+
+	renderer = new Renderer(
+		device,
+		context,
+		swapChain,
+		backBufferRTV,
+		depthStencilView,
+		width,
+		height,
+		sky,
+		entities,
+		lights
+	);
 }
 
 void Game::CreateTransformHierarchies()
@@ -419,6 +432,9 @@ void Game::OnResize()
 	// Update our projection matrix to match the new aspect ratio
 	if (camera)
 		camera->UpdateProjectionMatrix(this->width / (float)this->height);
+
+	//update renderer data
+
 }
 
 // --------------------------------------------------------
