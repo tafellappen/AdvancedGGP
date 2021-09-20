@@ -34,11 +34,6 @@ AssetManager::~AssetManager()
 
 void AssetManager::LoadAllAssets()
 {
-	/*std::experimental::filesystem::recursive_directory_iterator fileIterator = std::experimental::filesystem::recursive_directory_iterator();
-	for (std::experimental::filesystem::recursive_directory_iterator next((filepath)), end; next != end; ++next)
-	{
-
-	}*/
 	// https://docs.w3cub.com/cpp/filesystem/recursive_directory_iterator
 	for (auto& p : std::filesystem::recursive_directory_iterator(assetsFolderPath))
 	{
@@ -85,61 +80,7 @@ void AssetManager::LoadAllAssets()
 
 	}
 
-	//// Make the meshes
-	//Mesh* sphereMesh = new Mesh((assetsFolderPath + "/Models/sphere.obj").c_str(), device);
-	//Mesh* helixMesh =  new Mesh((assetsFolderPath + "/Models/helix.obj").c_str(), device);
-	//Mesh* cubeMesh =   new Mesh((assetsFolderPath + "/Models/cube.obj").c_str(), device);
-	//Mesh* coneMesh =   new Mesh((assetsFolderPath + "/Models/cone.obj").c_str(), device);
 
-	//meshes.insert({ "sphere", sphereMesh });
-	//meshes.insert({ "helix", helixMesh });
-	//meshes.insert({ "cube", cubeMesh });
-	//meshes.insert({ "cone", coneMesh });
-
-	// Declare the textures we'll need
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobbleA, cobbleN, cobbleR, cobbleM;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorA, floorN, floorR, floorM;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintA, paintN, paintR, paintM;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedA, scratchedN, scratchedR, scratchedM;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeA, bronzeN, bronzeR, bronzeM;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughA, roughN, roughR, roughM;
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodA, woodN, woodR, woodM;
-
-	//// Load the textures
-	//LoadTexture(L"/Textures/cobblestone_albedo.png", cobbleA);
-	//LoadTexture(L"/Textures/cobblestone_normals.png", cobbleN);
-	//LoadTexture(L"/Textures/cobblestone_roughness.png", cobbleR);
-	//LoadTexture(L"/Textures/cobblestone_metal.png", cobbleM);
-
-	//LoadTexture(L"/Textures/floor_albedo.png", floorA);
-	//LoadTexture(L"/Textures/floor_normals.png", floorN);
-	//LoadTexture(L"/Textures/floor_roughness.png", floorR);
-	//LoadTexture(L"/Textures/floor_metal.png", floorM);
-
-	//LoadTexture(L"/Textures/paint_albedo.png", paintA);
-	//LoadTexture(L"/Textures/paint_normals.png", paintN);
-	//LoadTexture(L"/Textures/paint_roughness.png", paintR);
-	//LoadTexture(L"/Textures/paint_metal.png", paintM);
-
-	//LoadTexture(L"/Textures/scratched_albedo.png", scratchedA);
-	//LoadTexture(L"/Textures/scratched_normals.png", scratchedN);
-	//LoadTexture(L"/Textures/scratched_roughness.png", scratchedR);
-	//LoadTexture(L"/Textures/scratched_metal.png", scratchedM);
-
-	//LoadTexture(L"/Textures/bronze_albedo.png", bronzeA);
-	//LoadTexture(L"/Textures/bronze_normals.png", bronzeN);
-	//LoadTexture(L"/Textures/bronze_roughness.png", bronzeR);
-	//LoadTexture(L"/Textures/bronze_metal.png", bronzeM);
-
-	//LoadTexture(L"/Textures/rough_albedo.png", roughA);
-	//LoadTexture(L"/Textures/rough_normals.png", roughN);
-	//LoadTexture(L"/Textures/rough_roughness.png", roughR);
-	//LoadTexture(L"/Textures/rough_metal.png", roughM);
-
-	//LoadTexture(L"/Textures/wood_albedo.png", woodA);
-	//LoadTexture(L"/Textures/wood_normals.png", woodN);
-	//LoadTexture(L"/Textures/wood_roughness.png", woodR);
-	//LoadTexture(L"/Textures/wood_metal.png", woodM);
 
 	// Describe and create our sampler state
 	D3D11_SAMPLER_DESC sampDesc = {};
@@ -183,17 +124,6 @@ void AssetManager::LoadAllAssets()
 	);
 
 
-	// Create basic materials
-	//Material* cobbleMat2x = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), cobbleA, cobbleN, cobbleR, cobbleM, samplerOptions);
-	//std::string matDefStr = "";
-	//if (matDefFile.is_open())
-	//{
-	//	while (matDefFile.good())
-	//	{
-	//		matDefStr += matDefFile.getline()
-	//	}
-	//	matDefFile.close();
-	//}
 
 	//go through all the material definitions
 	for (auto& p : std::filesystem::recursive_directory_iterator(assetsFolderPath + "/ObjectDefinitions/Materials"))
@@ -254,142 +184,6 @@ void AssetManager::LoadAllAssets()
 		
 	}
 
-	//std::ifstream matDefFile = std::ifstream(assetsFolderPath + "/ObjectDefinitions/Materials/cobbleMat2x.json");
-	////https://stackoverflow.com/questions/2912520/read-file-contents-into-a-string-in-c
-	//std::string matDefStr((std::istreambuf_iterator<char>(matDefFile)), (std::istreambuf_iterator<char>()));
-	////std::cout << "json file: " << std::endl;
-	//////std::cout << matDefFile << std::endl;
-	//json materialDefinition = json::parse(matDefStr);// nullptr, false);
-	////std::cout << materialDefinition << std::endl;
-
-
-	//std::string undefinedDefault = "undefined"; //default value for if the value is not found in the json
-
-	//SimpleVertexShader* vertexShader = vertexShaders[materialDefinition["vertexShader"]];
-	//SimplePixelShader* pixelShader = pixelShaders[materialDefinition["pixelShader"]];
-	////SimpleVertexShader* vertexShader = vertexShaders[materialDefinition.value("vertexShader", undefinedDefault)];
-	////SimplePixelShader* pixelShader = pixelShaders[materialDefinition.value("pixelShader", undefinedDefault)];
-	//SimplePixelShader* pixelShaderPBR = pixelShaders["PixelShaderPBR.cso"];
-	//std::string texAlbedo = materialDefinition["textures"]["albedo"];//.value("albedo", undefinedDefault);
-	//std::string texNorm = materialDefinition["textures"]["normal"];//.value("albedo", undefinedDefault);
-	//std::string texRough = materialDefinition["textures"]["rough"];//.value("albedo", undefinedDefault);
-	//std::string texMetal = materialDefinition["textures"]["metal"];//.value("albedo", undefinedDefault);
-	///*json textureDefObj = json::parse(texturesStr);
-	//std::string texAlbedo = textureDefObj.value("albedo", undefinedDefault);*/
-	//std::cout << texAlbedo << std::endl;
-
-	//Material* cobbleMat2x = new Material(
-	//	vertexShader,
-	//	pixelShader,
-	//	XMFLOAT4(1, 1, 1, 1),
-	//	256.0f,
-	//	XMFLOAT2(2, 2),
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions
-	//);
-	//	//textures[texAlbedo],
-	//	//textures[texNorm],
-	//	//textures[texRough],
-	//	//textures[texMetal],
-	//Material* floorMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), 
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-	//Material* paintMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), 
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-	//Material* scratchedMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), 
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-	//Material* bronzeMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2),
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-	//Material* roughMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2),
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-	//Material* woodMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), 
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-
-	////materials.insert({ "cobbleMat2x", cobbleMat2x });
-	////materials.insert({ "floorMat", floorMat });
-	////materials.insert({ "paintMat", paintMat });
-	////materials.insert({ "scratchedMat", scratchedMat });
-	////materials.insert({ "bronzeMat", bronzeMat });
-	////materials.insert({ "roughMat", roughMat });
-	////materials.insert({ "woodMat", woodMat });
-
-	//// Create PBR materials
-	//Material* cobbleMat2xPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), 
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-	//Material* floorMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), 
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-	//Material* paintMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), 
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-	//Material* scratchedMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), 
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-	//Material* bronzeMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), 
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-	//Material* roughMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), 
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-	//Material* woodMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), 
-	//	textures["cobblestone_albedo.png"],
-	//	textures["cobblestone_normals.png"],
-	//	textures["cobblestone_roughness.png"],
-	//	textures["cobblestone_metal.png"],
-	//	samplerOptions);
-
-	/*materials.insert({ "cobbleMat2xPBR", cobbleMat2xPBR });
-	materials.insert({ "floorMatPBR", floorMatPBR });
-	materials.insert({ "paintMatPBR", paintMatPBR });
-	materials.insert({ "scratchedMatPBR", scratchedMatPBR });
-	materials.insert({ "bronzeMatPBR", bronzeMatPBR });
-	materials.insert({ "roughMatPBR", roughMatPBR });
-	materials.insert({ "woodMatPBR", woodMatPBR });*/
 
 }
 
