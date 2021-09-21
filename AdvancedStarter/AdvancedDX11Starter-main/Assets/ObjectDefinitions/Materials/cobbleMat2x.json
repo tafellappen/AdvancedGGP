@@ -1,0 +1,21 @@
+{
+    "name": "cobbleMat2x",
+    "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "textures": {
+        "albedo": "cobblestone_albedo.png",
+        "normal": "cobblestone_normals.png",
+        "rough": "cobblestone_roughness.png",
+        "metal": "cobblestone_metal.png"
+    },
+    "uvScale": [
+        2.0,
+        2.0
+    ],
+    "vertexShader": "VertexShader.cso",
+    "pixelShader": "PixelShader.cso"
+}

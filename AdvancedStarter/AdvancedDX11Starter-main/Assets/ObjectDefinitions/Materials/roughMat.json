@@ -1,0 +1,21 @@
+{
+    "name": "roughMat",
+    "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "textures": {
+        "albedo": "rough_albedo.png",
+        "normal": "rough_normals.png",
+        "rough":  "rough_roughness.png",
+        "metal":  "rough_metal.png"
+    },
+    "uvScale": [
+        2.0,
+        2.0
+    ],
+    "vertexShader": "VertexShader.cso",
+    "pixelShader": "PixelShader.cso"
+}

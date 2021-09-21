@@ -1,0 +1,21 @@
+{
+    "name": "woodMat",
+    "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "textures": {
+        "albedo": "wood_albedo.png",
+        "normal": "wood_normals.png",
+        "rough":  "wood_roughness.png",
+        "metal":  "wood_metal.png"
+    },
+    "uvScale": [
+        2.0,
+        2.0
+    ],
+    "vertexShader": "VertexShader.cso",
+    "pixelShader": "PixelShader.cso"
+}

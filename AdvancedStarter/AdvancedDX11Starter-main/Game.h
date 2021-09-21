@@ -9,6 +9,11 @@
 #include "SpriteBatch.h"
 #include "Lights.h"
 #include "Sky.h"
+#include "Renderer.h"
+
+#include "AssetManager.h"
+
+#include "Input.h"//not sure if this is safe here but i need this for the HandleGuiUpdate method. probably a safer way to do this with a using statement or whatever cpp equivalent
 
 #include <DirectXMath.h>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
@@ -25,9 +30,12 @@ public:
 	// Overridden setup and game loop methods, which
 	// will be called automatically
 	void Init();
+	void CreateTransformHierarchies();
 	void OnResize();
 	void Update(float deltaTime, float totalTime);
 	void Draw(float deltaTime, float totalTime);
+
+	//void HandleGuiUpdate(float deltaTime);
 
 private:
 
@@ -46,9 +54,21 @@ private:
 	std::vector<ISimpleShader*> shaders;
 	Camera* camera;
 
+	Renderer* renderer;
+
 	// Lights
 	std::vector<Light> lights;
 	int lightCount;
+
+	//GUI things for lights
+	int maxLights;
+	float minPointLightRange;
+	float maxPointLightRange;
+	float minPointLightIntensity;
+	float maxPointLightIntensity;
+
+	bool allLightsSameColor;
+	DirectX::XMFLOAT3 everyLightColor;
 
 	// These will be loaded along with other assets and
 	// saved to these variables for ease of access
@@ -68,10 +88,26 @@ private:
 
 	// General helpers for setup and drawing
 	void GenerateLights();
+	void CreateRandomPointLight();
 	void DrawPointLights();
 	void DrawUI();
 
 	// Initialization helper method
 	void LoadAssetsAndCreateEntities();
+
+	void UpdateEntitityTransforms();
+
+	//GUI stuff
+	void HandleGuiUpdate(float deltaTime, Input& input); //for ImGui
+	void ShowLightsEditor();
+	void ShowEngineStats(float framerate);
+
+	void AddLabeledFloat(std::string label, float value);
+
+	void ConcatAndCreateText(std::string& label, std::string& valueStr);
+
+	void AddLabeledInt(std::string label, int value);
+
+	//int currentFPS;
 };
 

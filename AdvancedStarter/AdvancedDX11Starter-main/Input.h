@@ -24,6 +24,11 @@ public:
 private:
 	static Input* instance;
 	Input() {};
+
+	//for ImGui
+	bool guiWantsKeyboard;
+	bool guiWantsMouse;
+
 #pragma endregion
 
 public:
@@ -39,6 +44,10 @@ public:
 	int GetMouseYDelta();
 	float GetMouseWheel();
 	void SetWheelDelta(float delta);
+
+	//for ImGui
+	void SetGuiKeyboardCapture(bool capture) { guiWantsKeyboard = capture; }
+	void SetGuiMouseCapture(bool capture) { guiWantsMouse = capture; }
 
 	bool KeyDown(int key);
 	bool KeyUp(int key);

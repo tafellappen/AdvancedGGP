@@ -15,6 +15,7 @@ Transform::Transform()
 
 	// No need to recalc yet
 	matricesDirty = false;
+	parent = 0;
 }
 
 void Transform::MoveAbsolute(float x, float y, float z)
@@ -23,6 +24,7 @@ void Transform::MoveAbsolute(float x, float y, float z)
 	position.y += y;
 	position.z += z;
 	matricesDirty = true;
+	MarkChildrenTransformsDirty();
 }
 
 void Transform::MoveRelative(float x, float y, float z)
@@ -38,6 +40,7 @@ void Transform::MoveRelative(float x, float y, float z)
 	// Add and store, and invalidate the matrices
 	XMStoreFloat3(&position, XMLoadFloat3(&position) + dir);
 	matricesDirty = true;
+	MarkChildrenTransformsDirty();
 }
 
 void Transform::Rotate(float p, float y, float r)
@@ -46,6 +49,7 @@ void Transform::Rotate(float p, float y, float r)
 	pitchYawRoll.y += y;
 	pitchYawRoll.z += r;
 	matricesDirty = true;
+	MarkChildrenTransformsDirty();
 }
 
 void Transform::Scale(float x, float y, float z)
@@ -54,6 +58,7 @@ void Transform::Scale(float x, float y, float z)
 	scale.y *= y;
 	scale.z *= z;
 	matricesDirty = true;
+	MarkChildrenTransformsDirty();
 }
 
 void Transform::SetPosition(float x, float y, float z)
@@ -62,6 +67,7 @@ void Transform::SetPosition(float x, float y, float z)
 	position.y = y;
 	position.z = z;
 	matricesDirty = true;
+	MarkChildrenTransformsDirty();
 }
 
 void Transform::SetRotation(float p, float y, float r)
@@ -70,6 +76,7 @@ void Transform::SetRotation(float p, float y, float r)
 	pitchYawRoll.y = y;
 	pitchYawRoll.z = r;
 	matricesDirty = true;
+	MarkChildrenTransformsDirty();
 }
 
 void Transform::SetScale(float x, float y, float z)
@@ -78,6 +85,7 @@ void Transform::SetScale(float x, float y, float z)
 	scale.y = y;
 	scale.z = z;
 	matricesDirty = true;
+	MarkChildrenTransformsDirty();
 }
 
 DirectX::XMFLOAT3 Transform::GetPosition() { return position; }
@@ -98,6 +106,11 @@ DirectX::XMFLOAT4X4 Transform::GetWorldInverseTransposeMatrix()
 	UpdateMatrices();
 	return worldMatrix;
 }
+//
+//void Transform::markTransformDirty()
+//{
+//	matricesDirty = true;
+//}
 
 void Transform::UpdateMatrices()
 {
@@ -109,8 +122,17 @@ void Transform::UpdateMatrices()
 		XMMATRIX rot = XMMatrixRotationRollPitchYawFromVector(XMLoadFloat3(&pitchYawRoll));
 		XMMATRIX sc = XMMatrixScalingFromVector(XMLoadFloat3(&scale));
 
-		// Combine and store the world
+		// Calculate the world matrix for this transform
 		XMMATRIX wm = sc * rot * trans;
+
+		//if there is a parent, need to also apply the world matrix from the parent
+		if (parent)
+		{
+			XMFLOAT4X4 parentWorld = parent->GetWorldMatrix();
+			wm *= XMLoadFloat4x4(&parentWorld);
+		}
+
+		//save
 		XMStoreFloat4x4(&worldMatrix, wm);
 
 		// Invert and transpose, too
@@ -118,5 +140,90 @@ void Transform::UpdateMatrices()
 
 		// All set
 		matricesDirty = false;
+		MarkChildrenTransformsDirty();
+	}
+}
+
+int Transform::ChildCount()
+{
+	return children.size();
+}
+
+void Transform::AddChild(Transform* child)
+{
+	if (!child) return; //verify pointer
+	if (GetIndexOfChild(child) >= 0) return; //prevent adding duplicates
+
+	// Add child to list
+	children.push_back(child);
+	child->parent = this;
+
+	//mark child transforms out of date
+	child->matricesDirty = true;
+	child->MarkChildrenTransformsDirty();
+}
+
+void Transform::RemoveChild(Transform* child)
+{
+	if (!child) return; //verify pointer
+
+	auto childToRemove = std::find(children.begin(), children.end(), child);
+	if (childToRemove != children.end())
+	{
+		children.erase(childToRemove);
+		child->parent = 0;
+
+		child->matricesDirty = true;
+		child->MarkChildrenTransformsDirty();
+	}
+}
+
+void Transform::SetParent(Transform* newParent)
+{
+	//if this already has a parent, we need to make sure we unparent. So the parent of this transform also has to have this removed as a child
+	if (this->parent)
+	{
+		this->parent->RemoveChild(this);
+	}
+	if (newParent) 
+	{
+		newParent->AddChild(this); //yeah this is big brain time (add child will both add "this" to the newParent child list and also set newParent as the parent to the child
+
+	}
+}
+
+Transform* Transform::GetChild(unsigned int index)
+{
+	if (index >= children.size()) return 0;
+	return children[index];
+}
+
+int Transform::GetIndexOfChild(Transform* child)
+{
+	if (!child) return -1; //verify pointer
+	for (unsigned int i = 0; i < children.size(); i++)
+	{
+		if (child == children[i])
+		{
+			return (int)i;
+		}
+	}
+	return -1; //not found
+}
+
+Transform* Transform::GetParent()
+{
+	return parent;
+}
+
+/// <summary>
+/// Set the child of this transform as dirty, and recursively propogate through all children below it
+/// </summary>
+void Transform::MarkChildrenTransformsDirty()
+{
+	for (int i = 0; i < children.size(); i++)
+	{
+		children[i]->matricesDirty = true;
+		children[i]->MarkChildrenTransformsDirty();
 	}
 }

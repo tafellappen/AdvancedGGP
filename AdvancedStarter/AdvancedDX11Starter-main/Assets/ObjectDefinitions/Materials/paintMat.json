@@ -1,0 +1,21 @@
+{
+    "name": "paintMat",
+    "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "textures": {
+        "albedo": "paint_albedo.png",
+        "normal": "paint_normals.png",
+        "rough":  "paint_roughness.png",
+        "metal":  "paint_metal.png"
+    },
+    "uvScale": [
+        2.0,
+        2.0
+    ],
+    "vertexShader": "VertexShader.cso",
+    "pixelShader": "PixelShader.cso"
+}

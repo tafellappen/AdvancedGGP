@@ -4,6 +4,9 @@
 #include <WindowsX.h>
 #include <sstream>
 
+
+#include "imgui/imgui.h"
+
 // Define the static instance variable so our OS-level 
 // message handling function below can talk to our object
 DXCore* DXCore::DXCoreInstance = 0;
@@ -461,6 +464,7 @@ void DXCore::UpdateTitleBarStats()
 	fpsFrameCount++;
 
 	// Only calc FPS and update title bar once per second
+	//if (!ShouldUpdateFPS())
 	float timeDiff = totalTime - fpsTimeElapsed;
 	if (timeDiff < 1.0f)
 		return;
@@ -495,6 +499,7 @@ void DXCore::UpdateTitleBarStats()
 	fpsFrameCount = 0;
 	fpsTimeElapsed += 1.0f;
 }
+
 
 // --------------------------------------------------------
 // Allocates a console window we can print to for debugging
@@ -677,6 +682,10 @@ LRESULT DXCore::ProcessMessage(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPara
 	case WM_SETFOCUS:	hasFocus = true;	return 0;
 	case WM_KILLFOCUS:	hasFocus = false;	return 0;
 	case WM_ACTIVATE:	hasFocus = (LOWORD(wParam) != WA_INACTIVE); return 0;
+	// Has a key been pressed?
+	case WM_CHAR:
+		ImGui::GetIO().AddInputCharacter((char)wParam);
+		return 0;
 	}
 
 	// Let Windows handle any messages we're not touching

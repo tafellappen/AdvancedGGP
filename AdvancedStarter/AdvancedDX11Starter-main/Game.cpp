@@ -4,10 +4,14 @@
 
 #include "Game.h"
 #include "Vertex.h"
-#include "Input.h"
+
 
 #include "WICTextureLoader.h"
 
+#include "imgui/imgui.h"
+
+#include "imgui/imgui_impl_dx11.h" //visual studio wanted me to have these too, why did just the first one not work?
+#include "imgui/imgui_impl_win32.h"
 
 // Needed for a helper function to read compiled shader files from the hard drive
 #pragma comment(lib, "d3dcompiler.lib")
@@ -66,19 +70,28 @@ Game::~Game()
 	//   to call Release() on each DirectX object
 
 	// Clean up our other resources
-	for (auto& m : meshes) delete m;
-	for (auto& s : shaders) delete s; 
-	for (auto& m : materials) delete m;
-	for (auto& e : entities) delete e;
+	//for (auto& m : meshes) delete m;
+	//for (auto& s : shaders) delete s; 
+	//for (auto& m : materials) delete m;
+	//for (auto& e : entities) delete e;
 
 	// Delete any one-off objects
-	delete sky;
+	//delete sky;
 	delete camera;
 	delete arial;
 	delete spriteBatch;
+	delete renderer;
+
 
 	// Delete singletons
 	delete& Input::GetInstance();
+	delete& AssetManager::GetInstance();
+
+	// ImGui clean up
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+	ImGui::DestroyContext();
+
 }
 
 // --------------------------------------------------------
@@ -99,7 +112,12 @@ void Game::Init()
 	context->IASetPrimitiveTopology(D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 
 	// Set up lights initially
-	lightCount = 64;
+	lightCount = 30;
+	maxLights = 100;
+	minPointLightRange = 5.0f;
+	maxPointLightRange = 10.0f;
+	minPointLightIntensity = 0.1f;
+	maxPointLightIntensity = 3.0f;
 	GenerateLights();
 
 	// Make our camera
@@ -108,6 +126,51 @@ void Game::Init()
 		3.0f,		// Move speed
 		1.0f,		// Mouse look
 		this->width / (float)this->height); // Aspect ratio
+
+	// Initialize ImGui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	// Pick a style (uncomment one of these 3)
+	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsLight();
+	//ImGui::StyleColorsClassic();
+	// 
+	// 
+	// Setup Platform/Renderer backends
+	ImGui_ImplWin32_Init(hWnd);
+	ImGui_ImplDX11_Init(device.Get(), context.Get());
+
+	CreateTransformHierarchies();
+
+	renderer = new Renderer(
+		device,
+		context,
+		swapChain,
+		backBufferRTV,
+		depthStencilView,
+		width,
+		height,
+		sky,
+		entities,
+		lights,
+		lightMesh,
+		lightVS,
+		lightPS
+	);
+}
+
+void Game::CreateTransformHierarchies()
+{
+	entities[0]->GetTransform()->AddChild(entities[1]->GetTransform());
+	entities[1]->GetTransform()->AddChild(entities[2]->GetTransform());
+	entities[2]->GetTransform()->AddChild(entities[3]->GetTransform());
+	entities[3]->GetTransform()->AddChild(entities[4]->GetTransform());
+
+	entities[5]->GetTransform()->AddChild(entities[6]->GetTransform());
+	entities[6]->GetTransform()->AddChild(entities[7]->GetTransform());
+	entities[7]->GetTransform()->AddChild(entities[8]->GetTransform());
+	entities[8]->GetTransform()->AddChild(entities[9]->GetTransform());
+	entities[9]->GetTransform()->AddChild(entities[10]->GetTransform());
 }
 
 
@@ -116,127 +179,82 @@ void Game::Init()
 // --------------------------------------------------------
 void Game::LoadAssetsAndCreateEntities()
 {
-	// Load shaders using our succinct LoadShader() macro
-	SimpleVertexShader* vertexShader	= LoadShader(SimpleVertexShader, L"VertexShader.cso");
-	SimplePixelShader* pixelShader		= LoadShader(SimplePixelShader, L"PixelShader.cso");
-	SimplePixelShader* pixelShaderPBR	= LoadShader(SimplePixelShader, L"PixelShaderPBR.cso");
-	SimplePixelShader* solidColorPS		= LoadShader(SimplePixelShader, L"SolidColorPS.cso");
-	
-	SimpleVertexShader* skyVS = LoadShader(SimpleVertexShader, L"SkyVS.cso");
-	SimplePixelShader* skyPS  = LoadShader(SimplePixelShader, L"SkyPS.cso");
+	//load using asset manager
+	AssetManager& assetMngr = AssetManager::GetInstance();
 
-	shaders.push_back(vertexShader);
-	shaders.push_back(pixelShader);
-	shaders.push_back(pixelShaderPBR);
-	shaders.push_back(solidColorPS);
-	shaders.push_back(skyVS);
-	shaders.push_back(skyPS);
+	assetMngr.Initialize(
+		GetFullPathTo("../../Assets"), 
+		GetFullPathTo_Wide(L"../../Assets"), 
+		device, 
+		context
+	);
+
+	assetMngr.LoadVertexShader(
+		GetFullPathTo_Wide(L"VertexShader.cso"), 
+		"VertexShader.cso"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"PixelShader.cso"),
+		"PixelShader.cso"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"PixelShaderPBR.cso"),
+		"PixelShaderPBR.cso"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"SolidColorPS.cso"),
+		"SolidColorPS.cso"
+	);
+
+	//sky shaders
+	assetMngr.LoadVertexShader(
+		GetFullPathTo_Wide(L"SkyVS.cso"),
+		"SkyVS.cso"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"SkyPS.cso"),
+		"SkyPS.cso"
+	);
+	
+	//needs to happen after shaders are loaded right now because it relies on the shaders already existing to create the materials and everything
+	assetMngr.LoadAllAssets();
+
+	SimpleVertexShader* vertexShader	= assetMngr.GetVertexShader("VertexShader.cso");
+	SimplePixelShader* pixelShader		= assetMngr.GetPixelShader("PixelShader.cso");
+	SimplePixelShader* pixelShaderPBR	= assetMngr.GetPixelShader("PixelShaderPBR.cso");
+	SimplePixelShader* solidColorPS		= assetMngr.GetPixelShader("SolidColorPS.cso");
+
+	SimpleVertexShader* skyVS = assetMngr.GetVertexShader("SkyVS.cso");
+	SimplePixelShader* skyPS = assetMngr.GetPixelShader("SkyPS.cso");
 
 	// Set up the sprite batch and load the sprite font
 	spriteBatch = new SpriteBatch(context.Get());
 	arial = new SpriteFont(device.Get(), GetFullPathTo_Wide(L"../../Assets/Textures/arial.spritefont").c_str());
 
-	// Make the meshes
-	Mesh* sphereMesh = new Mesh(GetFullPathTo("../../Assets/Models/sphere.obj").c_str(), device);
-	Mesh* helixMesh = new Mesh(GetFullPathTo("../../Assets/Models/helix.obj").c_str(), device);
-	Mesh* cubeMesh = new Mesh(GetFullPathTo("../../Assets/Models/cube.obj").c_str(), device);
-	Mesh* coneMesh = new Mesh(GetFullPathTo("../../Assets/Models/cone.obj").c_str(), device);
+	// Grab the meshes from the asset manager
+	Mesh* sphereMesh = assetMngr.GetMesh("sphere.obj");
+	Mesh* helixMesh = assetMngr.GetMesh("helix.obj");
+	Mesh* cubeMesh = assetMngr.GetMesh("cube.obj");
+	Mesh* coneMesh = assetMngr.GetMesh("cone.obj");
 
 	meshes.push_back(sphereMesh);
 	meshes.push_back(helixMesh);
 	meshes.push_back(cubeMesh);
 	meshes.push_back(coneMesh);
 
-	
-	// Declare the textures we'll need
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> cobbleA,  cobbleN,  cobbleR,  cobbleM;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> floorA,  floorN,  floorR,  floorM;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> paintA,  paintN,  paintR,  paintM;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> scratchedA,  scratchedN,  scratchedR,  scratchedM;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> bronzeA,  bronzeN,  bronzeR,  bronzeM;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughA,  roughN,  roughR,  roughM;
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> woodA,  woodN,  woodR,  woodM;
 
-	// Load the textures using our succinct LoadTexture() macro
-	LoadTexture(L"../../Assets/Textures/cobblestone_albedo.png", cobbleA);
-	LoadTexture(L"../../Assets/Textures/cobblestone_normals.png", cobbleN);
-	LoadTexture(L"../../Assets/Textures/cobblestone_roughness.png", cobbleR);
-	LoadTexture(L"../../Assets/Textures/cobblestone_metal.png", cobbleM);
-
-	LoadTexture(L"../../Assets/Textures/floor_albedo.png", floorA);
-	LoadTexture(L"../../Assets/Textures/floor_normals.png", floorN);
-	LoadTexture(L"../../Assets/Textures/floor_roughness.png", floorR);
-	LoadTexture(L"../../Assets/Textures/floor_metal.png", floorM);
-	
-	LoadTexture(L"../../Assets/Textures/paint_albedo.png", paintA);
-	LoadTexture(L"../../Assets/Textures/paint_normals.png", paintN);
-	LoadTexture(L"../../Assets/Textures/paint_roughness.png", paintR);
-	LoadTexture(L"../../Assets/Textures/paint_metal.png", paintM);
-	
-	LoadTexture(L"../../Assets/Textures/scratched_albedo.png", scratchedA);
-	LoadTexture(L"../../Assets/Textures/scratched_normals.png", scratchedN);
-	LoadTexture(L"../../Assets/Textures/scratched_roughness.png", scratchedR);
-	LoadTexture(L"../../Assets/Textures/scratched_metal.png", scratchedM);
-	
-	LoadTexture(L"../../Assets/Textures/bronze_albedo.png", bronzeA);
-	LoadTexture(L"../../Assets/Textures/bronze_normals.png", bronzeN);
-	LoadTexture(L"../../Assets/Textures/bronze_roughness.png", bronzeR);
-	LoadTexture(L"../../Assets/Textures/bronze_metal.png", bronzeM);
-	
-	LoadTexture(L"../../Assets/Textures/rough_albedo.png", roughA);
-	LoadTexture(L"../../Assets/Textures/rough_normals.png", roughN);
-	LoadTexture(L"../../Assets/Textures/rough_roughness.png", roughR);
-	LoadTexture(L"../../Assets/Textures/rough_metal.png", roughM);
-	
-	LoadTexture(L"../../Assets/Textures/wood_albedo.png", woodA);
-	LoadTexture(L"../../Assets/Textures/wood_normals.png", woodN);
-	LoadTexture(L"../../Assets/Textures/wood_roughness.png", woodR);
-	LoadTexture(L"../../Assets/Textures/wood_metal.png", woodM);
-
-	// Describe and create our sampler state
-	D3D11_SAMPLER_DESC sampDesc = {};
-	sampDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-	sampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
-	sampDesc.MaxAnisotropy = 16;
-	sampDesc.MaxLOD = D3D11_FLOAT32_MAX;
-	device->CreateSamplerState(&sampDesc, samplerOptions.GetAddressOf());
+	// grab the sky from the asset manager
+	sky = assetMngr.GetSky();
 
 
-	// Create the sky using a DDS cube map
-	/*sky = new Sky(
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\SunnyCubeMap.dds").c_str(),
-		cubeMesh,
-		skyVS,
-		skyPS,
-		samplerOptions,
-		device,
-		context);*/
-
-	// Create the sky using 6 images
-	sky = new Sky(
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\right.png").c_str(),
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\left.png").c_str(),
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\up.png").c_str(),
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\down.png").c_str(),
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\front.png").c_str(),
-		GetFullPathTo_Wide(L"..\\..\\Assets\\Skies\\Night\\back.png").c_str(),
-		cubeMesh,
-		skyVS,
-		skyPS,
-		samplerOptions,
-		device,
-		context);
-
-	// Create basic materials
-	Material* cobbleMat2x = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), cobbleA, cobbleN, cobbleR, cobbleM, samplerOptions);
-	Material* floorMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), floorA, floorN, floorR, floorM, samplerOptions);
-	Material* paintMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), paintA, paintN, paintR, paintM, samplerOptions);
-	Material* scratchedMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), scratchedA, scratchedN, scratchedR, scratchedM, samplerOptions);
-	Material* bronzeMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), bronzeA, bronzeN, bronzeR, bronzeM, samplerOptions);
-	Material* roughMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), roughA, roughN, roughR, roughM, samplerOptions);
-	Material* woodMat = new Material(vertexShader, pixelShader, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), woodA, woodN, woodR, woodM, samplerOptions);
+	// grab basic materials from asset manager
+	Material* cobbleMat2x  = assetMngr.GetMaterial("cobbleMat2x");
+	Material* floorMat =     assetMngr.GetMaterial("floorMat");
+	Material* paintMat =     assetMngr.GetMaterial("paintMat");
+	Material* scratchedMat = assetMngr.GetMaterial("scratchedMat");
+	Material* bronzeMat =    assetMngr.GetMaterial("bronzeMat");
+	Material* roughMat =     assetMngr.GetMaterial("roughMat");
+	Material* woodMat =      assetMngr.GetMaterial("woodMat");
 
 	materials.push_back(cobbleMat2x);
 	materials.push_back(floorMat);
@@ -246,14 +264,14 @@ void Game::LoadAssetsAndCreateEntities()
 	materials.push_back(roughMat);
 	materials.push_back(woodMat);
 
-	// Create PBR materials
-	Material* cobbleMat2xPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), cobbleA, cobbleN, cobbleR, cobbleM, samplerOptions);
-	Material* floorMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), floorA, floorN, floorR, floorM, samplerOptions);
-	Material* paintMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), paintA, paintN, paintR, paintM, samplerOptions);
-	Material* scratchedMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), scratchedA, scratchedN, scratchedR, scratchedM, samplerOptions);
-	Material* bronzeMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), bronzeA, bronzeN, bronzeR, bronzeM, samplerOptions);
-	Material* roughMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), roughA, roughN, roughR, roughM, samplerOptions);
-	Material* woodMatPBR = new Material(vertexShader, pixelShaderPBR, XMFLOAT4(1, 1, 1, 1), 256.0f, XMFLOAT2(2, 2), woodA, woodN, woodR, woodM, samplerOptions);
+	// grab PBR materials from asset manager
+	Material* cobbleMat2xPBR =  assetMngr.GetMaterial("cobbleMat2xPBR");
+	Material* floorMatPBR =     assetMngr.GetMaterial("floorMatPBR");
+	Material* paintMatPBR =     assetMngr.GetMaterial("paintMatPBR");
+	Material* scratchedMatPBR = assetMngr.GetMaterial("scratchedMatPBR");
+	Material* bronzeMatPBR =    assetMngr.GetMaterial("bronzeMatPBR");
+	Material* roughMatPBR =     assetMngr.GetMaterial("roughMatPBR");
+	Material* woodMatPBR =      assetMngr.GetMaterial("woodMatPBR");
 
 	materials.push_back(cobbleMat2xPBR);
 	materials.push_back(floorMatPBR);
@@ -340,6 +358,7 @@ void Game::LoadAssetsAndCreateEntities()
 	entities.push_back(woodSphere);
 
 
+
 	// Save assets needed for drawing point lights
 	// (Since these are just copies of the pointers,
 	//  we won't need to directly delete them as 
@@ -348,6 +367,8 @@ void Game::LoadAssetsAndCreateEntities()
 	lightVS = vertexShader;
 	lightPS = solidColorPS;
 }
+
+
 
 
 // --------------------------------------------------------
@@ -386,17 +407,22 @@ void Game::GenerateLights()
 	// Create the rest of the lights
 	while (lights.size() < lightCount)
 	{
-		Light point = {};
-		point.Type = LIGHT_TYPE_POINT;
-		point.Position = XMFLOAT3(RandomRange(-10.0f, 10.0f), RandomRange(-5.0f, 5.0f), RandomRange(-10.0f, 10.0f));
-		point.Color = XMFLOAT3(RandomRange(0, 1), RandomRange(0, 1), RandomRange(0, 1));
-		point.Range = RandomRange(5.0f, 10.0f);
-		point.Intensity = RandomRange(0.1f, 3.0f);
-
-		// Add to the list
-		lights.push_back(point);
+		CreateRandomPointLight();
 	}
 
+}
+
+void Game::CreateRandomPointLight()
+{
+	Light point = {};
+	point.Type = LIGHT_TYPE_POINT;
+	point.Position = XMFLOAT3(RandomRange(-10.0f, 10.0f), RandomRange(-5.0f, 5.0f), RandomRange(-10.0f, 10.0f));
+	point.Color = XMFLOAT3(RandomRange(0, 1), RandomRange(0, 1), RandomRange(0, 1));
+	point.Range = RandomRange(minPointLightRange, maxPointLightRange);
+	point.Intensity = RandomRange(minPointLightIntensity, maxPointLightIntensity);
+
+	// Add to the list
+	lights.push_back(point);
 }
 
 
@@ -413,6 +439,9 @@ void Game::OnResize()
 	// Update our projection matrix to match the new aspect ratio
 	if (camera)
 		camera->UpdateProjectionMatrix(this->width / (float)this->height);
+
+	//update renderer data
+	renderer->PostResize(width, height, backBufferRTV, depthStencilView);
 }
 
 // --------------------------------------------------------
@@ -420,14 +449,148 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
+	
+	Input& input = Input::GetInstance();
+	HandleGuiUpdate(deltaTime, input);
+
 	// Update the camera
 	camera->Update(deltaTime);
 
 	// Check individual input
-	Input& input = Input::GetInstance();
 	if (input.KeyDown(VK_ESCAPE)) Quit();
 	if (input.KeyPress(VK_TAB)) GenerateLights();
 
+	//If lightCount was increased by user, create more random lights
+	while (lights.size() < lightCount)
+	{
+		CreateRandomPointLight();
+	}
+	renderer->UpdateLightVec(lights); //i hate this, please just use shared pointers already
+
+	UpdateEntitityTransforms();
+}
+
+void Game::UpdateEntitityTransforms()
+{
+	entities[0]->GetTransform()->MoveRelative(0.01f, 0.0f, 0.0f);
+	entities[0]->GetTransform()->Rotate(0.01f, 0.0f, 0.0f);
+
+	entities[6]->GetTransform()->Rotate(0.0f, 0.001f, 0.001f);
+	entities[6]->GetTransform()->SetScale(0.5f, 0.5f, 0.5f);
+
+}
+
+void Game::HandleGuiUpdate(float deltaTime, Input& input)
+{
+	// Reset input manager's gui state so we don’t
+		// taint our own input (you’ll uncomment later)
+	input.SetGuiKeyboardCapture(false);
+	input.SetGuiMouseCapture(false);
+	// Set io info
+	ImGuiIO& io = ImGui::GetIO();
+	io.DeltaTime = deltaTime;
+	io.DisplaySize.x = (float)this->width;
+	io.DisplaySize.y = (float)this->height;
+	io.KeyCtrl = input.KeyDown(VK_CONTROL);
+	io.KeyShift = input.KeyDown(VK_SHIFT);
+	io.KeyAlt = input.KeyDown(VK_MENU);
+	io.MousePos.x = (float)input.GetMouseX();
+	io.MousePos.y = (float)input.GetMouseY();
+	io.MouseDown[0] = input.MouseLeftDown();
+	io.MouseDown[1] = input.MouseRightDown();
+	io.MouseDown[2] = input.MouseMiddleDown();
+	io.MouseWheel = input.GetMouseWheel();
+	input.GetKeyArray(io.KeysDown, 256);
+	// Reset the frame
+	ImGui_ImplDX11_NewFrame();
+	ImGui_ImplWin32_NewFrame();
+	ImGui::NewFrame();
+	// Determine new input capture (you’ll uncomment later)
+	input.SetGuiKeyboardCapture(io.WantCaptureKeyboard);
+	input.SetGuiMouseCapture(io.WantCaptureMouse);
+	// Show the demo window
+	ImGui::ShowDemoWindow();
+	
+
+	ShowEngineStats(io.Framerate);
+
+	ShowLightsEditor();
+}
+
+void Game::ShowLightsEditor()
+{
+	//lights editor
+	ImGui::Begin("Lights");
+
+	//slider to change how many of them actually render
+	ImGui::SliderInt("Lights in Scene", &lightCount, 0, maxLights, "%d");
+
+
+	//display lights info as tree
+	if (ImGui::CollapsingHeader("Lights"))
+	{
+		for (int i = 0; i < lightCount; i++)
+		{
+			if (ImGui::TreeNode((void*)(intptr_t)i, "Light %d", i))
+			{
+				AddLabeledInt("Type: ", lights[i].Type); //id how to convert that to the actual text right now
+				if (lights[i].Type == LIGHT_TYPE_DIRECTIONAL) //if its not directional, then theres no direction to display (unless maybe spotlight but shhh)
+				{
+					ImGui::DragFloat3("Direction: ", &lights[i].Direction.x);
+				}
+				if (lights[i].Type != LIGHT_TYPE_DIRECTIONAL) //Directional lights have no position
+				{
+					ImGui::SliderFloat("Range", &lights[i].Range, minPointLightRange, maxPointLightRange);
+					ImGui::DragFloat3("Position: ", &lights[i].Position.x);
+					ImGui::SliderFloat("Intensity", &lights[i].Intensity, minPointLightIntensity, maxPointLightIntensity);
+					//AddLabeledFloat("SpotFalloff: ", lights[i].SpotFalloff); //isnt this just for spotlights? we dont have any of those right now
+				}
+				ImGui::DragFloat3("Color: ", &lights[i].Color.x);
+
+				/*ImGui::SameLine();
+				if (ImGui::SmallButton("button")) {}*/
+				ImGui::TreePop();
+			}
+		}
+	}
+
+	ImGui::End();
+}
+
+void Game::ShowEngineStats(float framerate)
+{
+	ImGui::Begin("Engine Stats");
+
+	//display FPS
+	AddLabeledInt("FPS: ", framerate); //automatically truncate the decimal part, makes this less of an eyesore
+
+	//display window dimensions
+	AddLabeledInt("Window Height: ", height);
+	AddLabeledInt("Window Width: ", width);
+
+	//display entities
+	AddLabeledInt("Entities: ", entities.size());
+
+	ImGui::End();
+}
+
+//there must be a cleaner way than having two methods that are basically the same other than the parameters, right?
+void Game::AddLabeledFloat(std::string label, float value)
+{
+	std::string valueStr = std::to_string(value);
+	ConcatAndCreateText(label, valueStr);
+}
+
+void Game::AddLabeledInt(std::string label, int value)
+{
+	std::string valueStr = std::to_string(value);
+	ConcatAndCreateText(label, valueStr);
+}
+
+void Game::ConcatAndCreateText(std::string& label, std::string& valueStr)
+{
+	std::string valueDisplay = label + valueStr;
+	ImGui::Text(valueDisplay.c_str());
 }
 
 // --------------------------------------------------------
@@ -435,56 +598,62 @@ void Game::Update(float deltaTime, float totalTime)
 // --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
-	// Background color for clearing
-	const float color[4] = { 0, 0, 0, 1 };
+	renderer->Render(camera, lightCount);
+	//DrawUI();
 
-	// Clear the render target and depth buffer (erases what's on the screen)
-	//  - Do this ONCE PER FRAME
-	//  - At the beginning of Draw (before drawing *anything*)
-	context->ClearRenderTargetView(backBufferRTV.Get(), color);
-	context->ClearDepthStencilView(
-		depthStencilView.Get(),
-		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-		1.0f,
-		0);
+	//// Background color for clearing
+	//const float color[4] = { 0, 0, 0, 1 };
 
-
-	// Draw all of the entities
-	for (auto ge : entities)
-	{
-		// Set the "per frame" data
-		// Note that this should literally be set once PER FRAME, before
-		// the draw loop, but we're currently setting it per entity since 
-		// we are just using whichever shader the current entity has.  
-		// Inefficient!!!
-		SimplePixelShader* ps = ge->GetMaterial()->GetPS();
-		ps->SetData("Lights", (void*)(&lights[0]), sizeof(Light) * lightCount);
-		ps->SetInt("LightCount", lightCount);
-		ps->SetFloat3("CameraPosition", camera->GetTransform()->GetPosition());
-		ps->CopyBufferData("perFrame");
-
-		// Draw the entity
-		ge->Draw(context, camera);
-	}
-
-	// Draw the light sources
-	DrawPointLights();
-
-	// Draw the sky
-	sky->Draw(camera);
-
-	// Draw some UI
-	DrawUI();
+	//// Clear the render target and depth buffer (erases what's on the screen)
+	////  - Do this ONCE PER FRAME
+	////  - At the beginning of Draw (before drawing *anything*)
+	//context->ClearRenderTargetView(backBufferRTV.Get(), color);
+	//context->ClearDepthStencilView(
+	//	depthStencilView.Get(),
+	//	D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+	//	1.0f,
+	//	0);
 
 
-	// Present the back buffer to the user
-	//  - Puts the final frame we're drawing into the window so the user can see it
-	//  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
-	swapChain->Present(0, 0);
+	//// Draw all of the entities
+	//for (auto ge : entities)
+	//{
+	//	// Set the "per frame" data
+	//	// Note that this should literally be set once PER FRAME, before
+	//	// the draw loop, but we're currently setting it per entity since 
+	//	// we are just using whichever shader the current entity has.  
+	//	// Inefficient!!!
+	//	SimplePixelShader* ps = ge->GetMaterial()->GetPS();
+	//	ps->SetData("Lights", (void*)(&lights[0]), sizeof(Light) * lightCount);
+	//	ps->SetInt("LightCount", lightCount);
+	//	ps->SetFloat3("CameraPosition", camera->GetTransform()->GetPosition());
+	//	ps->CopyBufferData("perFrame");
 
-	// Due to the usage of a more sophisticated swap chain,
-	// the render target must be re-bound after every call to Present()
-	context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthStencilView.Get());
+	//	// Draw the entity
+	//	ge->Draw(context, camera);
+	//}
+
+	//// Draw the light sources
+	//DrawPointLights();
+
+	//// Draw the sky
+	//sky->Draw(camera);
+
+	//// Draw some UI
+	//DrawUI();
+
+	////draw ImGUI
+	//ImGui::Render();;
+	//ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+	//// Present the back buffer to the user
+	////  - Puts the final frame we're drawing into the window so the user can see it
+	////  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
+	//swapChain->Present(0, 0);
+
+	//// Due to the usage of a more sophisticated swap chain,
+	//// the render target must be re-bound after every call to Present()
+	//context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthStencilView.Get());
 }
 
 
