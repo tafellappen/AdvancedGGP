@@ -70,24 +70,28 @@ Game::~Game()
 	//   to call Release() on each DirectX object
 
 	// Clean up our other resources
-	for (auto& m : meshes) delete m;
-	for (auto& s : shaders) delete s; 
-	for (auto& m : materials) delete m;
-	for (auto& e : entities) delete e;
+	//for (auto& m : meshes) delete m;
+	//for (auto& s : shaders) delete s; 
+	//for (auto& m : materials) delete m;
+	//for (auto& e : entities) delete e;
 
 	// Delete any one-off objects
-	delete sky;
+	//delete sky;
 	delete camera;
 	delete arial;
 	delete spriteBatch;
+	delete renderer;
+
 
 	// Delete singletons
 	delete& Input::GetInstance();
+	delete& AssetManager::GetInstance();
 
 	// ImGui clean up
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImGui::DestroyContext();
+
 }
 
 // --------------------------------------------------------
@@ -148,22 +152,25 @@ void Game::Init()
 		height,
 		sky,
 		entities,
-		lights
+		lights,
+		lightMesh,
+		lightVS,
+		lightPS
 	);
 }
 
 void Game::CreateTransformHierarchies()
 {
-	//entities[0]->GetTransform()->AddChild(entities[1]->GetTransform());
-	//entities[1]->GetTransform()->AddChild(entities[2]->GetTransform());
-	//entities[2]->GetTransform()->AddChild(entities[3]->GetTransform());
-	//entities[3]->GetTransform()->AddChild(entities[4]->GetTransform());
+	entities[0]->GetTransform()->AddChild(entities[1]->GetTransform());
+	entities[1]->GetTransform()->AddChild(entities[2]->GetTransform());
+	entities[2]->GetTransform()->AddChild(entities[3]->GetTransform());
+	entities[3]->GetTransform()->AddChild(entities[4]->GetTransform());
 
-	//entities[5]->GetTransform()->AddChild(entities[6]->GetTransform());
-	//entities[6]->GetTransform()->AddChild(entities[7]->GetTransform());
-	//entities[7]->GetTransform()->AddChild(entities[8]->GetTransform());
-	//entities[8]->GetTransform()->AddChild(entities[9]->GetTransform());
-	//entities[9]->GetTransform()->AddChild(entities[10]->GetTransform());
+	entities[5]->GetTransform()->AddChild(entities[6]->GetTransform());
+	entities[6]->GetTransform()->AddChild(entities[7]->GetTransform());
+	entities[7]->GetTransform()->AddChild(entities[8]->GetTransform());
+	entities[8]->GetTransform()->AddChild(entities[9]->GetTransform());
+	entities[9]->GetTransform()->AddChild(entities[10]->GetTransform());
 }
 
 
@@ -434,7 +441,7 @@ void Game::OnResize()
 		camera->UpdateProjectionMatrix(this->width / (float)this->height);
 
 	//update renderer data
-
+	renderer->PostResize(width, height, backBufferRTV, depthStencilView);
 }
 
 // --------------------------------------------------------
@@ -458,6 +465,7 @@ void Game::Update(float deltaTime, float totalTime)
 	{
 		CreateRandomPointLight();
 	}
+	renderer->UpdateLightVec(lights); //i hate this, please just use shared pointers already
 
 	UpdateEntitityTransforms();
 }
@@ -590,59 +598,62 @@ void Game::ConcatAndCreateText(std::string& label, std::string& valueStr)
 // --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
-	// Background color for clearing
-	const float color[4] = { 0, 0, 0, 1 };
+	renderer->Render(camera, lightCount);
+	//DrawUI();
 
-	// Clear the render target and depth buffer (erases what's on the screen)
-	//  - Do this ONCE PER FRAME
-	//  - At the beginning of Draw (before drawing *anything*)
-	context->ClearRenderTargetView(backBufferRTV.Get(), color);
-	context->ClearDepthStencilView(
-		depthStencilView.Get(),
-		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-		1.0f,
-		0);
+	//// Background color for clearing
+	//const float color[4] = { 0, 0, 0, 1 };
+
+	//// Clear the render target and depth buffer (erases what's on the screen)
+	////  - Do this ONCE PER FRAME
+	////  - At the beginning of Draw (before drawing *anything*)
+	//context->ClearRenderTargetView(backBufferRTV.Get(), color);
+	//context->ClearDepthStencilView(
+	//	depthStencilView.Get(),
+	//	D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
+	//	1.0f,
+	//	0);
 
 
-	// Draw all of the entities
-	for (auto ge : entities)
-	{
-		// Set the "per frame" data
-		// Note that this should literally be set once PER FRAME, before
-		// the draw loop, but we're currently setting it per entity since 
-		// we are just using whichever shader the current entity has.  
-		// Inefficient!!!
-		SimplePixelShader* ps = ge->GetMaterial()->GetPS();
-		ps->SetData("Lights", (void*)(&lights[0]), sizeof(Light) * lightCount);
-		ps->SetInt("LightCount", lightCount);
-		ps->SetFloat3("CameraPosition", camera->GetTransform()->GetPosition());
-		ps->CopyBufferData("perFrame");
+	//// Draw all of the entities
+	//for (auto ge : entities)
+	//{
+	//	// Set the "per frame" data
+	//	// Note that this should literally be set once PER FRAME, before
+	//	// the draw loop, but we're currently setting it per entity since 
+	//	// we are just using whichever shader the current entity has.  
+	//	// Inefficient!!!
+	//	SimplePixelShader* ps = ge->GetMaterial()->GetPS();
+	//	ps->SetData("Lights", (void*)(&lights[0]), sizeof(Light) * lightCount);
+	//	ps->SetInt("LightCount", lightCount);
+	//	ps->SetFloat3("CameraPosition", camera->GetTransform()->GetPosition());
+	//	ps->CopyBufferData("perFrame");
 
-		// Draw the entity
-		ge->Draw(context, camera);
-	}
+	//	// Draw the entity
+	//	ge->Draw(context, camera);
+	//}
 
-	// Draw the light sources
-	DrawPointLights();
+	//// Draw the light sources
+	//DrawPointLights();
 
-	// Draw the sky
-	sky->Draw(camera);
+	//// Draw the sky
+	//sky->Draw(camera);
 
-	// Draw some UI
-	DrawUI();
+	//// Draw some UI
+	//DrawUI();
 
-	//draw ImGUI
-	ImGui::Render();;
-	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+	////draw ImGUI
+	//ImGui::Render();;
+	//ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-	// Present the back buffer to the user
-	//  - Puts the final frame we're drawing into the window so the user can see it
-	//  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
-	swapChain->Present(0, 0);
+	//// Present the back buffer to the user
+	////  - Puts the final frame we're drawing into the window so the user can see it
+	////  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
+	//swapChain->Present(0, 0);
 
-	// Due to the usage of a more sophisticated swap chain,
-	// the render target must be re-bound after every call to Present()
-	context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthStencilView.Get());
+	//// Due to the usage of a more sophisticated swap chain,
+	//// the render target must be re-bound after every call to Present()
+	//context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthStencilView.Get());
 }
 
 

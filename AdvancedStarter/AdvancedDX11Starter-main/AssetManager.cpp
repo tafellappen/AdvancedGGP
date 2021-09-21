@@ -29,35 +29,35 @@ void AssetManager::Initialize(std::string filepath, std::wstring filepathW, Micr
 
 AssetManager::~AssetManager()
 {
-	//for (auto& meshItem : meshes)
-	//{
-	//	delete meshItem.second;
-	//	meshItem.second = nullptr;
-	//}
+	for (auto& meshItem : meshes)
+	{
+		delete meshItem.second;
+		meshItem.second = nullptr;
+	}
 
-	//for (auto& matItem : materials)
-	//{
-	//	delete matItem.second;
-	//	matItem.second = nullptr;
-	//}
+	for (auto& matItem : materials)
+	{
+		delete matItem.second;
+		matItem.second = nullptr;
+	}
 
-	//for (auto& shadItem : vertexShaders)
-	//{
-	//	delete shadItem.second;
-	//	shadItem.second = nullptr;
-	//}
+	for (auto& shadItem : vertexShaders)
+	{
+		delete shadItem.second;
+		shadItem.second = nullptr;
+	}
 
-	//for (auto& shadItem : pixelShaders)
-	//{
-	//	delete shadItem.second;
-	//	shadItem.second = nullptr;
-	//}
+	for (auto& shadItem : pixelShaders)
+	{
+		delete shadItem.second;
+		shadItem.second = nullptr;
+	}
 	////meshes.clear();
 	////materials.clear();
 	////vertexShaders.clear();
 	////pixelShaders.clear();
-	//delete sky;
-	//sky = nullptr;
+	delete sky;
+	sky = nullptr;
 }
 
 void AssetManager::LoadAllAssets()
