@@ -88,6 +88,26 @@ void Sky::Draw(Camera* camera)
 	context->OMSetDepthStencilState(0, 0);
 }
 
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Sky::GetIblIrradianceCubeMap()
+{
+	return Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>();
+}
+
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Sky::GetIblConvolvedSpecular()
+{
+	return Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>();
+}
+
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Sky::GetIblBrdfLookup()
+{
+	return Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>();
+}
+
+int Sky::GetMipLevelCount()
+{
+	return 0;
+}
+
 void Sky::InitRenderStates()
 {
 	// Rasterizer to reverse the cull mode
@@ -103,6 +123,18 @@ void Sky::InitRenderStates()
 	depthDesc.DepthFunc = D3D11_COMPARISON_LESS_EQUAL;
 	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
 	device->CreateDepthStencilState(&depthDesc, skyDepthState.GetAddressOf());
+}
+
+void Sky::IBLCreateIrradianceMap()
+{
+}
+
+void Sky::IBLCreateConvolvedSpecularMap()
+{
+}
+
+void Sky::IBLCreateBRDFLookUpTexture()
+{
 }
 
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Sky::CreateCubemap(const wchar_t* right, const wchar_t* left, const wchar_t* up, const wchar_t* down, const wchar_t* front, const wchar_t* back)
