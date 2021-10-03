@@ -61,7 +61,7 @@ Sky::~Sky()
 {
 }
 
-void Sky::Draw(Camera* camera)
+void Sky::Draw(std::shared_ptr<Camera> camera)
 {
 	// Change to the sky-specific rasterizer state
 	context->RSSetState(skyRasterState.Get());

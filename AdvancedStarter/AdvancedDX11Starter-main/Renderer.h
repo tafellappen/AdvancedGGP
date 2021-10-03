@@ -11,6 +11,8 @@
 
 #include "AssetManager.h"
 
+#include <memory>
+
 class Renderer
 {
 public:
@@ -41,7 +43,7 @@ public:
 
 	void UpdateLightVec(std::vector<Light> lights);
 
-	void Render(Camera* camera,	int lightCount);
+	void Render(std::shared_ptr<Camera> camera,	int lightCount);
 
 private:
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
@@ -61,7 +63,7 @@ private:
 	SimpleVertexShader* lightVS;
 	SimplePixelShader* lightPS;
 
-	void DrawPointLights(Camera* camera, int lightCount);
+	void DrawPointLights(std::shared_ptr<Camera> camera, int lightCount);
 
 };
 

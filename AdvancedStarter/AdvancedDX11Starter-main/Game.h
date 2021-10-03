@@ -19,6 +19,8 @@
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
 #include <vector>
 
+#include <memory> //smart pointers
+
 class Game 
 	: public DXCore
 {
@@ -52,7 +54,8 @@ private:
 	std::vector<GameEntity*> entitiesLineup;
 	std::vector<GameEntity*> entitiesGradient;
 	std::vector<ISimpleShader*> shaders;
-	Camera* camera;
+	std::shared_ptr<Camera> camera;
+	
 
 	Renderer* renderer;
 

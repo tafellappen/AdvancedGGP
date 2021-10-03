@@ -79,7 +79,7 @@ void Renderer::UpdateLightVec(std::vector<Light> lights)
 }
 
 
-void Renderer::Render(Camera* camera, int lightCount)
+void Renderer::Render(std::shared_ptr<Camera> camera, int lightCount)
 {
 	// Background color for clearing
 	const float color[4] = { 0, 0, 0, 1 };
@@ -103,7 +103,7 @@ void Renderer::Render(Camera* camera, int lightCount)
 		// the draw loop, but we're currently setting it per entity since 
 		// we are just using whichever shader the current entity has.  
 		// Inefficient!!!
-		SimplePixelShader* ps = ge->GetMaterial()->GetPS();
+		std::shared_ptr<SimplePixelShader> ps = ge->GetMaterial()->GetPS();
 		ps->SetData("Lights", (void*)(&lights[0]), sizeof(Light) * lightCount);
 		ps->SetInt("LightCount", lightCount);
 		ps->SetFloat3("CameraPosition", camera->GetTransform()->GetPosition());
@@ -136,7 +136,7 @@ void Renderer::Render(Camera* camera, int lightCount)
 	context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthBufferDSV.Get());
 }
 
-void Renderer::DrawPointLights(Camera* camera, int lightCount)
+void Renderer::DrawPointLights(std::shared_ptr<Camera> camera, int lightCount)
 {
 	AssetManager& assetMngr = AssetManager::GetInstance();
 

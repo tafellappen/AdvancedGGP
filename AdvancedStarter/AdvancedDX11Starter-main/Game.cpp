@@ -77,7 +77,7 @@ Game::~Game()
 
 	// Delete any one-off objects
 	//delete sky;
-	delete camera;
+	//delete camera;
 	delete arial;
 	delete spriteBatch;
 	delete renderer;
@@ -121,7 +121,7 @@ void Game::Init()
 	GenerateLights();
 
 	// Make our camera
-	camera = new Camera(
+	camera = std::make_shared<Camera>(
 		0, 0, -10,	// Position
 		3.0f,		// Move speed
 		1.0f,		// Mouse look

@@ -5,6 +5,7 @@
 #include "Camera.h"
 
 #include <wrl/client.h> // Used for ComPtr
+#include <memory>
 
 class Sky
 {
@@ -39,7 +40,7 @@ public:
 
 	~Sky();
 
-	void Draw(Camera* camera);
+	void Draw(std::shared_ptr<Camera> camera);
 
 private:
 

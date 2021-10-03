@@ -3,8 +3,8 @@
 
 
 Material::Material(
-	SimpleVertexShader* vs,
-	SimplePixelShader* ps,
+	std::shared_ptr<SimpleVertexShader> vs,
+	std::shared_ptr<SimplePixelShader> ps,
 	DirectX::XMFLOAT4 color,
 	float shininess,
 	DirectX::XMFLOAT2 uvScale,
@@ -31,7 +31,7 @@ Material::~Material()
 {
 }
 
-void Material::PrepareMaterial(Transform* transform, Camera* cam)
+void Material::PrepareMaterial(std::shared_ptr<Transform> transform, std::shared_ptr<Camera>cam)
 {
 	// Turn shaders on
 	vs->SetShader();

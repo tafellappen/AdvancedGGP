@@ -8,12 +8,14 @@
 #include "Camera.h"
 #include "Lights.h"
 
+#include <memory>
+
 class Material
 {
 public:
 	Material(
-		SimpleVertexShader* vs, 
-		SimplePixelShader* ps, 
+		std::shared_ptr<SimpleVertexShader> vs,
+		std::shared_ptr<SimplePixelShader> ps,
 		DirectX::XMFLOAT4 color, 
 		float shininess, 
 		DirectX::XMFLOAT2 uvScale, 
@@ -24,17 +26,17 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler);
 	~Material();
 
-	void PrepareMaterial(Transform* transform, Camera* cam);
+	void PrepareMaterial(std::shared_ptr<Transform> transform, std::shared_ptr<Camera> cam);
 
-	SimpleVertexShader* GetVS() { return vs; }
-	SimplePixelShader* GetPS() { return ps; }
+	std::shared_ptr<SimpleVertexShader> GetVS() { return vs; }
+	std::shared_ptr<SimplePixelShader> GetPS() { return ps; }
 
-	void SetVS(SimpleVertexShader* vs) { this->vs = vs; }
-	void SetPS(SimplePixelShader* ps) { this->ps = ps; }
+	void SetVS(std::shared_ptr<SimpleVertexShader> vs) { this->vs = vs; }
+	void SetPS(std::shared_ptr<SimplePixelShader> ps) { this->ps = ps; }
 
 private:
-	SimpleVertexShader* vs;
-	SimplePixelShader* ps;
+	std::shared_ptr<SimpleVertexShader> vs;
+	std::shared_ptr<SimplePixelShader> ps;
 
 	DirectX::XMFLOAT2 uvScale;
 	DirectX::XMFLOAT4 color;
