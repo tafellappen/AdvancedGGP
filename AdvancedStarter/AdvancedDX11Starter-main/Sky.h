@@ -41,9 +41,21 @@ public:
 
 	void Draw(Camera* camera);
 
+	// get methods for IBL
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetIblIrradianceCubeMap();
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetIblConvolvedSpecular();
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetIblBrdfLookup();
+
+	int GetMipLevelCount();
+
 private:
 
 	void InitRenderStates();
+
+	// IBL methods
+	void IBLCreateIrradianceMap();
+	void IBLCreateConvolvedSpecularMap();
+	void IBLCreateBRDFLookUpTexture();
 
 	// Helper for creating a cubemap from 6 individual textures
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> CreateCubemap(
@@ -67,5 +79,17 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerOptions;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
+
+	// IBL related resources
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iblIrradianceCubeMap;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iblConvolvedSpecular;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> iblBrdfLookup;
+
+	int mipLevelCount;
+
+	const int mipLevToSkip = 3;
+	const int iblCubeMapFaceSize = 512;
+	const int lookupTexSize = 512;
+
 };
 
