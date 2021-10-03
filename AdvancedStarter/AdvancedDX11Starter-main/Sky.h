@@ -3,6 +3,7 @@
 #include "Mesh.h"
 #include "SimpleShader.h"
 #include "Camera.h"
+//#include "AssetManager.h"
 
 #include <wrl/client.h> // Used for ComPtr
 

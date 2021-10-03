@@ -216,23 +216,23 @@ void Game::LoadAssetsAndCreateEntities()
 		"SkyPS.cso"
 	);
 
-	////shaders for IBL PBR lighting
-	//assetMngr.LoadVertexShader(
-	//	GetFullPathTo_Wide(L"FullscreenVS.cso"),
-	//	"FullscreenVS.cso"
-	//);
-	//assetMngr.LoadPixelShader(
-	//	GetFullPathTo_Wide(L"IBLIrradianceMapPS.cso"),
-	//	"IBLIrradianceMapPS.cso"
-	//);
-	//assetMngr.LoadPixelShader(
-	//	GetFullPathTo_Wide(L"IBLSpecularConvolutionPS.cso"),
-	//	"IBLSpecularConvolutionPS.cso"
-	//);	
-	//assetMngr.LoadPixelShader(
-	//	GetFullPathTo_Wide(L"IBLBrdfLookUpTablePS.cso"),
-	//	"IBLBrdfLookUpTablePS.cso"
-	//);
+	//shaders for IBL PBR lighting
+	assetMngr.LoadVertexShader(
+		GetFullPathTo_Wide(L"FullscreenVS.cso"),
+		"FullscreenVS.cso"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"IBLIrradianceMapPS.cso"),
+		"IBLIrradianceMapPS.cso"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"IBLSpecularConvolutionPS.cso"),
+		"IBLSpecularConvolutionPS.cso"
+	);	
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"IBLBrdfLookUpTablePS.cso"),
+		"IBLBrdfLookUpTablePS.cso"
+	);
 
 
 	//needs to happen after shaders are loaded right now because it relies on the shaders already existing to create the materials and everything
