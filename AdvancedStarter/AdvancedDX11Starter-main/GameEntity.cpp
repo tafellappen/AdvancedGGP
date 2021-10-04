@@ -14,10 +14,10 @@ Material* GameEntity::GetMaterial() { return material; }
 Transform* GameEntity::GetTransform() { return &transform; }
 
 
-void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, Camera* camera)
+void GameEntity::Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, Camera* camera, Sky* sky)
 {
 	// Tell the material to prepare for a draw
-	material->PrepareMaterial(&transform, camera);
+	material->PrepareMaterial(&transform, camera, sky);
 
 	// Draw the mesh
 	mesh->SetBuffersAndDraw(context);

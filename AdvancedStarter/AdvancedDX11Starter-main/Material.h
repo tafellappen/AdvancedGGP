@@ -7,6 +7,7 @@
 #include "SimpleShader.h"
 #include "Camera.h"
 #include "Lights.h"
+#include "Sky.h"
 
 class Material
 {
@@ -21,10 +22,12 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normals, 
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughness, 
 		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> metal, 
-		Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler);
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler,
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerClamp
+		);
 	~Material();
 
-	void PrepareMaterial(Transform* transform, Camera* cam);
+	void PrepareMaterial(Transform* transform, Camera* cam, Sky* sky);
 
 	SimpleVertexShader* GetVS() { return vs; }
 	SimplePixelShader* GetPS() { return ps; }
@@ -45,5 +48,6 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughnessSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> metalSRV;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerClamp;
 };
 

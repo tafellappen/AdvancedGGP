@@ -107,10 +107,11 @@ void Renderer::Render(Camera* camera, int lightCount)
 		ps->SetData("Lights", (void*)(&lights[0]), sizeof(Light) * lightCount);
 		ps->SetInt("LightCount", lightCount);
 		ps->SetFloat3("CameraPosition", camera->GetTransform()->GetPosition());
+		ps->SetInt("SpecIBLTotalMipLevels", sky->GetMipLevelCount());
 		ps->CopyBufferData("perFrame");
 
 		// Draw the entity
-		ge->Draw(context, camera);
+		ge->Draw(context, camera, sky);
 	}
 
 	// Draw the light sources

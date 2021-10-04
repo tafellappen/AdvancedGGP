@@ -7,6 +7,7 @@
 #include "Transform.h"
 #include "Camera.h"
 #include "SimpleShader.h"
+#include "Sky.h"
 
 class GameEntity
 {
@@ -17,7 +18,7 @@ public:
 	Material* GetMaterial();
 	Transform* GetTransform();
 
-	void Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, Camera* camera);
+	void Draw(Microsoft::WRL::ComPtr<ID3D11DeviceContext> context, Camera* camera, Sky* sky);
 
 private:
 

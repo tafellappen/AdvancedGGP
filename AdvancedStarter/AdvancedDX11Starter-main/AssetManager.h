@@ -68,6 +68,7 @@ private:
 
 	//important for textures
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerOptions;
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerClampOptions;
 
 	//lookup maps for assets
 	std::unordered_map<std::string, Mesh*> meshes;

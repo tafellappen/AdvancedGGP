@@ -1,7 +1,6 @@
 #include "Material.h"
 
 
-
 Material::Material(
 	SimpleVertexShader* vs,
 	SimplePixelShader* ps,
@@ -12,7 +11,9 @@ Material::Material(
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normals,
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughness,
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> metal,
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler)
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler,
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerClamp
+)
 {
 	this->vs = vs;
 	this->ps = ps;
@@ -23,6 +24,7 @@ Material::Material(
 	this->roughnessSRV = roughness;
 	this->metalSRV = metal;
 	this->sampler = sampler;
+	this->samplerClamp = samplerClamp;
 	this->uvScale = uvScale;
 }
 
@@ -31,7 +33,7 @@ Material::~Material()
 {
 }
 
-void Material::PrepareMaterial(Transform* transform, Camera* cam)
+void Material::PrepareMaterial(Transform* transform, Camera* cam, Sky* sky)
 {
 	// Turn shaders on
 	vs->SetShader();
@@ -56,6 +58,12 @@ void Material::PrepareMaterial(Transform* transform, Camera* cam)
 	ps->SetShaderResourceView("RoughnessTexture", roughnessSRV);
 	ps->SetShaderResourceView("MetalTexture", metalSRV);
 
+	//set IBL SRV's
+	ps->SetShaderResourceView("BrdfLookUpMap", sky->GetIblBrdfLookup());
+	ps->SetShaderResourceView("IrradianceIBLMap", sky->GetIblIrradianceCubeMap());
+	ps->SetShaderResourceView("SpecularIBLMap", sky->GetIblConvolvedSpecular());
+
 	// Set sampler
 	ps->SetSamplerState("BasicSampler", sampler);
+	ps->SetSamplerState("ClampSampler", samplerClamp);
 }

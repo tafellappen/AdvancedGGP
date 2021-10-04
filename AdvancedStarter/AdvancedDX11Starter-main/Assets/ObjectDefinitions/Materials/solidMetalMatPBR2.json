@@ -1,0 +1,21 @@
+{
+    "name": "solidMetalMatPBR2",
+    "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "textures": {
+        "albedo": "solid_metal_albedo.png",
+        "normal": "solid_metal_normals.png",
+        "rough":  "solid_metal_roughness-0-25.png",
+        "metal":  "solid_metal_metal.png"
+    },
+    "uvScale": [
+        2.0,
+        2.0
+    ],
+    "vertexShader": "VertexShader.cso",
+    "pixelShader": "PixelShaderPBR.cso"
+}

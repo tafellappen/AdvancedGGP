@@ -161,16 +161,16 @@ void Game::Init()
 
 void Game::CreateTransformHierarchies()
 {
-	entities[0]->GetTransform()->AddChild(entities[1]->GetTransform());
-	entities[1]->GetTransform()->AddChild(entities[2]->GetTransform());
-	entities[2]->GetTransform()->AddChild(entities[3]->GetTransform());
-	entities[3]->GetTransform()->AddChild(entities[4]->GetTransform());
+	//entities[0]->GetTransform()->AddChild(entities[1]->GetTransform());
+	//entities[1]->GetTransform()->AddChild(entities[2]->GetTransform());
+	//entities[2]->GetTransform()->AddChild(entities[3]->GetTransform());
+	//entities[3]->GetTransform()->AddChild(entities[4]->GetTransform());
 
-	entities[5]->GetTransform()->AddChild(entities[6]->GetTransform());
-	entities[6]->GetTransform()->AddChild(entities[7]->GetTransform());
-	entities[7]->GetTransform()->AddChild(entities[8]->GetTransform());
-	entities[8]->GetTransform()->AddChild(entities[9]->GetTransform());
-	entities[9]->GetTransform()->AddChild(entities[10]->GetTransform());
+	//entities[5]->GetTransform()->AddChild(entities[6]->GetTransform());
+	//entities[6]->GetTransform()->AddChild(entities[7]->GetTransform());
+	//entities[7]->GetTransform()->AddChild(entities[8]->GetTransform());
+	//entities[8]->GetTransform()->AddChild(entities[9]->GetTransform());
+	//entities[9]->GetTransform()->AddChild(entities[10]->GetTransform());
 }
 
 
@@ -377,6 +377,42 @@ void Game::LoadAssetsAndCreateEntities()
 	entities.push_back(woodSphere);
 
 
+	//plain material entites to show IBL obviously
+	Material* solidMetalMatPBR1 = assetMngr.GetMaterial("solidMetalMatPBR1");
+	Material* solidMetalMatPBR2 = assetMngr.GetMaterial("solidMetalMatPBR2");
+	Material* solidMetalMatPBR3 = assetMngr.GetMaterial("solidMetalMatPBR3");
+	Material* solidMetalMatPBR4 = assetMngr.GetMaterial("solidMetalMatPBR4");
+	Material* solidMetalMatPBR5 = assetMngr.GetMaterial("solidMetalMatPBR5");
+
+
+	GameEntity* solidMetalSphere1 = new GameEntity(sphereMesh, solidMetalMatPBR1);
+	GameEntity* solidMetalSphere2 = new GameEntity(sphereMesh, solidMetalMatPBR2);
+	GameEntity* solidMetalSphere3 = new GameEntity(sphereMesh, solidMetalMatPBR3);
+	GameEntity* solidMetalSphere4 = new GameEntity(sphereMesh, solidMetalMatPBR4);
+	GameEntity* solidMetalSphere5 = new GameEntity(sphereMesh, solidMetalMatPBR5);
+
+	solidMetalSphere1->GetTransform()->SetScale(1, 1, 1);
+	solidMetalSphere1->GetTransform()->SetPosition(6, 0, 0);
+
+	solidMetalSphere2->GetTransform()->SetScale(1, 1, 1);
+	solidMetalSphere2->GetTransform()->SetPosition(4, 0, 0);
+
+	solidMetalSphere3->GetTransform()->SetScale(1, 1, 1);
+	solidMetalSphere3->GetTransform()->SetPosition(2, 0, 0);
+
+	solidMetalSphere4->GetTransform()->SetScale(1, 1, 1);
+	solidMetalSphere4->GetTransform()->SetPosition(0, 0, 0);
+
+	solidMetalSphere5->GetTransform()->SetScale(1, 1, 1);
+	solidMetalSphere5->GetTransform()->SetPosition(-2, 0, 0);
+
+	entities.push_back(solidMetalSphere1);
+	entities.push_back(solidMetalSphere2);
+	entities.push_back(solidMetalSphere3);
+	entities.push_back(solidMetalSphere4);
+	entities.push_back(solidMetalSphere5);
+
+
 
 	// Save assets needed for drawing point lights
 	// (Since these are just copies of the pointers,
@@ -486,7 +522,7 @@ void Game::Update(float deltaTime, float totalTime)
 	}
 	renderer->UpdateLightVec(lights); //i hate this, please just use shared pointers already
 
-	UpdateEntitityTransforms();
+	//UpdateEntitityTransforms();
 }
 
 void Game::UpdateEntitityTransforms()
@@ -528,8 +564,11 @@ void Game::HandleGuiUpdate(float deltaTime, Input& input)
 	input.SetGuiKeyboardCapture(io.WantCaptureKeyboard);
 	input.SetGuiMouseCapture(io.WantCaptureMouse);
 	// Show the demo window
-	ImGui::ShowDemoWindow();
-	
+	// Demo website also here: https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
+	//ImGui::ShowDemoWindow();
+
+	//testing brdf lookup
+
 
 	ShowEngineStats(io.Framerate);
 

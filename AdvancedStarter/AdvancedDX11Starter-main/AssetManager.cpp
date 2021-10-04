@@ -117,6 +117,16 @@ void AssetManager::LoadAllAssets()
 	device->CreateSamplerState(&sampDesc, samplerOptions.GetAddressOf()); //todo: im pretty sure sampler state can just stay in this class and doesnt even need to be accessed in game
 	// emphasis on "pretty sure"
 
+	//create ClampSampler (for IBL PBR lighting)
+	D3D11_SAMPLER_DESC sampClampDesc = {}; //proably unecessary to have this rather than reuse the other but uuuh oh well
+	sampClampDesc.AddressU = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampClampDesc.AddressV = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampClampDesc.AddressW = D3D11_TEXTURE_ADDRESS_CLAMP;
+	sampClampDesc.Filter = D3D11_FILTER_ANISOTROPIC;
+	sampClampDesc.MaxAnisotropy = 16;
+	sampClampDesc.MaxLOD = D3D11_FLOAT32_MAX;
+	device->CreateSamplerState(&sampClampDesc, samplerClampOptions.GetAddressOf());
+
 	//for now assume that these already exist, aka assume that all shaders were loaded before this.
 	//todo: I'd really like to be able to put these both in their own method, and have this just automatically handle whether its a dds cube map or 6 images
 	SimpleVertexShader* skyVS = vertexShaders["SkyVS.cso"];
@@ -187,7 +197,8 @@ void AssetManager::LoadAllAssets()
 				textures[texNorm],
 				textures[texRough],
 				textures[texMetal],
-				samplerOptions
+				samplerOptions,
+				samplerClampOptions
 			);
 			materials.insert({ matName, thisMat });
 			std::cout << "Created material \"" << matName << "\" from definition \"" << fileName << "\"" << std::endl;
