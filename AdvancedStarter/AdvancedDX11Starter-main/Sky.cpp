@@ -97,22 +97,22 @@ void Sky::Draw(Camera* camera)
 
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Sky::GetIblIrradianceCubeMap()
 {
-	return Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>();
+	return iblIrradianceCubeMap;
 }
 
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Sky::GetIblConvolvedSpecular()
 {
-	return Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>();
+	return iblConvolvedSpecular;
 }
 
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Sky::GetIblBrdfLookup()
 {
-	return Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>();
+	return iblBrdfLookup;
 }
 
 int Sky::GetMipLevelCount()
 {
-	return 0;
+	return mipLevelCount;
 }
 
 void Sky::InitRenderStates()
@@ -201,10 +201,12 @@ void Sky::IBLCreateIrradianceMap()
 
 	//  STEP 6------------------------------------------------------------------------------------------------
 	// Loop through 6 faces of a cube map
-	for (int i = 0; i < 5; i++)
+	for (int i = 0; i < 6; i++)
 	{
 		int faceIndex = i; //I like i as the iterator but also want to make this loop a bit more readable
 		// Create, clear, and set a new render target view for this face
+
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv = {};
 
 		// Make a render target view for this face
 		D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
@@ -213,6 +215,8 @@ void Sky::IBLCreateIrradianceMap()
 		rtvDesc.Texture2DArray.FirstArraySlice = faceIndex;	// which texture are we rendering to?
 		rtvDesc.Texture2DArray.MipSlice = 0;			// which mip are we rendering into? 
 		rtvDesc.Format = textDesc.Format;				// same format as texture
+		device->CreateRenderTargetView(irrMapFinalTexture.Get(), &rtvDesc, rtv.GetAddressOf());
+		context->OMSetRenderTargets(1, rtv.GetAddressOf(), 0);
 
 		// send data to shaders
 		// per-face shader data and copy
@@ -310,10 +314,12 @@ void Sky::IBLCreateConvolvedSpecularMap()
 		vp.MaxDepth = 1.0f;
 		context->RSSetViewports(1, &vp);
 
-		for (int i = 0; i < 5; i++)
+		for (int i = 0; i < 6; i++)
 		{
 			int faceIndex = i; //I like i as the iterator but also want to make this loop a bit more readable
 			// Create, clear, and set a new render target view for this face
+
+			Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv = {};
 
 			// Make a render target view for this face
 			D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
@@ -322,6 +328,8 @@ void Sky::IBLCreateConvolvedSpecularMap()
 			rtvDesc.Texture2DArray.FirstArraySlice = faceIndex;	// which texture are we rendering to?
 			rtvDesc.Texture2DArray.MipSlice = currentMipLevel;	// which mip are we rendering into? 
 			rtvDesc.Format = textDesc.Format;				// same format as texture
+			device->CreateRenderTargetView(convSpecMapFinalTex.Get(), &rtvDesc, rtv.GetAddressOf());
+			context->OMSetRenderTargets(1, rtv.GetAddressOf(), 0);
 
 			// send data to shaders
 			// per-face shader data and copy
@@ -414,11 +422,16 @@ void Sky::IBLCreateBRDFLookUpTexture()
 	//  STEP 6------------------------------------------------------------------------------------------------
 	// No loop because we aren't going through a 6 faced cube map - just one texture
 	
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> rtv = {};
+
 	// Make a render target view
 	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
 	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;	// this points to a Texture2D (just one, not an array)
 	rtvDesc.Texture2DArray.MipSlice = 0;			// which mip are we rendering into? 
 	rtvDesc.Format = textDesc.Format;				// same format as texture
+
+	device->CreateRenderTargetView(brdfLookupFinalTex.Get(), &rtvDesc, rtv.GetAddressOf());
+	context->OMSetRenderTargets(1, rtv.GetAddressOf(), 0);
 
 	// this shader doesnt need any data sent to it
 

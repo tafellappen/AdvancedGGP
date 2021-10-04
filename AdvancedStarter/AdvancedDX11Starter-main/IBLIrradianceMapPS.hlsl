@@ -23,6 +23,7 @@ SamplerState BasicSampler	: register(s0);
 // http://www.codinglabs.net/article_physically_based_rendering.aspx
 float4 main(VertexToPixel input) : SV_TARGET
 {
+	//return float4(1, 0, 0, 1);
 	// Get a -1 to 1 range on x/y
 	float2 o = input.uv * 2 - 1;
 

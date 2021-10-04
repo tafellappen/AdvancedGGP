@@ -119,6 +119,9 @@ float4 main(VertexToPixel input) : SV_TARGET
 	// Add the indirect to the direct
 	totalColor += fullIndirect;
 
+	//return float4(indirectDiffuse, 1);
+	//return IrradianceIBLMap.Sample(BasicSampler, input.normal);
+
 	// Gamma correction
 	return float4(pow(totalColor, 1.0f / 2.2f), 1);
 }
