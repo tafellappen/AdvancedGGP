@@ -36,6 +36,9 @@ public:
 		unsigned int windowWidth,
 		unsigned int windowHeight,
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backBufferRTV,
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneColorsRTV,
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneNormalsRTV,
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneDepthsRTV,
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthBufferDSV
 	);
 
@@ -54,6 +57,14 @@ private:
 	Sky* sky;
 	std::vector<GameEntity*> entities;
 	std::vector<Light> lights;
+
+	//multiple render targets things - for refraction
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneColorsRTV;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneNormalsRTV;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneDepthsRTV;
+	//im guessing these go here? I have absolutely no idea at this point
+	//yes it seems like they do. go look at the repo
+
 
 	//int lightCount;
 

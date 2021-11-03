@@ -65,9 +65,12 @@ Renderer::~Renderer()
 
 }
 
-void Renderer::PostResize(unsigned int windowWidth, unsigned int windowHeight, Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backBufferRTV, Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthBufferDSV)
+void Renderer::PostResize(unsigned int windowWidth, unsigned int windowHeight, Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backBufferRTV, Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneColorsRTV,	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneNormalsRTV,	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneDepthsRTV, Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthBufferDSV)
 {
 	this->backBufferRTV = backBufferRTV;
+	this->sceneColorsRTV = sceneColorsRTV;
+	this->sceneNormalsRTV = sceneNormalsRTV;
+	this->sceneDepthsRTV = sceneDepthsRTV;
 	this->depthBufferDSV = depthBufferDSV;
 	this->windowWidth = windowWidth;
 	this->windowHeight = windowHeight;
