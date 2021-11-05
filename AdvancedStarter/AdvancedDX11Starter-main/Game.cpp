@@ -632,6 +632,56 @@ void Game::ShowEngineStats(float framerate)
 	ImGui::End();
 }
 
+void Game::ShowRenderTargets()
+{
+	ImGui::Begin("Render Targets");
+
+	//// Refraction options
+	//if (ImGui::CollapsingHeader("Refraction Options"))
+	//{
+	//	ImVec2 size = ImGui::GetItemRectSize();
+	//	float rtHeight = size.x * ((float)height / width);
+
+	//	bool refrNormals = renderer->GetRefractionFromNormalMap();
+	//	if (ImGui::Button(refrNormals ? "Refraction from Normal Map" : "Refraction from IoR"))
+	//		renderer->SetRefractionFromNormalMap(!refrNormals);
+
+	//	ImGui::SameLine();
+	//	bool silh = renderer->GetUseRefractionSilhouette();
+	//	if (ImGui::Button(silh ? "Refraction Silhouette Enabled" : "Refraction Silhouette Disabled"))
+	//		renderer->SetUseRefractionSilhouette(!silh);
+
+	//	float refrScale = renderer->GetRefractionScale();
+	//	if (ImGui::SliderFloat("Refraction Scale", &refrScale, -1.0f, 1.0f))
+	//		renderer->SetRefractionScale(refrScale);
+
+	//	if (!refrNormals)
+	//	{
+	//		float ior = renderer->GetIndexOfRefraction();
+	//		if (ImGui::SliderFloat("Index of Refraction", &ior, 0.0f, 2.0f))
+	//			renderer->SetIndexOfRefraction(ior);
+	//	}
+
+
+	//}
+
+
+	//if (ImGui::CollapsingHeader("All Render Targets"))
+	//{
+	//	ImVec2 size = ImGui::GetItemRectSize();
+	//	float rtHeight = size.x * ((float)height / width);
+
+	//	for (int i = 0; i < RenderTargetType::RENDER_TARGET_TYPE_COUNT; i++)
+	//	{
+	//		ImageWithHover(renderer->GetRenderTargetSRV((RenderTargetType)i).Get(), ImVec2(size.x, rtHeight));
+	//	}
+
+	//	ImageWithHover(Assets::GetInstance().GetTexture("random").Get(), ImVec2(256, 256));
+	//}
+
+	ImGui::End();
+}
+
 //there must be a cleaner way than having two methods that are basically the same other than the parameters, right?
 void Game::AddLabeledFloat(std::string label, float value)
 {

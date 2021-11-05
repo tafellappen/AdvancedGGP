@@ -65,15 +65,31 @@ Renderer::~Renderer()
 
 }
 
-void Renderer::PostResize(unsigned int windowWidth, unsigned int windowHeight, Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backBufferRTV, Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneColorsRTV,	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneNormalsRTV,	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneDepthsRTV, Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthBufferDSV)
+void Renderer::PostResize(
+	unsigned int windowWidth, 
+	unsigned int windowHeight, 
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backBufferRTV, 
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthBufferDSV)
 {
 	this->backBufferRTV = backBufferRTV;
-	this->sceneColorsRTV = sceneColorsRTV;
-	this->sceneNormalsRTV = sceneNormalsRTV;
-	this->sceneDepthsRTV = sceneDepthsRTV;
 	this->depthBufferDSV = depthBufferDSV;
 	this->windowWidth = windowWidth;
 	this->windowHeight = windowHeight;
+
+	//render target views
+	sceneColorsRTV.Reset();
+	sceneNormalsRTV.Reset();
+	sceneDepthsRTV.Reset();
+	//shader resource views
+	sceneColorsSRV.Reset();
+	sceneNormalsSRV.Reset();
+	sceneDepthsSRV.Reset();
+
+	CreateRenderTarget(windowWidth, windowHeight, sceneColorsRTV, sceneColorsSRV);
+	CreateRenderTarget(windowWidth, windowHeight, sceneNormalsRTV, sceneNormalsSRV);
+	CreateRenderTarget(windowWidth, windowHeight, sceneDepthsRTV, sceneDepthsSRV);
+
+
 }
 
 void Renderer::UpdateLightVec(std::vector<Light> lights)
@@ -195,6 +211,36 @@ void Renderer::DrawPointLights(Camera* camera, int lightCount)
 		lightMesh->SetBuffersAndDraw(context);
 	}
 
+}
+
+void Renderer::CreateRenderTarget(unsigned int width, unsigned int height, Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& rtv, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& srv, DXGI_FORMAT colorFormat)
+{
+	// Make the texture
+	Microsoft::WRL::ComPtr<ID3D11Texture2D> rtTexture;
+
+	D3D11_TEXTURE2D_DESC texDesc = {};
+	texDesc.Width = width;
+	texDesc.Height = height;
+	texDesc.ArraySize = 1;
+	texDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE; // Need both!
+	texDesc.Format = colorFormat;
+	texDesc.MipLevels = 1; // Usually no mip chain needed for render targets
+	texDesc.MiscFlags = 0;
+	texDesc.SampleDesc.Count = 1; // Can't be zero
+	device->CreateTexture2D(&texDesc, 0, rtTexture.GetAddressOf());
+
+	// Make the render target view
+	D3D11_RENDER_TARGET_VIEW_DESC rtvDesc = {};
+	rtvDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D; // This points to a Texture2D
+	rtvDesc.Texture2D.MipSlice = 0;                             // Which mip are we rendering into?
+	rtvDesc.Format = texDesc.Format;                // Same format as texture
+	device->CreateRenderTargetView(rtTexture.Get(), &rtvDesc, rtv.GetAddressOf());
+
+	// Create the shader resource view using default options 
+	device->CreateShaderResourceView(
+		rtTexture.Get(),     // Texture resource itself
+		0,                   // Null description = default SRV options
+		srv.GetAddressOf()); // ComPtr<ID3D11ShaderResourceView>
 }
 
 

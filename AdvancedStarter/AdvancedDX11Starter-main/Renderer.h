@@ -36,9 +36,6 @@ public:
 		unsigned int windowWidth,
 		unsigned int windowHeight,
 		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> backBufferRTV,
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneColorsRTV,
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneNormalsRTV,
-		Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneDepthsRTV,
 		Microsoft::WRL::ComPtr<ID3D11DepthStencilView> depthBufferDSV
 	);
 
@@ -62,8 +59,11 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneColorsRTV;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneNormalsRTV;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneDepthsRTV;
-	//im guessing these go here? I have absolutely no idea at this point
-	//yes it seems like they do. go look at the repo
+	//SRVs also seem to go best here. repo just has all of these things in arrays instead. probably nicer for adding more but i cant even go watch Platinum End right now so we cant have nice things anyway
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneColorsSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneNormalsSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneDepthsSRV;	//these all used for imgui i think? maybe? idk but word vomiting into code comments helps me think
+
 
 
 	//int lightCount;
@@ -73,6 +73,14 @@ private:
 	SimplePixelShader* lightPS;
 
 	void DrawPointLights(Camera* camera, int lightCount);
+
+	void CreateRenderTarget(
+		unsigned int width,
+		unsigned int height,
+		Microsoft::WRL::ComPtr<ID3D11RenderTargetView>& rtv,
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>& srv,
+		DXGI_FORMAT colorFormat = DXGI_FORMAT_R8G8B8A8_UNORM
+	);
 
 };
 
