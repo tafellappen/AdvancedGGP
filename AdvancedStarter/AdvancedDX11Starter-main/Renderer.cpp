@@ -27,7 +27,14 @@ Renderer::Renderer(
 	SimpleVertexShader* lightVS,
 	SimplePixelShader* lightPS
 
-)
+):
+	vsPerFrameConstantBuffer(0),
+	psPerFrameConstantBuffer(0),
+	ambientNonPBR(0.1f, 0.1f, 0.25f),
+	refractionScale(0.1f),
+	useRefractionSilhouette(false),
+	refractionFromNormalMap(true),
+	indexOfRefraction(0.5f)
 {
 	this->device = device;
 	this->context = context;
@@ -44,6 +51,41 @@ Renderer::Renderer(
 	this->lightVS = lightVS;
 	this->lightPS = lightPS;
 	//this->lightCount = lightCount;
+
+    // Initialize structs
+	vsPerFrameData = {};
+	psPerFrameData = {};
+
+	// Grab two shaders on which to base per-frame cbuffers
+	// Note: We're assuming ALL entity/material per-frame buffers are identical!
+	//       And that they're all called "perFrame"
+	AssetManager& assets = AssetManager::GetInstance();
+	SimplePixelShader* ps = assets.GetPixelShader("PixelShaderPBR.cso");
+	SimpleVertexShader* vs = assets.GetVertexShader("VertexShader.cso");
+
+	// Struct to hold the descriptions from existing buffers
+	D3D11_BUFFER_DESC bufferDesc = {};
+	const SimpleConstantBuffer* scb = 0;
+
+	// Make a new buffer that matches the existing PS per-frame buffer
+	scb = ps->GetBufferInfo("perFrame");
+	scb->ConstantBuffer.Get()->GetDesc(&bufferDesc);
+	device->CreateBuffer(&bufferDesc, 0, psPerFrameConstantBuffer.GetAddressOf());
+
+	// Make a new buffer that matches the existing PS per-frame buffer
+	scb = vs->GetBufferInfo("perFrame");
+	scb->ConstantBuffer.Get()->GetDesc(&bufferDesc);
+	device->CreateBuffer(&bufferDesc, 0, vsPerFrameConstantBuffer.GetAddressOf());
+
+	PostResize(windowWidth, windowHeight, backBufferRTV, depthBufferDSV);
+
+	// Depth state for refraction silhouette
+	D3D11_DEPTH_STENCIL_DESC depthDesc = {};
+	depthDesc.DepthEnable = true;
+	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // No depth writing
+	depthDesc.DepthFunc = D3D11_COMPARISON_LESS;
+	device->CreateDepthStencilState(&depthDesc, refractionSilhouetteDepthState.GetAddressOf());
+
 }
 
 Renderer::~Renderer()
@@ -88,6 +130,7 @@ void Renderer::PostResize(
 	CreateRenderTarget(windowWidth, windowHeight, sceneColorsRTV, sceneColorsSRV);
 	CreateRenderTarget(windowWidth, windowHeight, sceneNormalsRTV, sceneNormalsSRV);
 	CreateRenderTarget(windowWidth, windowHeight, sceneDepthsRTV, sceneDepthsSRV);
+	CreateRenderTarget(windowWidth, windowHeight, refractionSilhouetteRTV, refractionSilhouetteSRV);
 
 
 }
@@ -113,24 +156,112 @@ void Renderer::Render(Camera* camera, int lightCount)
 		1.0f,
 		0);
 
+	//clear refraction render targets
+	context->ClearRenderTargetView(sceneColorsRTV.Get(), color);
+	context->ClearRenderTargetView(sceneNormalsRTV.Get(), color);
+	context->ClearRenderTargetView(refractionSilhouetteRTV.Get(), color);
+	//context->ClearRenderTargetView(sceneDepthsRTV.Get(), color);
+	const float depth[4] = { 1,0,0,0 };
+	context->ClearRenderTargetView(sceneDepthsRTV.Get(), depth);
 
-	// Draw all of the entities
+	const int numTargets = 3;
+	ID3D11RenderTargetView* targets[numTargets] = {};
+	targets[0] = sceneColorsRTV.Get();
+	targets[1] = sceneNormalsRTV.Get();
+	targets[2] = sceneDepthsRTV.Get();
+	//targets[3] = refractionSilhouetteRTV.Get(); //no i dont think i need you here
+	context->OMSetRenderTargets(numTargets, targets, depthBufferDSV.Get());
+
+	// Collect all per-frame data and copy to GPU
+	{
+		// vs ----
+		vsPerFrameData.ViewMatrix = camera->GetView();
+		vsPerFrameData.ProjectionMatrix = camera->GetProjection();
+		context->UpdateSubresource(vsPerFrameConstantBuffer.Get(), 0, 0, &vsPerFrameData, 0, 0);
+
+		// ps ----
+		memcpy(&psPerFrameData.Lights, &lights[0], sizeof(Light) * lightCount);
+		psPerFrameData.LightCount = lightCount;
+		psPerFrameData.CameraPosition = camera->GetTransform()->GetPosition();
+		psPerFrameData.TotalSpecIBLMipLevels = sky->GetMipLevelCount();
+		psPerFrameData.AmbientNonPBR = ambientNonPBR;
+		context->UpdateSubresource(psPerFrameConstantBuffer.Get(), 0, 0, &psPerFrameData, 0, 0);
+	}
+
+	std::vector<GameEntity*> refractiveEntities;
+	// Draw all of the non-refractive entities
 	for (auto ge : entities)
 	{
-		// Set the "per frame" data
-		// Note that this should literally be set once PER FRAME, before
-		// the draw loop, but we're currently setting it per entity since 
-		// we are just using whichever shader the current entity has.  
-		// Inefficient!!!
-		SimplePixelShader* ps = ge->GetMaterial()->GetPS();
-		ps->SetData("Lights", (void*)(&lights[0]), sizeof(Light) * lightCount);
-		ps->SetInt("LightCount", lightCount);
-		ps->SetFloat3("CameraPosition", camera->GetTransform()->GetPosition());
-		ps->SetInt("SpecIBLTotalMipLevels", sky->GetMipLevelCount());
-		ps->CopyBufferData("perFrame");
+		// Skip refractive materials for now
+		if (ge->GetMaterial()->GetRefractive())
+		{
+			refractiveEntities.push_back(ge);
+			//continue;
+		}
+		else
+		{
+			// Set the "per frame" data
+			// Note that this should literally be set once PER FRAME, before
+			// the draw loop, but we're currently setting it per entity since 
+			// we are just using whichever shader the current entity has.  
+			// Inefficient!!!
+			SimplePixelShader* ps = ge->GetMaterial()->GetPS();
+			ps->SetData("Lights", (void*)(&lights[0]), sizeof(Light) * lightCount);
+			ps->SetInt("LightCount", lightCount);
+			ps->SetFloat3("CameraPosition", camera->GetTransform()->GetPosition());
+			ps->SetInt("SpecIBLTotalMipLevels", sky->GetMipLevelCount());
+			ps->CopyBufferData("perFrame");
 
-		// Draw the entity
-		ge->Draw(context, camera, sky);
+			// Draw the entity
+			ge->Draw(context, camera, sky);
+
+		}
+
+	}
+
+	// Get data asset manager
+	AssetManager& assets = AssetManager::GetInstance();
+	SimpleVertexShader* vs = assets.GetVertexShader("FullscreenVS.cso");
+	vs->SetShader();
+
+	//draw refractive entities
+	if (useRefractionSilhouette)
+	{
+		targets[0] = refractionSilhouetteRTV.Get();
+		context->OMSetRenderTargets(1, targets, depthBufferDSV.Get());
+
+		// Depth state
+		context->OMSetDepthStencilState(refractionSilhouetteDepthState.Get(), 0);
+
+		// Grab the solid color shader
+		SimplePixelShader* solidColorPS = assets.GetPixelShader("SolidColorPS.cso");
+
+
+		for (auto ge : refractiveEntities)
+		{
+			// Get this material and sub the refraction PS for now
+			Material* mat = ge->GetMaterial();
+			SimplePixelShader* prevPS = mat->GetPS();
+			mat->SetPS(solidColorPS);
+
+			// Overall material prep
+			mat->PrepareMaterial(ge->GetTransform(), camera, sky);
+			//mat->SetPerMaterialDataAndResources(true);
+
+			// Set up the refraction specific data
+			solidColorPS->SetFloat3("Color", XMFLOAT3(1, 1, 1));
+			solidColorPS->CopyBufferData("externalData");
+
+			// Reset "per frame" buffer for VS
+			context->VSSetConstantBuffers(0, 1, vsPerFrameConstantBuffer.GetAddressOf());
+
+			// Draw
+			ge->GetMesh()->SetBuffersAndDraw(context);
+
+			// Reset this material's PS
+			mat->SetPS(prevPS);
+		}
+
 	}
 
 	// Draw the light sources
@@ -154,6 +285,21 @@ void Renderer::Render(Camera* camera, int lightCount)
 	// Due to the usage of a more sophisticated swap chain,
 	// the render target must be re-bound after every call to Present()
 	context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthBufferDSV.Get());
+}
+
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Renderer::GetSceneColorsSRV()
+{
+	return sceneColorsSRV;
+}
+
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Renderer::GetSceneNormalsSRV()
+{
+	return sceneNormalsSRV;
+}
+
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Renderer::GetSceneDepthsSRV()
+{
+	return sceneDepthsSRV;
 }
 
 void Renderer::DrawPointLights(Camera* camera, int lightCount)

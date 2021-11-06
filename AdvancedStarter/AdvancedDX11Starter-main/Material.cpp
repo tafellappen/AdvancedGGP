@@ -12,7 +12,8 @@ Material::Material(
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughness,
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> metal,
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler,
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerClamp
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerClamp//,
+	//bool refractive = false
 )
 {
 	this->vs = vs;
@@ -26,6 +27,7 @@ Material::Material(
 	this->sampler = sampler;
 	this->samplerClamp = samplerClamp;
 	this->uvScale = uvScale;
+	//this->refractive = refractive;
 }
 
 
@@ -66,4 +68,14 @@ void Material::PrepareMaterial(Transform* transform, Camera* cam, Sky* sky)
 	// Set sampler
 	ps->SetSamplerState("BasicSampler", sampler);
 	ps->SetSamplerState("ClampSampler", samplerClamp);
+}
+
+void Material::SetRefractive(bool refractive)
+{
+	this->refractive = refractive;
+}
+
+bool Material::GetRefractive()
+{
+	return refractive;
 }

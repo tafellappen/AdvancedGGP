@@ -306,6 +306,7 @@ void Game::LoadAssetsAndCreateEntities()
 	GameEntity* cobSpherePBR = new GameEntity(sphereMesh, cobbleMat2xPBR);
 	cobSpherePBR->GetTransform()->SetScale(2, 2, 2);
 	cobSpherePBR->GetTransform()->SetPosition(-6, 2, 0);
+	cobSpherePBR->GetMaterial()->SetRefractive(true); //i hate this
 
 	GameEntity* floorSpherePBR = new GameEntity(sphereMesh, floorMatPBR);
 	floorSpherePBR->GetTransform()->SetScale(2, 2, 2);
@@ -343,6 +344,7 @@ void Game::LoadAssetsAndCreateEntities()
 	GameEntity* cobSphere = new GameEntity(sphereMesh, cobbleMat2x);
 	cobSphere->GetTransform()->SetScale(2, 2, 2);
 	cobSphere->GetTransform()->SetPosition(-6, -2, 0);
+	cobSphere->GetMaterial()->SetRefractive(true); //i hate this so much lol
 
 	GameEntity* floorSphere = new GameEntity(sphereMesh, floorMat);
 	floorSphere->GetTransform()->SetScale(2, 2, 2);
@@ -563,6 +565,7 @@ void Game::HandleGuiUpdate(float deltaTime, Input& input)
 	// Determine new input capture (you’ll uncomment later)
 	input.SetGuiKeyboardCapture(io.WantCaptureKeyboard);
 	input.SetGuiMouseCapture(io.WantCaptureMouse);
+
 	// Show the demo window
 	// Demo website also here: https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
 	//ImGui::ShowDemoWindow();
@@ -571,8 +574,8 @@ void Game::HandleGuiUpdate(float deltaTime, Input& input)
 
 
 	ShowEngineStats(io.Framerate);
-
 	ShowLightsEditor();
+	ShowRenderTargets();
 }
 
 void Game::ShowLightsEditor()
@@ -666,18 +669,21 @@ void Game::ShowRenderTargets()
 	//}
 
 
-	//if (ImGui::CollapsingHeader("All Render Targets"))
-	//{
-	//	ImVec2 size = ImGui::GetItemRectSize();
-	//	float rtHeight = size.x * ((float)height / width);
+	if (ImGui::CollapsingHeader("All Render Targets"))
+	{
+		ImVec2 size = ImGui::GetItemRectSize();
+		float rtHeight = size.x * ((float)height / width);
 
-	//	for (int i = 0; i < RenderTargetType::RENDER_TARGET_TYPE_COUNT; i++)
-	//	{
-	//		ImageWithHover(renderer->GetRenderTargetSRV((RenderTargetType)i).Get(), ImVec2(size.x, rtHeight));
-	//	}
+		ImGui::Image(renderer->GetSceneColorsSRV().Get(), ImVec2(500, 300));
+		ImGui::Image(renderer->GetSceneNormalsSRV().Get(), ImVec2(500, 300));
+		ImGui::Image(renderer->GetSceneDepthsSRV().Get(), ImVec2(500, 300));
+		//for (int i = 0; i < RenderTargetType::RENDER_TARGET_TYPE_COUNT; i++)
+		//{
+		//	ImageWithHover(renderer->GetRenderTargetSRV((RenderTargetType)i).Get(), ImVec2(size.x, rtHeight));
+		//}
 
-	//	ImageWithHover(Assets::GetInstance().GetTexture("random").Get(), ImVec2(256, 256));
-	//}
+		//ImageWithHover(Assets::GetInstance().GetTexture("random").Get(), ImVec2(256, 256));
+	}
 
 	ImGui::End();
 }
