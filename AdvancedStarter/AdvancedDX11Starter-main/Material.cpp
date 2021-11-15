@@ -70,6 +70,11 @@ void Material::PrepareMaterial(Transform* transform, Camera* cam, Sky* sky)
 	ps->SetSamplerState("ClampSampler", samplerClamp);
 }
 
+//void Material::SetPerMaterialDataAndResources(bool copyToGPUNow)
+//{
+//	//set vertex shader per-material variables
+//}
+
 void Material::SetRefractive(bool refractive)
 {
 	this->refractive = refractive;

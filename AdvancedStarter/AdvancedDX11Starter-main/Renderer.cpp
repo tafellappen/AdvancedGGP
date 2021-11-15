@@ -8,6 +8,7 @@
 
 #include "Input.h"//not sure if this is safe here but i need this for the HandleGuiUpdate method. probably a safer way to do this with a using statement or whatever cpp equivalent
 
+#include "AssetManager.h"
 
 using namespace DirectX;
 
@@ -225,8 +226,9 @@ void Renderer::Render(Camera* camera, int lightCount)
 	vs->SetShader();
 
 	//draw refractive entities
-	if (useRefractionSilhouette)
+	if (useRefractionSilhouette) //loop and render the refractive objects to the texture for the silhouette
 	{
+
 		targets[0] = refractionSilhouetteRTV.Get();
 		context->OMSetRenderTargets(1, targets, depthBufferDSV.Get());
 
@@ -262,6 +264,57 @@ void Renderer::Render(Camera* camera, int lightCount)
 			mat->SetPS(prevPS);
 		}
 
+		// Reset depth state
+		context->OMSetDepthStencilState(0, 0);
+	}
+	// Loop and draw refractive objects
+	{
+		// Set up pipeline for refractive draw
+		// Same target (back buffer), but now we need the depth buffer again
+		targets[0] = backBufferRTV.Get();
+		context->OMSetRenderTargets(1, targets, depthBufferDSV.Get());
+
+		// Grab the refractive shader
+		SimplePixelShader* refractionPS = assets.GetPixelShader("RefractionPS.cso");
+
+		// Loop and draw each one
+		for (auto ge : refractiveEntities)
+		{
+			// Get this material and sub the refraction PS for now
+			Material* mat = ge->GetMaterial();
+			SimplePixelShader* prevPS = mat->GetPS();
+			mat->SetPS(refractionPS);
+
+			// Overall material prep
+			mat->PrepareMaterial(ge->GetTransform(), camera, sky);
+			//mat->SetPerMaterialDataAndResources(true); //i dont think i need this right now?
+
+			// Set up the refraction specific data
+			refractionPS->SetFloat2("screenSize", XMFLOAT2((float)windowWidth, (float)windowHeight));
+			refractionPS->SetMatrix4x4("viewMatrix", camera->GetView());
+			refractionPS->SetMatrix4x4("projMatrix", camera->GetProjection());
+			refractionPS->SetInt("useRefractionSilhouette", useRefractionSilhouette);
+			refractionPS->SetInt("refractionFromNormalMap", refractionFromNormalMap);
+			refractionPS->SetFloat("indexOfRefraction", indexOfRefraction);
+			refractionPS->SetFloat("refractionScale", refractionScale);
+			refractionPS->CopyBufferData("perObject");
+
+			// Set textures
+			refractionPS->SetShaderResourceView("ScreenPixels", sceneColorsSRV.Get());
+			refractionPS->SetShaderResourceView("RefractionSilhouette", refractionSilhouetteSRV.Get());
+			refractionPS->SetShaderResourceView("EnvironmentMap", sky->GetEnvironmentMap());
+
+
+			// Reset "per frame" buffers
+			context->VSSetConstantBuffers(0, 1, vsPerFrameConstantBuffer.GetAddressOf());
+			context->PSSetConstantBuffers(0, 1, psPerFrameConstantBuffer.GetAddressOf());
+
+			// Draw
+			ge->GetMesh()->SetBuffersAndDraw(context);
+
+			// Reset this material's PS
+			mat->SetPS(prevPS);
+		}
 	}
 
 	// Draw the light sources

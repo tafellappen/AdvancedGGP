@@ -8,8 +8,8 @@
 #include "Sky.h"
 #include "GameEntity.h"
 #include "Lights.h"
-
-#include "AssetManager.h"
+//
+//#include "AssetManager.h"
 
 // This needs to match the expected per-frame vertex shader data
 struct VSPerFrameData

@@ -100,6 +100,19 @@ Game::~Game()
 // --------------------------------------------------------
 void Game::Init()
 {
+	// Initialize ImGui
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	// Pick a style (uncomment one of these 3)
+	ImGui::StyleColorsDark();
+	//ImGui::StyleColorsLight();
+	//ImGui::StyleColorsClassic();
+	// 
+	// 
+	// Setup Platform/Renderer backends
+	ImGui_ImplWin32_Init(hWnd);
+	ImGui_ImplDX11_Init(device.Get(), context.Get());
+
 	// Initialize the input manager with the window's handle
 	Input::GetInstance().Initialize(this->hWnd);
 
@@ -126,19 +139,6 @@ void Game::Init()
 		3.0f,		// Move speed
 		1.0f,		// Mouse look
 		this->width / (float)this->height); // Aspect ratio
-
-	// Initialize ImGui
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	// Pick a style (uncomment one of these 3)
-	ImGui::StyleColorsDark();
-	//ImGui::StyleColorsLight();
-	//ImGui::StyleColorsClassic();
-	// 
-	// 
-	// Setup Platform/Renderer backends
-	ImGui_ImplWin32_Init(hWnd);
-	ImGui_ImplDX11_Init(device.Get(), context.Get());
 
 	CreateTransformHierarchies();
 
@@ -344,7 +344,7 @@ void Game::LoadAssetsAndCreateEntities()
 	GameEntity* cobSphere = new GameEntity(sphereMesh, cobbleMat2x);
 	cobSphere->GetTransform()->SetScale(2, 2, 2);
 	cobSphere->GetTransform()->SetPosition(-6, -2, 0);
-	cobSphere->GetMaterial()->SetRefractive(true); //i hate this so much lol
+	cobSphere->GetMaterial()->SetRefractive(true); //i hate this so much
 
 	GameEntity* floorSphere = new GameEntity(sphereMesh, floorMat);
 	floorSphere->GetTransform()->SetScale(2, 2, 2);

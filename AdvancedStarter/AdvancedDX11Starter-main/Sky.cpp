@@ -110,6 +110,11 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Sky::GetIblBrdfLookup()
 	return iblBrdfLookup;
 }
 
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Sky::GetEnvironmentMap()
+{
+	return skySRV;
+}
+
 int Sky::GetMipLevelCount()
 {
 	return mipLevelCount;

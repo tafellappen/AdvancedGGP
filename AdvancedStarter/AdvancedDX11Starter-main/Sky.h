@@ -47,6 +47,8 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetIblConvolvedSpecular();
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetIblBrdfLookup();
 
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetEnvironmentMap();
+
 	int GetMipLevelCount();
 
 private:
