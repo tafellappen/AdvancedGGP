@@ -25,6 +25,9 @@ cbuffer perFrame : register(b1)
 
 	// Needed for specular (reflection) calculation
 	float3 CameraPosition;
+
+	// Ambient color for the environment
+	float3 AmbientNonPBR;
 };
 
 
@@ -39,6 +42,13 @@ struct VertexToPixel
 	float3 worldPos			: POSITION; // The world position of this PIXEL
 };
 
+struct PS_Output
+{
+	float4 colorNoAmbient	: SV_TARGET0;
+	float4 ambientColor		: SV_TARGET0;
+	float4 normals			: SV_TARGET1;
+	float depths			: SV_TARGET2;
+};
 
 // Texture-related variables
 Texture2D AlbedoTexture			: register(t0);
@@ -48,7 +58,7 @@ SamplerState BasicSampler		: register(s0);
 
 
 // Entry point for this pixel shader
-float4 main(VertexToPixel input) : SV_TARGET
+PS_Output main(VertexToPixel input) : SV_TARGET
 {
 	// Always re-normalize interpolated direction vectors
 	input.normal = normalize(input.normal);
@@ -90,5 +100,15 @@ float4 main(VertexToPixel input) : SV_TARGET
 	}
 
 	// Gamma correction
-	return float4(pow(totalColor, 1.0f / 2.2f), 1);
+	//return float4(pow(totalColor, 1.0f / 2.2f), 1);
+	
+	// Handle ambient
+	float3 ambient = surfaceColor.rgb * AmbientNonPBR;
+	// Multiple render target output
+	PS_Output output;
+	output.colorNoAmbient = float4(totalColor, 1); // No gamma correction yet!
+	output.ambientColor = float4(ambient, 1);
+	output.normals = float4(input.normal * 0.5f + 0.5f, 1);
+	output.depths = input.screenPosition.z;
+	return output;
 }

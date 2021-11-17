@@ -33,7 +33,6 @@ Renderer::Renderer(
 	psPerFrameConstantBuffer(0),
 	ambientNonPBR(0.1f, 0.1f, 0.25f),
 	refractionScale(0.1f),
-	useRefractionSilhouette(false),
 	refractionFromNormalMap(true),
 	indexOfRefraction(0.5f)
 {
@@ -123,15 +122,20 @@ void Renderer::PostResize(
 	sceneColorsRTV.Reset();
 	sceneNormalsRTV.Reset();
 	sceneDepthsRTV.Reset();
+	refractionSilhouetteRTV.Reset();
+	finalCompositeRTV.Reset();
 	//shader resource views
 	sceneColorsSRV.Reset();
 	sceneNormalsSRV.Reset();
 	sceneDepthsSRV.Reset();
+	refractionSilhouetteSRV.Reset();
+	finalCompositeSRV.Reset();
 
 	CreateRenderTarget(windowWidth, windowHeight, sceneColorsRTV, sceneColorsSRV);
 	CreateRenderTarget(windowWidth, windowHeight, sceneNormalsRTV, sceneNormalsSRV);
 	CreateRenderTarget(windowWidth, windowHeight, sceneDepthsRTV, sceneDepthsSRV);
 	CreateRenderTarget(windowWidth, windowHeight, refractionSilhouetteRTV, refractionSilhouetteSRV);
+	CreateRenderTarget(windowWidth, windowHeight, finalCompositeRTV, finalCompositeSRV);
 
 
 }
@@ -151,17 +155,13 @@ void Renderer::Render(Camera* camera, int lightCount)
 	//  - Do this ONCE PER FRAME
 	//  - At the beginning of Draw (before drawing *anything*)
 	context->ClearRenderTargetView(backBufferRTV.Get(), color);
-	context->ClearDepthStencilView(
-		depthBufferDSV.Get(),
-		D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-		1.0f,
-		0);
+	context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f,	0);
 
 	//clear refraction render targets
 	context->ClearRenderTargetView(sceneColorsRTV.Get(), color);
 	context->ClearRenderTargetView(sceneNormalsRTV.Get(), color);
 	context->ClearRenderTargetView(refractionSilhouetteRTV.Get(), color);
-	//context->ClearRenderTargetView(sceneDepthsRTV.Get(), color);
+	context->ClearRenderTargetView(finalCompositeRTV.Get(), color);
 	const float depth[4] = { 1,0,0,0 };
 	context->ClearRenderTargetView(sceneDepthsRTV.Get(), depth);
 
@@ -201,11 +201,12 @@ void Renderer::Render(Camera* camera, int lightCount)
 		}
 		else
 		{
-			// Set the "per frame" data
-			// Note that this should literally be set once PER FRAME, before
-			// the draw loop, but we're currently setting it per entity since 
-			// we are just using whichever shader the current entity has.  
-			// Inefficient!!!
+
+			// Set the "per frame" data 
+			// Note that this should literally be set once PER FRAME, before 
+			// the draw loop, but we're currently setting it per entity since  
+			// we are just using whichever shader the current entity has.   
+			// Inefficient!!! 
 			SimplePixelShader* ps = ge->GetMaterial()->GetPS();
 			ps->SetData("Lights", (void*)(&lights[0]), sizeof(Light) * lightCount);
 			ps->SetInt("LightCount", lightCount);
@@ -213,115 +214,145 @@ void Renderer::Render(Camera* camera, int lightCount)
 			ps->SetInt("SpecIBLTotalMipLevels", sky->GetMipLevelCount());
 			ps->CopyBufferData("perFrame");
 
-			// Draw the entity
+			// Draw the entity 
 			ge->Draw(context, camera, sky);
 
 		}
 
 	}
 
+	//-----------END ALL SOLID/OPAQUE OBJECTS----------------------------------------------
+	// Draw the sky, AFTER all opaque but BEFORE transparent ones
+	sky->Draw(camera);
+
 	// Get data asset manager
 	AssetManager& assets = AssetManager::GetInstance();
 	SimpleVertexShader* vs = assets.GetVertexShader("FullscreenVS.cso");
 	vs->SetShader();
 
-	//draw refractive entities
-	if (useRefractionSilhouette) //loop and render the refractive objects to the texture for the silhouette
+	// Final combine
 	{
+		// Set up final combine
+		targets[0] = finalCompositeRTV.Get();
+		context->OMSetRenderTargets(1, targets, 0);
 
-		targets[0] = refractionSilhouetteRTV.Get();
-		context->OMSetRenderTargets(1, targets, depthBufferDSV.Get());
-
-		// Depth state
-		context->OMSetDepthStencilState(refractionSilhouetteDepthState.Get(), 0);
-
-		// Grab the solid color shader
-		SimplePixelShader* solidColorPS = assets.GetPixelShader("SolidColorPS.cso");
-
-
-		for (auto ge : refractiveEntities)
-		{
-			// Get this material and sub the refraction PS for now
-			Material* mat = ge->GetMaterial();
-			SimplePixelShader* prevPS = mat->GetPS();
-			mat->SetPS(solidColorPS);
-
-			// Overall material prep
-			mat->PrepareMaterial(ge->GetTransform(), camera, sky);
-			//mat->SetPerMaterialDataAndResources(true);
-
-			// Set up the refraction specific data
-			solidColorPS->SetFloat3("Color", XMFLOAT3(1, 1, 1));
-			solidColorPS->CopyBufferData("externalData");
-
-			// Reset "per frame" buffer for VS
-			context->VSSetConstantBuffers(0, 1, vsPerFrameConstantBuffer.GetAddressOf());
-
-			// Draw
-			ge->GetMesh()->SetBuffersAndDraw(context);
-
-			// Reset this material's PS
-			mat->SetPS(prevPS);
-		}
-
-		// Reset depth state
-		context->OMSetDepthStencilState(0, 0);
+		SimplePixelShader* ps = assets.GetPixelShader("CombinePS.cso");
+		ps->SetShader();
+		ps->SetShaderResourceView("SceneColors", sceneColorsSRV);
+		ps->CopyAllBufferData();
+		context->Draw(3, 0);
 	}
-	// Loop and draw refractive objects
+
+	// Draw the solid objects to the screen
 	{
-		// Set up pipeline for refractive draw
-		// Same target (back buffer), but now we need the depth buffer again
 		targets[0] = backBufferRTV.Get();
-		context->OMSetRenderTargets(1, targets, depthBufferDSV.Get());
+		context->OMSetRenderTargets(1, targets, 0);
+		SimplePixelShader* ps = assets.GetPixelShader("SimpleTexturePS.cso");
+		ps->SetShader();
+		ps->SetShaderResourceView("Pixels", finalCompositeSRV.Get());
+		context->Draw(3, 0);
+	}
 
-		// Grab the refractive shader
-		SimplePixelShader* refractionPS = assets.GetPixelShader("RefractionPS.cso");
-
-		// Loop and draw each one
-		for (auto ge : refractiveEntities)
+	//---Refraction---
+	{
+		//making the refraction silhouette
 		{
-			// Get this material and sub the refraction PS for now
-			Material* mat = ge->GetMaterial();
-			SimplePixelShader* prevPS = mat->GetPS();
-			mat->SetPS(refractionPS);
+			//loop and render the refractive objects to the texture for the silhouette, as a solid color
 
-			// Overall material prep
-			mat->PrepareMaterial(ge->GetTransform(), camera, sky);
-			//mat->SetPerMaterialDataAndResources(true); //i dont think i need this right now?
+			targets[0] = refractionSilhouetteRTV.Get();
+			context->OMSetRenderTargets(1, targets, depthBufferDSV.Get());
 
-			// Set up the refraction specific data
-			refractionPS->SetFloat2("screenSize", XMFLOAT2((float)windowWidth, (float)windowHeight));
-			refractionPS->SetMatrix4x4("viewMatrix", camera->GetView());
-			refractionPS->SetMatrix4x4("projMatrix", camera->GetProjection());
-			refractionPS->SetInt("useRefractionSilhouette", useRefractionSilhouette);
-			refractionPS->SetInt("refractionFromNormalMap", refractionFromNormalMap);
-			refractionPS->SetFloat("indexOfRefraction", indexOfRefraction);
-			refractionPS->SetFloat("refractionScale", refractionScale);
-			refractionPS->CopyBufferData("perObject");
+			// Depth state
+			context->OMSetDepthStencilState(refractionSilhouetteDepthState.Get(), 0);
 
-			// Set textures
-			refractionPS->SetShaderResourceView("ScreenPixels", sceneColorsSRV.Get());
-			refractionPS->SetShaderResourceView("RefractionSilhouette", refractionSilhouetteSRV.Get());
-			refractionPS->SetShaderResourceView("EnvironmentMap", sky->GetEnvironmentMap());
+			// Grab the solid color shader
+			SimplePixelShader* solidColorPS = assets.GetPixelShader("SolidColorPS.cso");
 
 
-			// Reset "per frame" buffers
-			context->VSSetConstantBuffers(0, 1, vsPerFrameConstantBuffer.GetAddressOf());
-			context->PSSetConstantBuffers(0, 1, psPerFrameConstantBuffer.GetAddressOf());
+			for (auto ge : refractiveEntities)
+			{
+				// Get this material and sub the refraction PS for now
+				Material* mat = ge->GetMaterial();
+				SimplePixelShader* prevPS = mat->GetPS();
+				mat->SetPS(solidColorPS);
 
-			// Draw
-			ge->GetMesh()->SetBuffersAndDraw(context);
+				// Overall material prep
+				mat->PrepareMaterial(ge->GetTransform(), camera, sky);
+				mat->SetPerMaterialDataAndResources(true, sky);
 
-			// Reset this material's PS
-			mat->SetPS(prevPS);
+				// Set up the refraction specific data
+				solidColorPS->SetFloat3("Color", XMFLOAT3(1, 1, 1));
+				solidColorPS->CopyBufferData("externalData");
+
+				// Reset "per frame" buffer for VS
+				context->VSSetConstantBuffers(0, 1, vsPerFrameConstantBuffer.GetAddressOf());
+
+				// Draw
+				ge->GetMesh()->SetBuffersAndDraw(context);
+
+				// Reset this material's PS
+				mat->SetPS(prevPS);
+			}
+
+			// Reset depth state
+			context->OMSetDepthStencilState(0, 0);
+		}
+		// Loop and draw refractive objects
+		{
+			// Set up pipeline for refractive draw
+			// Same target (back buffer), but now we need the depth buffer again
+			targets[0] = backBufferRTV.Get();
+			context->OMSetRenderTargets(1, targets, depthBufferDSV.Get());
+
+			// Grab the refractive shader
+			SimplePixelShader* refractionPS = assets.GetPixelShader("RefractionPS.cso");
+
+			// Loop and draw each one
+			for (auto ge : refractiveEntities)
+			{
+				// Get this material and sub the refraction PS for now
+				Material* mat = ge->GetMaterial();
+				SimplePixelShader* prevPS = mat->GetPS();
+				mat->SetPS(refractionPS);
+
+				// Overall material prep
+				mat->PrepareMaterial(ge->GetTransform(), camera, sky);
+				mat->SetPerMaterialDataAndResources(true, sky);
+
+				// Set up the refraction specific data
+				refractionPS->SetFloat2("screenSize", XMFLOAT2((float)windowWidth, (float)windowHeight));
+				refractionPS->SetMatrix4x4("viewMatrix", camera->GetView());
+				refractionPS->SetMatrix4x4("projMatrix", camera->GetProjection());
+				//refractionPS->SetInt("useRefractionSilhouette", useRefractionSilhouette);
+				refractionPS->SetInt("refractionFromNormalMap", refractionFromNormalMap);
+				refractionPS->SetFloat("indexOfRefraction", indexOfRefraction);
+				refractionPS->SetFloat("refractionScale", refractionScale);
+				refractionPS->CopyBufferData("perObject");
+
+				// Set textures
+				refractionPS->SetShaderResourceView("ScreenPixels", finalCompositeSRV.Get());
+				refractionPS->SetShaderResourceView("RefractionSilhouette", refractionSilhouetteSRV.Get());
+				refractionPS->SetShaderResourceView("EnvironmentMap", sky->GetEnvironmentMap());
+
+
+				// Reset "per frame" buffers
+				context->VSSetConstantBuffers(0, 1, vsPerFrameConstantBuffer.GetAddressOf());
+				context->PSSetConstantBuffers(0, 1, psPerFrameConstantBuffer.GetAddressOf());
+
+				// Draw
+				ge->GetMesh()->SetBuffersAndDraw(context);
+
+				// Reset this material's PS
+				mat->SetPS(prevPS);
+			}
 		}
 	}
 
 	// Draw the light sources
+	context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthBufferDSV.Get());
 	DrawPointLights(camera, lightCount);
 
-	// Draw the sky
-	sky->Draw(camera);
+
 
 	// Draw some UI
 	//DrawUI();
@@ -338,6 +369,11 @@ void Renderer::Render(Camera* camera, int lightCount)
 	// Due to the usage of a more sophisticated swap chain,
 	// the render target must be re-bound after every call to Present()
 	context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthBufferDSV.Get());
+
+	// Unbind all SRVs at the end of the frame so they're not still bound for input
+	// when we begin the MRTs of the next frame
+	ID3D11ShaderResourceView* nullSRVs[16] = {};
+	context->PSSetShaderResources(0, 16, nullSRVs);
 }
 
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Renderer::GetSceneColorsSRV()
@@ -353,6 +389,16 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Renderer::GetSceneNormalsSRV()
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Renderer::GetSceneDepthsSRV()
 {
 	return sceneDepthsSRV;
+}
+
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Renderer::GetRefractionSilhouetteSRV()
+{
+	return refractionSilhouetteSRV;
+}
+
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Renderer::GetFinalCompositeSRV()
+{
+	return finalCompositeSRV;
 }
 
 void Renderer::DrawPointLights(Camera* camera, int lightCount)

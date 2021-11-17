@@ -34,7 +34,7 @@ cbuffer perObject : register(b2)
 	matrix viewMatrix;
 	matrix projMatrix;
 	float2 screenSize;
-	int useRefractionSilhouette;
+	//int useRefractionSilhouette;
 	int refractionFromNormalMap;
 	float indexOfRefraction;
 	float refractionScale;
@@ -117,7 +117,8 @@ float4 main(VertexToPixel input) : SV_TARGET
 
 	// Get the depth at the offset and verify its valid
 	float silhouette = RefractionSilhouette.Sample(ClampSampler, refractedUV).r;
-	if (useRefractionSilhouette && silhouette < 1)
+	//if (useRefractionSilhouette && silhouette < 1)
+	if (silhouette < 1)
 	{
 		// Invalid spot for the offset so default to THIS pixel's UV for the "refraction"
 		refractedUV = screenUV;

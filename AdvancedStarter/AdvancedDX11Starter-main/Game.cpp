@@ -234,6 +234,19 @@ void Game::LoadAssetsAndCreateEntities()
 		"IBLBrdfLookUpTablePS.cso"
 	);
 
+	//pixel shader for refraction
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"RefractionPS.cso"),
+		"RefractionPS.cso"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"SimpleTexturePS.cso"),
+		"SimpleTexturePS.cso"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"CombinePS.cso"),
+		"CombinePS.cso"
+	);
 
 	//needs to happen after shaders are loaded right now because it relies on the shaders already existing to create the materials and everything
 	assetMngr.LoadAllAssets();
@@ -311,6 +324,7 @@ void Game::LoadAssetsAndCreateEntities()
 	GameEntity* floorSpherePBR = new GameEntity(sphereMesh, floorMatPBR);
 	floorSpherePBR->GetTransform()->SetScale(2, 2, 2);
 	floorSpherePBR->GetTransform()->SetPosition(-4, 2, 0);
+	floorSpherePBR->GetMaterial()->SetRefractive(true); //i hate this
 
 	GameEntity* paintSpherePBR = new GameEntity(sphereMesh, paintMatPBR);
 	paintSpherePBR->GetTransform()->SetScale(2, 2, 2);
@@ -344,7 +358,7 @@ void Game::LoadAssetsAndCreateEntities()
 	GameEntity* cobSphere = new GameEntity(sphereMesh, cobbleMat2x);
 	cobSphere->GetTransform()->SetScale(2, 2, 2);
 	cobSphere->GetTransform()->SetPosition(-6, -2, 0);
-	cobSphere->GetMaterial()->SetRefractive(true); //i hate this so much
+	//cobSphere->GetMaterial()->SetRefractive(true); //i hate this so much
 
 	GameEntity* floorSphere = new GameEntity(sphereMesh, floorMat);
 	floorSphere->GetTransform()->SetScale(2, 2, 2);
@@ -677,6 +691,8 @@ void Game::ShowRenderTargets()
 		ImGui::Image(renderer->GetSceneColorsSRV().Get(), ImVec2(500, 300));
 		ImGui::Image(renderer->GetSceneNormalsSRV().Get(), ImVec2(500, 300));
 		ImGui::Image(renderer->GetSceneDepthsSRV().Get(), ImVec2(500, 300));
+		ImGui::Image(renderer->GetRefractionSilhouetteSRV().Get(), ImVec2(500, 300));
+		ImGui::Image(renderer->GetFinalCompositeSRV().Get(), ImVec2(500, 300));
 		//for (int i = 0; i < RenderTargetType::RENDER_TARGET_TYPE_COUNT; i++)
 		//{
 		//	ImageWithHover(renderer->GetRenderTargetSRV((RenderTargetType)i).Get(), ImVec2(size.x, rtHeight));

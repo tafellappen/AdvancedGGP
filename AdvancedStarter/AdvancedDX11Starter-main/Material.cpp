@@ -27,6 +27,7 @@ Material::Material(
 	this->sampler = sampler;
 	this->samplerClamp = samplerClamp;
 	this->uvScale = uvScale;
+	this->refractive = false; //defaulting this to false for now because clean code is a myth in week 12
 	//this->refractive = refractive;
 }
 
@@ -70,10 +71,40 @@ void Material::PrepareMaterial(Transform* transform, Camera* cam, Sky* sky)
 	ps->SetSamplerState("ClampSampler", samplerClamp);
 }
 
-//void Material::SetPerMaterialDataAndResources(bool copyToGPUNow)
-//{
-//	//set vertex shader per-material variables
-//}
+void Material::SetPerMaterialDataAndResources(bool copyToGPUNow, Sky* sky)
+{
+	//set vertex shader per-material variables
+	vs->SetFloat2("uvScale", uvScale);
+	if (copyToGPUNow)
+	{
+		vs->CopyBufferData("perMaterial");
+	}
+
+	//pixel shader per-mat variables
+	ps->SetFloat4("Color", color);
+	ps->SetFloat("Shininess", shininess);
+	if (copyToGPUNow)
+	{
+		ps->CopyBufferData("perMaterial");
+	}
+
+	//wait, why is this different from "prepare material"
+	// Set SRVs
+	ps->SetShaderResourceView("AlbedoTexture", albedoSRV);
+	ps->SetShaderResourceView("NormalTexture", normalSRV);
+	ps->SetShaderResourceView("RoughnessTexture", roughnessSRV);
+	ps->SetShaderResourceView("MetalTexture", metalSRV);
+
+	//set IBL SRV's
+	ps->SetShaderResourceView("BrdfLookUpMap", sky->GetIblBrdfLookup());
+	ps->SetShaderResourceView("IrradianceIBLMap", sky->GetIblIrradianceCubeMap());
+	ps->SetShaderResourceView("SpecularIBLMap", sky->GetIblConvolvedSpecular());
+
+	// Set sampler
+	ps->SetSamplerState("BasicSampler", sampler);
+	ps->SetSamplerState("ClampSampler", samplerClamp);
+
+}
 
 void Material::SetRefractive(bool refractive)
 {

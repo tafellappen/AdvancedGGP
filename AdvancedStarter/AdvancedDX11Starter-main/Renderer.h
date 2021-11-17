@@ -63,6 +63,8 @@ public:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSceneColorsSRV();
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSceneNormalsSRV();
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSceneDepthsSRV();
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetRefractionSilhouetteSRV();
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetFinalCompositeSRV();
 
 private:
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
@@ -81,15 +83,16 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneNormalsRTV;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneDepthsRTV;
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> refractionSilhouetteRTV;
+	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> finalCompositeRTV;
 	//SRVs also seem to go best here. repo just has all of these things in arrays instead. probably nicer for adding more but i cant even go watch Platinum End right now so we cant have nice things anyway
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneColorsSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneNormalsSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> sceneDepthsSRV;	//these all used for imgui i think? maybe? idk but word vomiting into code comments helps me think
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> refractionSilhouetteSRV;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> finalCompositeSRV;
 
 	//other misc refraction things
 	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> refractionSilhouetteDepthState;
-	bool useRefractionSilhouette;
 	bool refractionFromNormalMap;
 	float indexOfRefraction;
 	float refractionScale;

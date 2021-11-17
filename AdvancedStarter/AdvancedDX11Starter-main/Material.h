@@ -29,7 +29,7 @@ public:
 	~Material();
 
 	void PrepareMaterial(Transform* transform, Camera* cam, Sky* sky);
-	//void SetPerMaterialDataAndResources(bool copyToGPUNow);
+	void SetPerMaterialDataAndResources(bool copyToGPUNow, Sky* sky);
 
 	SimpleVertexShader* GetVS() { return vs; }
 	SimplePixelShader* GetPS() { return ps; }
