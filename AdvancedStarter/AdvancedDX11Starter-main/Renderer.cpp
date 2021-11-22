@@ -26,7 +26,8 @@ Renderer::Renderer(
 	std::vector<Light> lights,
 	Mesh* lightMesh,
 	SimpleVertexShader* lightVS,
-	SimplePixelShader* lightPS
+	SimplePixelShader* lightPS,
+	std::vector<std::shared_ptr<Emitter>> particleEmitters
 
 ):
 	vsPerFrameConstantBuffer(0),
@@ -85,6 +86,27 @@ Renderer::Renderer(
 	depthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // No depth writing
 	depthDesc.DepthFunc = D3D11_COMPARISON_LESS;
 	device->CreateDepthStencilState(&depthDesc, refractionSilhouetteDepthState.GetAddressOf());
+
+	// Set up render states for particles (since all emitters might use similar ones)
+	// Particles need to be drawn with respect to the depth buffer, so that they do not draw in front things that they are behind
+	// But they also should not write to the depth buffer, because then they will block other particles
+	D3D11_DEPTH_STENCIL_DESC particleDepthDesc = {};
+	particleDepthDesc.DepthEnable = true; // READ from depth buffer
+	particleDepthDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO; // No depth WRITING
+	particleDepthDesc.DepthFunc = D3D11_COMPARISON_LESS; // Standard depth comparison
+	device->CreateDepthStencilState(&particleDepthDesc, particleDepthState.GetAddressOf());
+
+	// Additive blend state for particles (Not every emitter is necessarily additively blended!)
+	D3D11_BLEND_DESC additiveBlendDesc = {};
+	additiveBlendDesc.RenderTarget[0].BlendEnable = true;
+	additiveBlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD; // Add both colors
+	additiveBlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD; // Add both alpha values
+	additiveBlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_ONE;   // 100% of source color
+	additiveBlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_ONE;  // 100% of destination color
+	additiveBlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;   // 100% of source alpha
+	additiveBlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ONE;  // 100% of destination alpha
+	additiveBlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+	device->CreateBlendState(&additiveBlendDesc, particleBlendAdditive.GetAddressOf());
 
 }
 
@@ -146,7 +168,7 @@ void Renderer::UpdateLightVec(std::vector<Light> lights)
 }
 
 
-void Renderer::Render(Camera* camera, int lightCount)
+void Renderer::Render(Camera* camera, int lightCount, float totalTime)
 {
 	// Background color for clearing
 	const float color[4] = { 0, 0, 0, 1 };
@@ -346,6 +368,27 @@ void Renderer::Render(Camera* camera, int lightCount)
 				mat->SetPS(prevPS);
 			}
 		}
+	}
+
+	//draw particles
+	{
+		//bind the buffers
+		targets[0] = backBufferRTV.Get();
+		context->OMSetRenderTargets(1, targets, depthBufferDSV.Get());
+
+		//particle specific blend and depth states
+		context->OMSetBlendState(particleBlendAdditive.Get(), 0, 0xFFFFFFFF);
+		context->OMSetDepthStencilState(particleDepthState.Get(), 0); //i need to figure out what the heck that blend state is supposed to be too
+
+		for (auto emit : particleEmitters)
+		{
+			emit->Draw(camera, totalTime);
+
+		}
+
+		//reset states
+		context->OMSetBlendState(0, 0, 0xFFFFFFFF);
+		context->OMSetDepthStencilState(0, 0);
 	}
 
 	// Draw the light sources

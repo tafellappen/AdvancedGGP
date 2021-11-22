@@ -54,6 +54,8 @@ private:
 	std::vector<ISimpleShader*> shaders;
 	Camera* camera;
 
+	std::vector<std::shared_ptr<Emitter>> particleEmitters;
+
 	Renderer* renderer;
 
 	// Lights
@@ -87,6 +89,7 @@ private:
 	Sky* sky;
 
 	// General helpers for setup and drawing
+	void CreateParticleEmitters();
 	void GenerateLights();
 	void CreateRandomPointLight();
 	void DrawPointLights();

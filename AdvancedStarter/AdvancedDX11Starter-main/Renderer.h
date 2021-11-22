@@ -8,6 +8,7 @@
 #include "Sky.h"
 #include "GameEntity.h"
 #include "Lights.h"
+#include "Emitter.h"
 //
 //#include "AssetManager.h"
 
@@ -44,7 +45,8 @@ public:
 		std::vector<Light> lights,
 		Mesh* lightMesh,
 		SimpleVertexShader* lightVS,
-		SimplePixelShader* lightPS
+		SimplePixelShader* lightPS,
+		std::vector<std::shared_ptr<Emitter>> particleEmitters
 	);
 
 	~Renderer();
@@ -58,7 +60,7 @@ public:
 
 	void UpdateLightVec(std::vector<Light> lights);
 
-	void Render(Camera* camera,	int lightCount);
+	void Render(Camera* camera,	int lightCount, float totalTime);
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSceneColorsSRV();
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSceneNormalsSRV();
@@ -107,8 +109,13 @@ private:
 	// Overall ambient for non-pbr shaders
 	DirectX::XMFLOAT3 ambientNonPBR;
 
-	//int lightCount;
+	//particle things
+	std::vector<std::shared_ptr<Emitter>> particleEmitters;
+	Microsoft::WRL::ComPtr<ID3D11BlendState> particleBlendAdditive;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> particleDepthState;
 
+
+	//int lightCount;
 	Mesh* lightMesh;
 	SimpleVertexShader* lightVS;
 	SimplePixelShader* lightPS;

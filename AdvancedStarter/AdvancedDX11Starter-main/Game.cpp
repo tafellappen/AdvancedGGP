@@ -141,6 +141,7 @@ void Game::Init()
 		this->width / (float)this->height); // Aspect ratio
 
 	CreateTransformHierarchies();
+	CreateParticleEmitters();
 
 	renderer = new Renderer(
 		device,
@@ -155,7 +156,8 @@ void Game::Init()
 		lights,
 		lightMesh,
 		lightVS,
-		lightPS
+		lightPS,
+		particleEmitters
 	);
 }
 
@@ -246,6 +248,16 @@ void Game::LoadAssetsAndCreateEntities()
 	assetMngr.LoadPixelShader(
 		GetFullPathTo_Wide(L"CombinePS.cso"),
 		"CombinePS.cso"
+	);
+
+	//particle shaders
+	assetMngr.LoadVertexShader(
+		GetFullPathTo_Wide(L"ParticleVS.cso"),
+		"ParticleVS.cso"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"ParticlePS.cso"),
+		"ParticlePS.cso"
 	);
 
 	//needs to happen after shaders are loaded right now because it relies on the shaders already existing to create the materials and everything
@@ -428,7 +440,7 @@ void Game::LoadAssetsAndCreateEntities()
 	entities.push_back(solidMetalSphere4);
 	entities.push_back(solidMetalSphere5);
 
-
+	
 
 	// Save assets needed for drawing point lights
 	// (Since these are just copies of the pointers,
@@ -441,6 +453,23 @@ void Game::LoadAssetsAndCreateEntities()
 
 
 
+
+void Game::CreateParticleEmitters()
+{
+	//grab assets from asset manager
+	AssetManager& assetMngr = AssetManager::GetInstance();
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture1 = assetMngr.GetTexture("dirt_03.png");
+	//std::shared_ptr<SimpleVertexShader> vs = std::make_shared<SimpleVertexShader>(assetMngr.GetVertexShader("ParticleVS.cso"));
+	//std::shared_ptr<SimplePixelShader> ps = std::make_shared<SimplePixelShader>(assetMngr.GetPixelShader("ParticlePS.cso"));
+	SimpleVertexShader* vs = assetMngr.GetVertexShader("ParticleVS.cso");
+	SimplePixelShader* ps = assetMngr.GetPixelShader("ParticlePS.cso");
+
+	std::shared_ptr<Emitter> emit1 = std::make_shared<Emitter>(7, 1, 10, vs, ps, device, context, texture1);
+	emit1->GetTransform()->SetPosition(0.0f, 3.0f, 0.0f);
+	particleEmitters.push_back(emit1);
+
+
+}
 
 // --------------------------------------------------------
 // Generates the lights in the scene: 3 directional lights
@@ -539,6 +568,11 @@ void Game::Update(float deltaTime, float totalTime)
 	renderer->UpdateLightVec(lights); //i hate this, please just use shared pointers already
 
 	//UpdateEntitityTransforms();
+
+	for (auto emit : particleEmitters)
+	{
+		emit->Update(deltaTime, totalTime);
+	}
 }
 
 void Game::UpdateEntitityTransforms()
@@ -653,35 +687,6 @@ void Game::ShowRenderTargets()
 {
 	ImGui::Begin("Render Targets");
 
-	//// Refraction options
-	//if (ImGui::CollapsingHeader("Refraction Options"))
-	//{
-	//	ImVec2 size = ImGui::GetItemRectSize();
-	//	float rtHeight = size.x * ((float)height / width);
-
-	//	bool refrNormals = renderer->GetRefractionFromNormalMap();
-	//	if (ImGui::Button(refrNormals ? "Refraction from Normal Map" : "Refraction from IoR"))
-	//		renderer->SetRefractionFromNormalMap(!refrNormals);
-
-	//	ImGui::SameLine();
-	//	bool silh = renderer->GetUseRefractionSilhouette();
-	//	if (ImGui::Button(silh ? "Refraction Silhouette Enabled" : "Refraction Silhouette Disabled"))
-	//		renderer->SetUseRefractionSilhouette(!silh);
-
-	//	float refrScale = renderer->GetRefractionScale();
-	//	if (ImGui::SliderFloat("Refraction Scale", &refrScale, -1.0f, 1.0f))
-	//		renderer->SetRefractionScale(refrScale);
-
-	//	if (!refrNormals)
-	//	{
-	//		float ior = renderer->GetIndexOfRefraction();
-	//		if (ImGui::SliderFloat("Index of Refraction", &ior, 0.0f, 2.0f))
-	//			renderer->SetIndexOfRefraction(ior);
-	//	}
-
-
-	//}
-
 
 	if (ImGui::CollapsingHeader("All Render Targets"))
 	{
@@ -693,12 +698,6 @@ void Game::ShowRenderTargets()
 		ImGui::Image(renderer->GetSceneDepthsSRV().Get(), ImVec2(500, 300));
 		ImGui::Image(renderer->GetRefractionSilhouetteSRV().Get(), ImVec2(500, 300));
 		ImGui::Image(renderer->GetFinalCompositeSRV().Get(), ImVec2(500, 300));
-		//for (int i = 0; i < RenderTargetType::RENDER_TARGET_TYPE_COUNT; i++)
-		//{
-		//	ImageWithHover(renderer->GetRenderTargetSRV((RenderTargetType)i).Get(), ImVec2(size.x, rtHeight));
-		//}
-
-		//ImageWithHover(Assets::GetInstance().GetTexture("random").Get(), ImVec2(256, 256));
 	}
 
 	ImGui::End();
@@ -728,62 +727,7 @@ void Game::ConcatAndCreateText(std::string& label, std::string& valueStr)
 // --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
-	renderer->Render(camera, lightCount);
-	//DrawUI();
-
-	//// Background color for clearing
-	//const float color[4] = { 0, 0, 0, 1 };
-
-	//// Clear the render target and depth buffer (erases what's on the screen)
-	////  - Do this ONCE PER FRAME
-	////  - At the beginning of Draw (before drawing *anything*)
-	//context->ClearRenderTargetView(backBufferRTV.Get(), color);
-	//context->ClearDepthStencilView(
-	//	depthStencilView.Get(),
-	//	D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL,
-	//	1.0f,
-	//	0);
-
-
-	//// Draw all of the entities
-	//for (auto ge : entities)
-	//{
-	//	// Set the "per frame" data
-	//	// Note that this should literally be set once PER FRAME, before
-	//	// the draw loop, but we're currently setting it per entity since 
-	//	// we are just using whichever shader the current entity has.  
-	//	// Inefficient!!!
-	//	SimplePixelShader* ps = ge->GetMaterial()->GetPS();
-	//	ps->SetData("Lights", (void*)(&lights[0]), sizeof(Light) * lightCount);
-	//	ps->SetInt("LightCount", lightCount);
-	//	ps->SetFloat3("CameraPosition", camera->GetTransform()->GetPosition());
-	//	ps->CopyBufferData("perFrame");
-
-	//	// Draw the entity
-	//	ge->Draw(context, camera);
-	//}
-
-	//// Draw the light sources
-	//DrawPointLights();
-
-	//// Draw the sky
-	//sky->Draw(camera);
-
-	//// Draw some UI
-	//DrawUI();
-
-	////draw ImGUI
-	//ImGui::Render();;
-	//ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-
-	//// Present the back buffer to the user
-	////  - Puts the final frame we're drawing into the window so the user can see it
-	////  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
-	//swapChain->Present(0, 0);
-
-	//// Due to the usage of a more sophisticated swap chain,
-	//// the render target must be re-bound after every call to Present()
-	//context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthStencilView.Get());
+	renderer->Render(camera, lightCount, totalTime);
 }
 
 

@@ -18,26 +18,54 @@ struct ParticleData
 class Emitter
 {
 public:
-	Emitter();
+		//std::shared_ptr<SimpleVertexShader> vs,
+		//std::shared_ptr<SimplePixelShader> ps,
+	Emitter(
+		float particlesEmitPerSec,
+		float particleLifetime,
+		float maxParticles,
+		SimpleVertexShader* vs,
+		SimplePixelShader* ps,
+		Microsoft::WRL::ComPtr<ID3D11Device> device,
+		Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture		
+	);
+	~Emitter();
 
-	void Update();
-	void Draw();
+	void Update(float dt, float currentTime);
+	void Draw(Camera* camera, float currentTime);
+
+	std::shared_ptr<Transform> GetTransform();
+	//std::shared_ptr<SimpleVertexShader> GetVS() { return vs; }
+	//std::shared_ptr<SimplePixelShader> GetPS() { return ps; }
 private:
-	ParticleData particles; //how do arrays even work
 	int firstLivingIndex;
 	int firstDeadIndex;
 	int livingCount;
+	int maxParticles;
+	ParticleData* particles; //pointer to the first element of the array
 
-	float particlesEmitPerSecond;
+	float particlesEmitPerSec;
 	float secBetweenParticleEmit;
 	float timeSinceLastEmit;
 
 	float particleLifetime;
 
-	std::shared_ptr<SimpleVertexShader> vs;
-	std::shared_ptr<SimplePixelShader> ps;
-	Transform transform;
+	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
 
+	//std::shared_ptr<SimpleVertexShader> vs;
+	//std::shared_ptr<SimplePixelShader> ps;
+	SimpleVertexShader* vs;
+	SimplePixelShader* ps;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> particleDataBuffer;
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> particleDataSRV;
+	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
+
+	std::shared_ptr<Transform> transform;
+
+	void EmitParticle(float emitTime);
+	void UpdateSingleParticle(float currentTime, int index);
 };
 

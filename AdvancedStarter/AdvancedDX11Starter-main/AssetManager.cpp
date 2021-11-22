@@ -222,6 +222,11 @@ void AssetManager::LoadPixelShader(std::wstring filepath, std::string shaderName
 	pixelShaders.insert({ shaderName, Shader });
 }
 
+Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> AssetManager::GetTexture(std::string name)
+{
+	return textures[name];
+}
+
 Mesh* AssetManager::GetMesh(std::string name)
 {
 	return meshes[name];
