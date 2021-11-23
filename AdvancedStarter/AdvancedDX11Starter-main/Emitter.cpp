@@ -3,23 +3,24 @@
 Emitter::Emitter(
 	float particlesEmitPerSec, 
 	float particleLifetime, 
-	float maxParticles, 
+	float maxParticles,
+	DirectX::XMFLOAT4 color,
 	SimpleVertexShader* vs, 
 	SimplePixelShader* ps,
 	Microsoft::WRL::ComPtr<ID3D11Device> device,
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture,
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture
 )
 {
 	this->particlesEmitPerSec = particlesEmitPerSec;
 	this->particleLifetime = particleLifetime;
 	this->maxParticles = maxParticles;
+	this->color = color;
 	this->vs = vs;
 	this->ps = ps;
 	this->context = context;
 	this->texture = texture;
-	this->sampler = sampler;
+	//this->sampler = sampler;
 
 	this->secBetweenParticleEmit = 1.0f / particlesEmitPerSec;
 
@@ -28,6 +29,7 @@ Emitter::Emitter(
 	firstLivingIndex = 0;
 	firstDeadIndex = 0;
 	transform = std::make_shared<Transform>();
+	emitFromPoint = true;
 
 	particles = new ParticleData[maxParticles];
 
@@ -113,11 +115,7 @@ void Emitter::Update(float dt, float currentTime)
 		}
 		else//first dead and first alive would be equal in this case - meaning they are all alive
 		{
-			//in THEORY this should be based on maxParticles instead of livingCount,
-			//but for some reason that i cannot find, firstLiving and firstDead are 
-			//becoming equal even when all of the particles are not living
-			//meaning we eventually wind up with a negative living particle count
-			for (int i = 0; i < livingCount-1; i++)
+			for (int i = 0; i < maxParticles; i++)
 			{
 				UpdateSingleParticle(currentTime, i);
 			}
@@ -127,7 +125,7 @@ void Emitter::Update(float dt, float currentTime)
 	timeSinceLastEmit += dt;
 	while (timeSinceLastEmit > secBetweenParticleEmit)
 	{
-		EmitParticle(dt);
+		EmitParticle(currentTime);
 		timeSinceLastEmit -= secBetweenParticleEmit;
 	}
 
@@ -161,6 +159,9 @@ void Emitter::Update(float dt, float currentTime)
 	//unmap (unlock) now that we're done with it
 	context->Unmap(particleDataBuffer.Get(), 0);
 
+	//std::cout << "living: " << livingCount << std::endl;
+	//std::cout << "firstDead:   " << firstDeadIndex << std::endl;
+	//std::cout << "firstLiving: " << firstLivingIndex << std::endl;
 }
 
 void Emitter::Draw(Camera* camera, float currentTime)
@@ -184,8 +185,10 @@ void Emitter::Draw(Camera* camera, float currentTime)
 
 	vs->SetShaderResourceView("ParticleData", particleDataSRV);
 
+	ps->SetFloat4("Color", color);
+	ps->CopyAllBufferData();
 	ps->SetShaderResourceView("Texture", texture);
-	ps->SetSamplerState("BasicSampler", sampler);
+	//ps->SetSamplerState("BasicSampler", sampler);
 
 	context->DrawIndexed(livingCount * 6, 0, 0);
 
@@ -196,6 +199,12 @@ std::shared_ptr<Transform> Emitter::GetTransform()
 	return transform;
 }
 
+void Emitter::SetRectBounds(float x, float y, float z)
+{
+	emissionRectDimensions = DirectX::XMFLOAT3(x, y, z);
+	emitFromPoint = false;
+}
+
 void Emitter::EmitParticle(float emitTime)
 {
 	if (livingCount >= maxParticles) //dont spawn more if its reached the max
@@ -203,7 +212,23 @@ void Emitter::EmitParticle(float emitTime)
 
 	//update the particle with new information
 	particles[firstDeadIndex].EmitTime = emitTime;
-	particles[firstDeadIndex].StartPosition = transform->GetPosition(); //for now, just make every particle start at the emitter position
+	if (emitFromPoint)
+	{
+		particles[firstDeadIndex].StartPosition = transform->GetPosition();
+
+	}
+	else
+	{
+		//i will be lazy and not center it around the emitter transform
+		float x = rand() / (float)RAND_MAX * emissionRectDimensions.x;
+		float y = rand() / (float)RAND_MAX * emissionRectDimensions.y;
+		float z = rand() / (float)RAND_MAX * emissionRectDimensions.z;
+
+
+		particles[firstDeadIndex].StartPosition = DirectX::XMFLOAT3(x, y, z);
+	}
+
+
 
 	firstDeadIndex++;
 	firstDeadIndex %= maxParticles;

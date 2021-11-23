@@ -3,6 +3,7 @@
 #include <d3d11.h> // for ID3D11Device and ID3D11DeviceContext
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
 #include <memory>
+#include <iostream>
 
 
 #include "SimpleShader.h"
@@ -14,6 +15,7 @@ struct ParticleData
 {
 	float EmitTime;
 	DirectX::XMFLOAT3 StartPosition;
+	//DirectX::XMFLOAT3 StartVelocity;
 };
 
 class Emitter
@@ -25,12 +27,12 @@ public:
 		float particlesEmitPerSec,
 		float particleLifetime,
 		float maxParticles,
+		DirectX::XMFLOAT4 color,
 		SimpleVertexShader* vs,
 		SimplePixelShader* ps,
 		Microsoft::WRL::ComPtr<ID3D11Device> device,
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture,
-		Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture
 	);
 	~Emitter();
 
@@ -38,7 +40,7 @@ public:
 	void Draw(Camera* camera, float currentTime);
 
 	std::shared_ptr<Transform> GetTransform();
-	//void SetCubeBounds(float x, float y, float z);
+	void SetRectBounds(float x, float y, float z);
 	//std::shared_ptr<SimpleVertexShader> GetVS() { return vs; }
 	//std::shared_ptr<SimplePixelShader> GetPS() { return ps; }
 private:
@@ -54,6 +56,11 @@ private:
 
 	float particleLifetime;
 
+	bool emitFromPoint;
+	DirectX::XMFLOAT3 emissionRectDimensions;
+	DirectX::XMFLOAT4 color;
+
+
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
 
 	//std::shared_ptr<SimpleVertexShader> vs;
@@ -66,7 +73,7 @@ private:
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
 
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
+	//Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
 
 	std::shared_ptr<Transform> transform;
 

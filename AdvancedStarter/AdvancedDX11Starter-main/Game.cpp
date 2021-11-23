@@ -463,20 +463,34 @@ void Game::CreateParticleEmitters()
 	SimpleVertexShader* vs = assetMngr.GetVertexShader("ParticleVS.cso");
 	SimplePixelShader* ps = assetMngr.GetPixelShader("ParticlePS.cso");
 
-
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture1 = assetMngr.GetTexture("dirt_03.png");
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2 = assetMngr.GetTexture("light_03.png");
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2 = assetMngr.GetTexture("light_03.png");
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2 = assetMngr.GetTexture("light_03.png");
-	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2 = assetMngr.GetTexture("light_03.png");
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2 = assetMngr.GetTexture("light_03.png");
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture3 = assetMngr.GetTexture("twirl_03.png");
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture4 = assetMngr.GetTexture("star_07.png");
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture5 = assetMngr.GetTexture("spark_02.png");
 
-	//tastes almost as good as Anna's hotfix brownies
-	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler = assetMngr.GetSamplerOptions();
-
-	std::shared_ptr<Emitter> emit1 = std::make_shared<Emitter>(1, 10, 10, vs, ps, device, context, texture1, sampler);
+	std::shared_ptr<Emitter> emit1 = std::make_shared<Emitter>(2, 10, 500, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vs, ps, device, context, texture1);
+	std::shared_ptr<Emitter> emit2 = std::make_shared<Emitter>(5, 15, 500, XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f), vs, ps, device, context, texture2);
+	std::shared_ptr<Emitter> emit3 = std::make_shared<Emitter>(6, 18, 500, XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f), vs, ps, device, context, texture3);
+	std::shared_ptr<Emitter> emit4 = std::make_shared<Emitter>(8, 5, 500, XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f), vs, ps, device, context, texture4);
+	std::shared_ptr<Emitter> emit5 = std::make_shared<Emitter>(10, 30, 600, XMFLOAT4(0.0f, 1.0f, 0.5f, 1.0f), vs, ps, device, context, texture5);
+	//place the emitters
 	emit1->GetTransform()->SetPosition(0.0f, 4.0f, 0.0f);
-	//entities[2]->GetTransform()->SetPosition(0.0f, 4.0f, 0.0f);
+	emit2->GetTransform()->SetPosition(2.0f, 5.0f, 0.0f);
+	emit3->GetTransform()->SetPosition(-2.0f, 5.0f, 0.0f);
+	emit4->GetTransform()->SetPosition(3.0f, 3.0f, -3.0f);
+	emit5->GetTransform()->SetPosition(-3.0f, 3.0f, -3.0f);	
+
+	emit2->SetRectBounds(5.0f, 5.0f, 5.0f);
+	emit3->SetRectBounds(5.0f, 5.0f, 0.0f);
+	emit4->SetRectBounds(5.0f, 0.0f, 5.0f);
+	emit5->SetRectBounds(9.0f, 0.0f, 0.0f);
+
 	particleEmitters.push_back(emit1);
+	particleEmitters.push_back(emit2);
+	particleEmitters.push_back(emit3);
+	particleEmitters.push_back(emit4);
+	particleEmitters.push_back(emit5);
 
 
 }
