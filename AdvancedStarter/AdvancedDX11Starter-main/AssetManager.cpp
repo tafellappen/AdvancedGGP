@@ -143,6 +143,21 @@ void AssetManager::LoadAllAssets()
 	context);*/
 
 	sky = new Sky(
+		(assetsFolderPath_Wide + L"\\Skies\\Night\\right.png").c_str(),
+		(assetsFolderPath_Wide + L"\\Skies\\Night\\left.png").c_str(),
+		(assetsFolderPath_Wide + L"\\Skies\\Night\\up.png").c_str(),
+		(assetsFolderPath_Wide + L"\\Skies\\Night\\down.png").c_str(),
+		(assetsFolderPath_Wide + L"\\Skies\\Night\\front.png").c_str(),
+		(assetsFolderPath_Wide + L"\\Skies\\Night\\back.png").c_str(),
+		cubeMesh,
+		skyVS,
+		skyPS,
+		samplerOptions,
+		device,
+		context
+	);
+
+	/*	sky = new Sky(
 		(assetsFolderPath_Wide + L"\\Skies\\Clouds-Pink\\right.png").c_str(),
 		(assetsFolderPath_Wide + L"\\Skies\\Clouds-Pink\\left.png").c_str(),
 		(assetsFolderPath_Wide + L"\\Skies\\Clouds-Pink\\up.png").c_str(),
@@ -156,7 +171,7 @@ void AssetManager::LoadAllAssets()
 		device,
 		context
 	);
-
+*/
 
 
 	//go through all the material definitions
@@ -225,6 +240,11 @@ void AssetManager::LoadPixelShader(std::wstring filepath, std::string shaderName
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> AssetManager::GetTexture(std::string name)
 {
 	return textures[name];
+}
+
+Microsoft::WRL::ComPtr<ID3D11SamplerState> AssetManager::GetSamplerOptions()
+{
+	return samplerOptions;
 }
 
 Mesh* AssetManager::GetMesh(std::string name)

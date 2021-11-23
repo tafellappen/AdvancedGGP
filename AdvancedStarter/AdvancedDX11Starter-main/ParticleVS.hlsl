@@ -26,7 +26,7 @@ struct VertexShaderInput
 struct VertexToPixel
 {
 	float2 uv				: TEXCOORD;
-	float4 position			: POSITION;
+	float4 position			: SV_POSITION;
 };
 
 VertexToPixel main(uint id : SV_VertexID)

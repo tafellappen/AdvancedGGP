@@ -48,6 +48,8 @@ Renderer::Renderer(
 	this->entities = entities;
 	this->lights = lights;
 
+	this->particleEmitters = particleEmitters;
+
 	this->lightMesh = lightMesh;
 	this->lightVS = lightVS;
 	this->lightPS = lightPS;

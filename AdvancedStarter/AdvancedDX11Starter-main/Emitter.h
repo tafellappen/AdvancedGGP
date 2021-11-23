@@ -9,6 +9,7 @@
 #include "Material.h"
 #include "Transform.h"
 
+
 struct ParticleData
 {
 	float EmitTime;
@@ -28,7 +29,8 @@ public:
 		SimplePixelShader* ps,
 		Microsoft::WRL::ComPtr<ID3D11Device> device,
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
-		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture		
+		Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture,
+		Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler
 	);
 	~Emitter();
 
@@ -36,6 +38,7 @@ public:
 	void Draw(Camera* camera, float currentTime);
 
 	std::shared_ptr<Transform> GetTransform();
+	//void SetCubeBounds(float x, float y, float z);
 	//std::shared_ptr<SimpleVertexShader> GetVS() { return vs; }
 	//std::shared_ptr<SimplePixelShader> GetPS() { return ps; }
 private:
@@ -62,6 +65,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Buffer> indexBuffer;
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture;
+
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
 
 	std::shared_ptr<Transform> transform;
 

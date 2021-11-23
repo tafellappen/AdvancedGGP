@@ -8,7 +8,8 @@ Emitter::Emitter(
 	SimplePixelShader* ps,
 	Microsoft::WRL::ComPtr<ID3D11Device> device,
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture,
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler
 )
 {
 	this->particlesEmitPerSec = particlesEmitPerSec;
@@ -17,6 +18,8 @@ Emitter::Emitter(
 	this->vs = vs;
 	this->ps = ps;
 	this->context = context;
+	this->texture = texture;
+	this->sampler = sampler;
 
 	this->secBetweenParticleEmit = 1.0f / particlesEmitPerSec;
 
@@ -108,9 +111,13 @@ void Emitter::Update(float dt, float currentTime)
 				UpdateSingleParticle(currentTime, i);
 			}
 		}
-		else //first dead and first alive would be equal in this case - meaning they are all alive
+		else//first dead and first alive would be equal in this case - meaning they are all alive
 		{
-			for (int i = 0; i < maxParticles; i++)
+			//in THEORY this should be based on maxParticles instead of livingCount,
+			//but for some reason that i cannot find, firstLiving and firstDead are 
+			//becoming equal even when all of the particles are not living
+			//meaning we eventually wind up with a negative living particle count
+			for (int i = 0; i < livingCount-1; i++)
 			{
 				UpdateSingleParticle(currentTime, i);
 			}
@@ -178,6 +185,7 @@ void Emitter::Draw(Camera* camera, float currentTime)
 	vs->SetShaderResourceView("ParticleData", particleDataSRV);
 
 	ps->SetShaderResourceView("Texture", texture);
+	ps->SetSamplerState("BasicSampler", sampler);
 
 	context->DrawIndexed(livingCount * 6, 0, 0);
 
@@ -198,10 +206,11 @@ void Emitter::EmitParticle(float emitTime)
 	particles[firstDeadIndex].StartPosition = transform->GetPosition(); //for now, just make every particle start at the emitter position
 
 	firstDeadIndex++;
-	if (firstDeadIndex > maxParticles) 
-	{
-		firstDeadIndex = 0; //wrapping back to the front of the array
-	}
+	firstDeadIndex %= maxParticles;
+	//if (firstDeadIndex > maxParticles) 
+	//{
+	//	firstDeadIndex = 0; //wrapping back to the front of the array
+	//}
 
 	livingCount++;
 }

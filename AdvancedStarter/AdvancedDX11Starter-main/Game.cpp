@@ -458,14 +458,24 @@ void Game::CreateParticleEmitters()
 {
 	//grab assets from asset manager
 	AssetManager& assetMngr = AssetManager::GetInstance();
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture1 = assetMngr.GetTexture("dirt_03.png");
 	//std::shared_ptr<SimpleVertexShader> vs = std::make_shared<SimpleVertexShader>(assetMngr.GetVertexShader("ParticleVS.cso"));
 	//std::shared_ptr<SimplePixelShader> ps = std::make_shared<SimplePixelShader>(assetMngr.GetPixelShader("ParticlePS.cso"));
 	SimpleVertexShader* vs = assetMngr.GetVertexShader("ParticleVS.cso");
 	SimplePixelShader* ps = assetMngr.GetPixelShader("ParticlePS.cso");
 
-	std::shared_ptr<Emitter> emit1 = std::make_shared<Emitter>(7, 1, 10, vs, ps, device, context, texture1);
-	emit1->GetTransform()->SetPosition(0.0f, 3.0f, 0.0f);
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture1 = assetMngr.GetTexture("dirt_03.png");
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2 = assetMngr.GetTexture("light_03.png");
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2 = assetMngr.GetTexture("light_03.png");
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2 = assetMngr.GetTexture("light_03.png");
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2 = assetMngr.GetTexture("light_03.png");
+
+	//tastes almost as good as Anna's hotfix brownies
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler = assetMngr.GetSamplerOptions();
+
+	std::shared_ptr<Emitter> emit1 = std::make_shared<Emitter>(1, 10, 10, vs, ps, device, context, texture1, sampler);
+	emit1->GetTransform()->SetPosition(0.0f, 4.0f, 0.0f);
+	//entities[2]->GetTransform()->SetPosition(0.0f, 4.0f, 0.0f);
 	particleEmitters.push_back(emit1);
 
 

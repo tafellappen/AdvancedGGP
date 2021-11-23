@@ -55,6 +55,8 @@ public:
 	void LoadPixelShader(std::wstring filepath, std::string shaderName);
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTexture(std::string name);
+	Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSamplerOptions();
+
 	Mesh* GetMesh(std::string name);
 	Material* GetMaterial(std::string name);
 	SimpleVertexShader* GetVertexShader(std::string name);
