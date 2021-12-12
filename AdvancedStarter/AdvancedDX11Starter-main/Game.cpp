@@ -143,6 +143,8 @@ void Game::Init()
 	CreateTransformHierarchies();
 	CreateParticleEmitters();
 
+	currentSceneState = SceneState::Main;
+
 	renderer = new Renderer(
 		device,
 		context,
@@ -573,29 +575,41 @@ void Game::OnResize()
 // --------------------------------------------------------
 void Game::Update(float deltaTime, float totalTime)
 {
-	
+
 	Input& input = Input::GetInstance();
 	HandleGuiUpdate(deltaTime, input);
 
-	// Update the camera
-	camera->Update(deltaTime);
 
-	// Check individual input
-	if (input.KeyDown(VK_ESCAPE)) Quit();
-	if (input.KeyPress(VK_TAB)) GenerateLights();
-
-	//If lightCount was increased by user, create more random lights
-	while (lights.size() < lightCount)
+	switch (currentSceneState)
 	{
-		CreateRandomPointLight();
-	}
-	renderer->UpdateLightVec(lights); //i hate this, please just use shared pointers already
+	case SceneState::Main:
+		// Update the camera
+		camera->Update(deltaTime);
 
-	//UpdateEntitityTransforms();
+		// Check individual input
+		if (input.KeyDown(VK_ESCAPE)) Quit();
+		if (input.KeyPress(VK_TAB)) GenerateLights();
 
-	for (auto emit : particleEmitters)
-	{
-		emit->Update(deltaTime, totalTime);
+		//If lightCount was increased by user, create more random lights
+		while (lights.size() < lightCount)
+		{
+			CreateRandomPointLight();
+		}
+		renderer->UpdateLightVec(lights); //i hate this, please just use shared pointers already
+
+		//UpdateEntitityTransforms();
+
+		for (auto emit : particleEmitters)
+		{
+			emit->Update(deltaTime, totalTime);
+		}
+
+		break;
+	case SceneState::Fractal:
+
+		break;
+	default:
+		break;
 	}
 }
 
@@ -642,12 +656,21 @@ void Game::HandleGuiUpdate(float deltaTime, Input& input)
 	// Demo website also here: https://pthom.github.io/imgui_manual_online/manual/imgui_manual.html
 	//ImGui::ShowDemoWindow();
 
-	//testing brdf lookup
 
+	switch (currentSceneState)
+	{
+	case SceneState::Main:
+		ShowEngineStats(io.Framerate);
+		ShowLightsEditor();
+		ShowRenderTargets();
 
-	ShowEngineStats(io.Framerate);
-	ShowLightsEditor();
-	ShowRenderTargets();
+		break;
+	case SceneState::Fractal:
+
+		break;
+	default:
+		break;
+	}
 }
 
 void Game::ShowLightsEditor()
@@ -751,7 +774,18 @@ void Game::ConcatAndCreateText(std::string& label, std::string& valueStr)
 // --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
-	renderer->Render(camera, lightCount, totalTime);
+
+	switch (currentSceneState)
+	{
+	case SceneState::Main:
+		renderer->Render(camera, lightCount, totalTime, currentSceneState);
+		break;
+	case SceneState::Fractal:
+
+		break;
+	default:
+		break;
+	}
 }
 
 

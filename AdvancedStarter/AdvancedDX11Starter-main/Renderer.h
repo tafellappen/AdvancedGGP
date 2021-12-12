@@ -9,6 +9,7 @@
 #include "GameEntity.h"
 #include "Lights.h"
 #include "Emitter.h"
+#include "SceneManager.h"
 //
 //#include "AssetManager.h"
 
@@ -60,7 +61,9 @@ public:
 
 	void UpdateLightVec(std::vector<Light> lights);
 
-	void Render(Camera* camera,	int lightCount, float totalTime);
+	void Render(Camera* camera,	int lightCount, float totalTime, SceneState currentSceneState);
+
+	void StandardSceneRender(const float  color[4], Camera* camera, int lightCount, float totalTime);
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSceneColorsSRV();
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSceneNormalsSRV();

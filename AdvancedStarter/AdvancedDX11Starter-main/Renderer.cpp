@@ -170,7 +170,7 @@ void Renderer::UpdateLightVec(std::vector<Light> lights)
 }
 
 
-void Renderer::Render(Camera* camera, int lightCount, float totalTime)
+void Renderer::Render(Camera* camera, int lightCount, float totalTime, SceneState currentSceneState)
 {
 	// Background color for clearing
 	const float color[4] = { 0, 0, 0, 1 };
@@ -181,6 +181,44 @@ void Renderer::Render(Camera* camera, int lightCount, float totalTime)
 	context->ClearRenderTargetView(backBufferRTV.Get(), color);
 	context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f,	0);
 
+	switch (currentSceneState)
+	{
+	case SceneState::Main:
+		StandardSceneRender(color, camera, lightCount, totalTime);
+		break;
+	case SceneState::Fractal:
+
+		break;
+	default:
+		break;
+	}
+
+
+
+	// Draw some UI
+	//DrawUI();
+
+	//draw ImGUI
+	ImGui::Render();;
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+	// Present the back buffer to the user
+	//  - Puts the final frame we're drawing into the window so the user can see it
+	//  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
+	swapChain->Present(0, 0);
+
+	// Due to the usage of a more sophisticated swap chain,
+	// the render target must be re-bound after every call to Present()
+	context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthBufferDSV.Get());
+
+	// Unbind all SRVs at the end of the frame so they're not still bound for input
+	// when we begin the MRTs of the next frame
+	ID3D11ShaderResourceView* nullSRVs[16] = {};
+	context->PSSetShaderResources(0, 16, nullSRVs);
+}
+
+void Renderer::StandardSceneRender(const float  color[4], Camera* camera, int lightCount, float totalTime)
+{
 	//clear refraction render targets
 	context->ClearRenderTargetView(sceneColorsRTV.Get(), color);
 	context->ClearRenderTargetView(sceneNormalsRTV.Get(), color);
@@ -396,29 +434,6 @@ void Renderer::Render(Camera* camera, int lightCount, float totalTime)
 	// Draw the light sources
 	context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthBufferDSV.Get());
 	DrawPointLights(camera, lightCount);
-
-
-
-	// Draw some UI
-	//DrawUI();
-
-	//draw ImGUI
-	ImGui::Render();;
-	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
-
-	// Present the back buffer to the user
-	//  - Puts the final frame we're drawing into the window so the user can see it
-	//  - Do this exactly ONCE PER FRAME (always at the very end of the frame)
-	swapChain->Present(0, 0);
-
-	// Due to the usage of a more sophisticated swap chain,
-	// the render target must be re-bound after every call to Present()
-	context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthBufferDSV.Get());
-
-	// Unbind all SRVs at the end of the frame so they're not still bound for input
-	// when we begin the MRTs of the next frame
-	ID3D11ShaderResourceView* nullSRVs[16] = {};
-	context->PSSetShaderResources(0, 16, nullSRVs);
 }
 
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Renderer::GetSceneColorsSRV()

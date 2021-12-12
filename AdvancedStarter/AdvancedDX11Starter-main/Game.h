@@ -18,6 +18,7 @@
 #include <DirectXMath.h>
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
 #include <vector>
+#include "SceneManager.h"
 
 class Game 
 	: public DXCore
@@ -87,6 +88,11 @@ private:
 
 	// Skybox
 	Sky* sky;
+
+	//fractal things
+
+	SceneState currentSceneState;
+
 
 	// General helpers for setup and drawing
 	void CreateParticleEmitters();
