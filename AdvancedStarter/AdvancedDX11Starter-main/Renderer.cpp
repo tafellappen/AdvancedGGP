@@ -193,8 +193,6 @@ void Renderer::Render(Camera* camera, int lightCount, float totalTime, SceneStat
 		break;
 	}
 
-
-
 	// Draw some UI
 	//DrawUI();
 
@@ -216,6 +214,11 @@ void Renderer::Render(Camera* camera, int lightCount, float totalTime, SceneStat
 	ID3D11ShaderResourceView* nullSRVs[16] = {};
 	context->PSSetShaderResources(0, 16, nullSRVs);
 }
+
+void Renderer::FractalRender(const float color[4], Camera* camera, float totalTime)
+{
+}
+
 
 void Renderer::StandardSceneRender(const float  color[4], Camera* camera, int lightCount, float totalTime)
 {

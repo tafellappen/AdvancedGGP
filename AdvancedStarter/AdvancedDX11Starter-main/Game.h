@@ -19,6 +19,7 @@
 #include <wrl/client.h> // Used for ComPtr - a smart pointer for COM objects
 #include <vector>
 #include "SceneManager.h"
+#include "Mandelbrot.h"
 
 class Game 
 	: public DXCore
@@ -58,6 +59,8 @@ private:
 	std::vector<std::shared_ptr<Emitter>> particleEmitters;
 
 	Renderer* renderer;
+
+	std::shared_ptr<Mandelbrot> mandelbrot;
 
 	// Lights
 	std::vector<Light> lights;
@@ -108,9 +111,11 @@ private:
 
 	//GUI stuff
 	void HandleGuiUpdate(float deltaTime, Input& input); //for ImGui
+	void ShowSceneSelect();
 	void ShowLightsEditor();
 	void ShowEngineStats(float framerate);
 	void ShowRenderTargets();
+	void ShowFractalInfo();
 
 	void AddLabeledFloat(std::string label, float value);
 

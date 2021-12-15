@@ -237,6 +237,12 @@ void AssetManager::LoadPixelShader(std::wstring filepath, std::string shaderName
 	pixelShaders.insert({ shaderName, Shader });
 }
 
+void AssetManager::LoadComputeShader(std::wstring filepath, std::string shaderName)
+{
+	SimpleComputeShader* Shader = LoadShader(SimpleComputeShader, filepath);
+	computeShaders.insert({ shaderName, Shader });
+}
+
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> AssetManager::GetTexture(std::string name)
 {
 	return textures[name];
@@ -265,6 +271,11 @@ SimpleVertexShader* AssetManager::GetVertexShader(std::string name)
 SimplePixelShader* AssetManager::GetPixelShader(std::string name)
 {
 	return pixelShaders[name];
+}
+
+SimpleComputeShader* AssetManager::GetComputeShader(std::string name)
+{
+	return computeShaders[name];
 }
 
 Sky* AssetManager::GetSky()

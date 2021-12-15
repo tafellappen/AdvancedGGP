@@ -118,6 +118,9 @@ void Game::Init()
 
 	// Asset loading and entity creation
 	LoadAssetsAndCreateEntities();
+
+	//initialize mandelbrot data
+	mandelbrot = std::make_shared<Mandelbrot>(device, context, width, height, camera);
 	
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
@@ -143,7 +146,7 @@ void Game::Init()
 	CreateTransformHierarchies();
 	CreateParticleEmitters();
 
-	currentSceneState = SceneState::Main;
+	currentSceneState = SceneState::Fractal;
 
 	renderer = new Renderer(
 		device,
@@ -260,6 +263,11 @@ void Game::LoadAssetsAndCreateEntities()
 	assetMngr.LoadPixelShader(
 		GetFullPathTo_Wide(L"ParticlePS.cso"),
 		"ParticlePS.cso"
+	);
+
+	assetMngr.LoadComputeShader(
+		GetFullPathTo_Wide(L"FractalCS.cso"),
+		"FractalCS.cso"
 	);
 
 	//needs to happen after shaders are loaded right now because it relies on the shaders already existing to create the materials and everything
@@ -671,6 +679,30 @@ void Game::HandleGuiUpdate(float deltaTime, Input& input)
 	default:
 		break;
 	}
+	ShowSceneSelect();
+}
+
+void Game::ShowSceneSelect()
+{
+	if (ImGui::TreeNode("Select Scene"))
+	{
+		//i thought this would be good to have as an enum select but this would probably be more robust and dynamic if it was an array instead
+		char buf[32];
+		sprintf_s(buf, "Main");
+		if (ImGui::Selectable(buf, currentSceneState == SceneState::Main))
+			currentSceneState = SceneState::Main;		
+		//char buf[32];
+		sprintf_s(buf, "Fractal");
+		if (ImGui::Selectable(buf, currentSceneState == SceneState::Fractal))
+			currentSceneState = SceneState::Fractal;
+		//static int selected = -1;
+		//for (int n = 0; n < int(SceneState::COUNT); n++)
+		//{
+		//	if (ImGui::Selectable(buf, selected == n))
+		//		selected = n;
+		//}
+		ImGui::TreePop();
+	}
 }
 
 void Game::ShowLightsEditor()
@@ -727,6 +759,7 @@ void Game::ShowEngineStats(float framerate)
 	//display entities
 	AddLabeledInt("Entities: ", entities.size());
 
+
 	ImGui::End();
 }
 
@@ -748,6 +781,10 @@ void Game::ShowRenderTargets()
 	}
 
 	ImGui::End();
+}
+
+void Game::ShowFractalInfo()
+{
 }
 
 //there must be a cleaner way than having two methods that are basically the same other than the parameters, right?
@@ -774,11 +811,12 @@ void Game::ConcatAndCreateText(std::string& label, std::string& valueStr)
 // --------------------------------------------------------
 void Game::Draw(float deltaTime, float totalTime)
 {
-
+	mandelbrot->RunComputeShader();
+	renderer->Render(camera, lightCount, totalTime, currentSceneState);
+	//can get rid of this switch i think???? 
 	switch (currentSceneState)
 	{
 	case SceneState::Main:
-		renderer->Render(camera, lightCount, totalTime, currentSceneState);
 		break;
 	case SceneState::Fractal:
 

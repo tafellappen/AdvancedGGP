@@ -53,6 +53,7 @@ public:
 	void LoadAllAssets();
 	void LoadVertexShader(std::wstring filepath, std::string shaderName);
 	void LoadPixelShader(std::wstring filepath, std::string shaderName);
+	void LoadComputeShader(std::wstring filepath, std::string shaderName);
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetTexture(std::string name);
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> GetSamplerOptions();
@@ -61,6 +62,7 @@ public:
 	Material* GetMaterial(std::string name);
 	SimpleVertexShader* GetVertexShader(std::string name);
 	SimplePixelShader* GetPixelShader(std::string name);
+	SimpleComputeShader* GetComputeShader(std::string name);
 	Sky* GetSky();
 
 private:
@@ -79,6 +81,7 @@ private:
 	std::unordered_map<std::string, Material*> materials;
 	std::unordered_map<std::string, SimpleVertexShader*> vertexShaders;
 	std::unordered_map<std::string, SimplePixelShader*> pixelShaders;
+	std::unordered_map<std::string, SimpleComputeShader*> computeShaders;
 
 
 	Sky* sky;
