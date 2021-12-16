@@ -27,8 +27,10 @@ public:
 		bool refractive = false*/
 		);
 	~Material();
-
+	//for normal mesh drawing
 	void PrepareMaterial(Transform* transform, Camera* cam, Sky* sky);
+	//used for drawing with no meshes (just for drawing the compute shader results directly to the screen right now - not using it as a mesh texture right now)
+	void PrepareMaterial(Camera* cam, Sky* sky);
 	void SetPerMaterialDataAndResources(bool copyToGPUNow, Sky* sky);
 
 	SimpleVertexShader* GetVS() { return vs; }
@@ -36,6 +38,9 @@ public:
 
 	void SetVS(SimpleVertexShader* vs) { this->vs = vs; }
 	void SetPS(SimplePixelShader* ps) { this->ps = ps; }
+
+	void AddPSTextureSRV(std::string shaderName, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv);
+	void AddVSTextureSRV(std::string shaderName, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv);
 
 	//i really really really do not have the time or patience to update material definitions and the asset manager
 	void SetRefractive(bool refractive);
@@ -54,6 +59,9 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> normalSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> roughnessSRV;
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> metalSRV;
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> psOtherTextureSRVs;
+	std::unordered_map<std::string, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView>> vsOtherTextureSRVs;
+
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> sampler;
 	Microsoft::WRL::ComPtr<ID3D11SamplerState> samplerClamp;
 };

@@ -71,6 +71,25 @@ void Material::PrepareMaterial(Transform* transform, Camera* cam, Sky* sky)
 	ps->SetSamplerState("ClampSampler", samplerClamp);
 }
 
+void Material::PrepareMaterial(Camera* cam, Sky* sky)
+{
+	// Turn shaders on
+	vs->SetShader();
+	ps->SetShader();
+
+
+	// Set pixel shader data
+	ps->SetFloat4("Color", color);
+	//ps->SetFloat("Shininess", shininess);
+	ps->CopyBufferData("perMaterial");
+
+	//for (auto t : psOtherTextureSRVs) { ps->SetShaderResourceView(t.first.c_str(), t.second); }
+	ps->SetShaderResourceView("Pixels", psOtherTextureSRVs["Pixels"]);
+
+	// Set sampler
+	ps->SetSamplerState("BasicSampler", sampler);
+}
+
 void Material::SetPerMaterialDataAndResources(bool copyToGPUNow, Sky* sky)
 {
 	//set vertex shader per-material variables
@@ -104,6 +123,16 @@ void Material::SetPerMaterialDataAndResources(bool copyToGPUNow, Sky* sky)
 	ps->SetSamplerState("BasicSampler", sampler);
 	ps->SetSamplerState("ClampSampler", samplerClamp);
 
+}
+
+void Material::AddPSTextureSRV(std::string shaderName, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv)
+{
+	psOtherTextureSRVs.insert({ shaderName, srv });
+}
+
+void Material::AddVSTextureSRV(std::string shaderName, Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> srv)
+{
+	vsOtherTextureSRVs.insert({ shaderName, srv });
 }
 
 void Material::SetRefractive(bool refractive)

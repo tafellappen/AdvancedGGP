@@ -116,12 +116,8 @@ void Game::Init()
 	// Initialize the input manager with the window's handle
 	Input::GetInstance().Initialize(this->hWnd);
 
-	// Asset loading and entity creation
-	LoadAssetsAndCreateEntities();
 
-	//initialize mandelbrot data
-	mandelbrot = std::make_shared<Mandelbrot>(device, context, width, height, camera);
-	
+
 	// Tell the input assembler stage of the pipeline what kind of
 	// geometric primitives (points, lines or triangles) we want to draw.  
 	// Essentially: "What kind of shape should the GPU draw with our data?"
@@ -143,6 +139,9 @@ void Game::Init()
 		1.0f,		// Mouse look
 		this->width / (float)this->height); // Aspect ratio
 
+	// Asset loading and entity creation
+	LoadAssetsAndCreateEntities();
+
 	CreateTransformHierarchies();
 	CreateParticleEmitters();
 
@@ -162,7 +161,8 @@ void Game::Init()
 		lightMesh,
 		lightVS,
 		lightPS,
-		particleEmitters
+		particleEmitters,
+		mandelbrot
 	);
 }
 
@@ -265,9 +265,18 @@ void Game::LoadAssetsAndCreateEntities()
 		"ParticlePS.cso"
 	);
 
+	//fractal things
 	assetMngr.LoadComputeShader(
 		GetFullPathTo_Wide(L"FractalCS.cso"),
 		"FractalCS.cso"
+	);
+	assetMngr.LoadVertexShader(
+		GetFullPathTo_Wide(L"FractalVS.cso"),
+		"FractalVS.cso"
+	);
+	assetMngr.LoadPixelShader(
+		GetFullPathTo_Wide(L"FractalPS.cso"),
+		"FractalPS.cso"
 	);
 
 	//needs to happen after shaders are loaded right now because it relies on the shaders already existing to create the materials and everything
@@ -459,6 +468,20 @@ void Game::LoadAssetsAndCreateEntities()
 	lightMesh = sphereMesh;
 	lightVS = vertexShader;
 	lightPS = solidColorPS;
+
+	// Create material for mandelbrot
+	Material* mandelMaterial = assetMngr.GetMaterial("mandelbrotMat");
+	//mandelMaterial->AddPSSampler("BasicSampler", samplerOptions);
+	materials.push_back(mandelMaterial);
+
+	//initialize mandelbrot data
+	mandelbrot = std::make_shared<Mandelbrot>(
+		device,
+		context, 
+		width, 
+		height,
+		camera, 
+		mandelMaterial);
 }
 
 
@@ -591,9 +614,8 @@ void Game::Update(float deltaTime, float totalTime)
 	switch (currentSceneState)
 	{
 	case SceneState::Main:
-		// Update the camera
-		camera->Update(deltaTime);
 
+		camera->Update(deltaTime);
 		// Check individual input
 		if (input.KeyDown(VK_ESCAPE)) Quit();
 		if (input.KeyPress(VK_TAB)) GenerateLights();
@@ -614,7 +636,7 @@ void Game::Update(float deltaTime, float totalTime)
 
 		break;
 	case SceneState::Fractal:
-
+		mandelbrot->Update(deltaTime);
 		break;
 	default:
 		break;

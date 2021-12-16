@@ -10,6 +10,7 @@
 #include "Lights.h"
 #include "Emitter.h"
 #include "SceneManager.h"
+#include "Mandelbrot.h"
 //
 //#include "AssetManager.h"
 
@@ -30,6 +31,12 @@ struct PSPerFrameData
 	DirectX::XMFLOAT3 AmbientNonPBR;
 };
 
+//// Specifically for mandelbrot
+//struct MandelPSPerFrameData
+//{
+//	DirectX::XMFLOAT4 Color2;
+//};
+
 class Renderer
 {
 public:
@@ -47,7 +54,8 @@ public:
 		Mesh* lightMesh,
 		SimpleVertexShader* lightVS,
 		SimplePixelShader* lightPS,
-		std::vector<std::shared_ptr<Emitter>> particleEmitters
+		std::vector<std::shared_ptr<Emitter>> particleEmitters,
+		std::shared_ptr<Mandelbrot> mandelbrot
 	);
 
 	~Renderer();
@@ -63,7 +71,7 @@ public:
 
 	void Render(Camera* camera,	int lightCount, float totalTime, SceneState currentSceneState);
 	void FractalRender(const float  color[4], Camera* camera, float totalTime);
-	void StandardSceneRender(const float  color[4], Camera* camera, int lightCount, float totalTime);
+	void StandardSceneRender(const float  color[4], Camera* camera, int lightCount, float totalTime, SceneState currentSceneState);
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSceneColorsSRV();
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSceneNormalsSRV();
@@ -82,6 +90,8 @@ private:
 	Sky* sky;
 	std::vector<GameEntity*> entities;
 	std::vector<Light> lights;
+
+	std::shared_ptr<Mandelbrot> mandelbrot;
 
 	//multiple render targets things - for refraction
 	Microsoft::WRL::ComPtr<ID3D11RenderTargetView> sceneColorsRTV;
@@ -105,8 +115,11 @@ private:
 	// Per-frame constant buffers and data
 	Microsoft::WRL::ComPtr<ID3D11Buffer> psPerFrameConstantBuffer;
 	Microsoft::WRL::ComPtr<ID3D11Buffer> vsPerFrameConstantBuffer;
+	//Microsoft::WRL::ComPtr<ID3D11Buffer> psMandePerFrameConstantBuffer;
 	PSPerFrameData psPerFrameData;
 	VSPerFrameData vsPerFrameData;
+	//MandelPSPerFrameData psMandelPerFrameData;
+	DirectX::XMFLOAT4 testColor;
 
 
 	// Overall ambient for non-pbr shaders

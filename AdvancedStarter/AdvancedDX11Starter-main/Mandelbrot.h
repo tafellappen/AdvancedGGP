@@ -6,6 +6,8 @@
 
 #include "Camera.h"
 #include "AssetManager.h"
+#include "Material.h"
+#include "Input.h"
 
 //----------IDEA DUMP------------
 // this could be modified slightly to generate mandelbrot renders of arbitrary size
@@ -24,22 +26,54 @@ public:
 		Microsoft::WRL::ComPtr<ID3D11DeviceContext> context,
 		unsigned int windowWidth,
 		unsigned int windowHeight,
-		Camera* camera
+		Camera* camera,
+		Material* material
 	);
+	
+	~Mandelbrot();
 
-	void Update();
+	void Update(float dt);
+	void Draw(Camera* camera, Sky* sky);
 	void PostResize(unsigned int windowWidth, unsigned int windowHeight);
 	void RunComputeShader(); //this might only need to run when the position is updated. idk if that would cause a stall but probably not?
+	Material* GetMaterial();
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> GetSRV();
 private:
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
 	Camera* camera;
+	DirectX::XMFLOAT3 initialCamPosition;
 
-	DirectX::XMFLOAT2 complexPos;
+
+
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> computeTextureSRV;
 	Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> computeTextureUAV;
 	unsigned int windowWidth;
 	unsigned int windowHeight;
+
+	float camXdifference;
+	float camYdifference;
+	float camZdifference;
+
+	
+	Transform transform;
+	float movementSpeed;
+	DirectX::XMFLOAT2 aspectRatio;
+	DirectX::XMFLOAT2 complexExtents;
+	DirectX::XMFLOAT2 screenCenter;
+	float zoom;
+
+	SimpleComputeShader* fractalCS;
+	//SimpleVertexShader* fractalVS;
+	//SimplePixelShader* fractalPS;
+
+	Material* material; //i think this was a mistake, its harder to get the control I need. should have looked at Sky from the beginning
+	Microsoft::WRL::ComPtr<ID3D11RasterizerState>   mandelbrotRasterState;
+	Microsoft::WRL::ComPtr<ID3D11DepthStencilState> mandelbrotDepthState;
+
+
+	//Microsoft::WRL::ComPtr<ID3D11Buffer> psPerFrameConstantBuffer;
+	//PSPerFrameData psPerFrameData;
 
 	//could use z value for zoom actually
 	// 	   maybe save camera starting position, so everything can be relative to that
@@ -51,10 +85,15 @@ private:
 	// 	   i really hope that doesnt make for a really stupid tradeoff later on
 	// 	   but theoretically the way im doing the mapping here should encapsulate this method enough that I dont have to change any other logic here just because i stopped using the camera position
 	//plan for now is just take x and z axes of camera. This may backfire if user switches rotation in the other scene though
-	void MapCamWorldToComplex(); 
+	void MapWorldToComplex(); 
 	void ResetCamera(); //leave this idea here, it may be useful to have this if something goes wrong. would be funny if this went wrong too though. 
 
 	//helpers
 	void CreateComputeShaderTexture();
+	void RetreiveShaders();
+	void InitRenderStates();
 };
 
+//scale  = cam current z minus cam previous z
+//work based on extents rather than arbitrary 
+//get center in shader from actual center of the texture

@@ -27,7 +27,8 @@ Renderer::Renderer(
 	Mesh* lightMesh,
 	SimpleVertexShader* lightVS,
 	SimplePixelShader* lightPS,
-	std::vector<std::shared_ptr<Emitter>> particleEmitters
+	std::vector<std::shared_ptr<Emitter>> particleEmitters,
+	std::shared_ptr<Mandelbrot> mandelbrot
 
 ):
 	vsPerFrameConstantBuffer(0),
@@ -50,6 +51,8 @@ Renderer::Renderer(
 
 	this->particleEmitters = particleEmitters;
 
+	this->mandelbrot = mandelbrot;
+
 	this->lightMesh = lightMesh;
 	this->lightVS = lightVS;
 	this->lightPS = lightPS;
@@ -64,6 +67,7 @@ Renderer::Renderer(
 	//       And that they're all called "perFrame"
 	AssetManager& assets = AssetManager::GetInstance();
 	SimplePixelShader* ps = assets.GetPixelShader("PixelShaderPBR.cso");
+	SimplePixelShader* mandelPS = assets.GetPixelShader("FractalPS.cso");
 	SimpleVertexShader* vs = assets.GetVertexShader("VertexShader.cso");
 
 	// Struct to hold the descriptions from existing buffers
@@ -73,12 +77,18 @@ Renderer::Renderer(
 	// Make a new buffer that matches the existing PS per-frame buffer
 	scb = ps->GetBufferInfo("perFrame");
 	scb->ConstantBuffer.Get()->GetDesc(&bufferDesc);
-	device->CreateBuffer(&bufferDesc, 0, psPerFrameConstantBuffer.GetAddressOf());
+	device->CreateBuffer(&bufferDesc, 0, psPerFrameConstantBuffer.GetAddressOf());	
 
 	// Make a new buffer that matches the existing PS per-frame buffer
 	scb = vs->GetBufferInfo("perFrame");
 	scb->ConstantBuffer.Get()->GetDesc(&bufferDesc);
 	device->CreateBuffer(&bufferDesc, 0, vsPerFrameConstantBuffer.GetAddressOf());
+
+	//// fractal only
+	//scb = mandelPS->GetBufferInfo("perFrame");
+	//scb->ConstantBuffer.Get()->GetDesc(&bufferDesc);
+	//device->CreateBuffer(&bufferDesc, 0, psMandePerFrameConstantBuffer.GetAddressOf());
+	testColor = DirectX::XMFLOAT4(1, 1, 1, 1);
 
 	PostResize(windowWidth, windowHeight, backBufferRTV, depthBufferDSV);
 
@@ -181,13 +191,23 @@ void Renderer::Render(Camera* camera, int lightCount, float totalTime, SceneStat
 	context->ClearRenderTargetView(backBufferRTV.Get(), color);
 	context->ClearDepthStencilView(depthBufferDSV.Get(), D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1.0f,	0);
 
+	StandardSceneRender(color, camera, lightCount, totalTime, currentSceneState);
+		//SimplePixelShader* ps = mandelbrot->GetMaterial()->GetPS();
+	//well this could have been executed better
 	switch (currentSceneState)
 	{
 	case SceneState::Main:
-		StandardSceneRender(color, camera, lightCount, totalTime);
 		break;
 	case SceneState::Fractal:
+		////memcpy(&psPerFrameData.Lights, &lights[0], sizeof(Light) * lightCount);
+		//psMandelPerFrameData.Color2 = testColor;
+		//context->UpdateSubresource(psMandePerFrameConstantBuffer.Get(), 0, 0, &psMandelPerFrameData, 0, 0);
 
+		//ps->SetFloat4("Color2", color);
+		//ps->CopyBufferData("perFrame");
+		//mandelbrot->GetMaterial()->PrepareMaterial(camera, sky);
+		////mandelbrot->Draw(camera, sky);
+		//context->DrawInstancedIndirect(psMandePerFrameConstantBuffer.Get(), 0);
 		break;
 	default:
 		break;
@@ -220,7 +240,7 @@ void Renderer::FractalRender(const float color[4], Camera* camera, float totalTi
 }
 
 
-void Renderer::StandardSceneRender(const float  color[4], Camera* camera, int lightCount, float totalTime)
+void Renderer::StandardSceneRender(const float  color[4], Camera* camera, int lightCount, float totalTime, SceneState currentSceneState)
 {
 	//clear refraction render targets
 	context->ClearRenderTargetView(sceneColorsRTV.Get(), color);
@@ -294,7 +314,6 @@ void Renderer::StandardSceneRender(const float  color[4], Camera* camera, int li
 	AssetManager& assets = AssetManager::GetInstance();
 	SimpleVertexShader* vs = assets.GetVertexShader("FullscreenVS.cso");
 	vs->SetShader();
-
 	// Final combine
 	{
 		// Set up final combine
@@ -308,6 +327,7 @@ void Renderer::StandardSceneRender(const float  color[4], Camera* camera, int li
 		context->Draw(3, 0);
 	}
 
+
 	// Draw the solid objects to the screen
 	{
 		targets[0] = backBufferRTV.Get();
@@ -317,6 +337,27 @@ void Renderer::StandardSceneRender(const float  color[4], Camera* camera, int li
 		ps->SetShaderResourceView("Pixels", finalCompositeSRV.Get());
 		context->Draw(3, 0);
 	}
+
+	//fractal
+	{
+		targets[0] = backBufferRTV.Get();
+		context->OMSetRenderTargets(1, targets, 0);
+		//context->OMSetBlendState(particleBlendAdditive.Get(), 0, 0xFFFFFFFF);
+		//context->OMSetDepthStencilState(particleDepthState.Get(), 0); //i need to figure out what the heck that blend state is supposed to be too
+
+
+		SimplePixelShader* ps = assets.GetPixelShader("FractalPS.cso");
+		ps->SetShader();
+		ps->SetShaderResourceView("Pixels", mandelbrot->GetSRV());
+		ps->CopyAllBufferData();
+
+		context->OMSetBlendState(0, 0, 0xFFFFFFFF);
+		context->OMSetDepthStencilState(0, 0);
+		context->Draw(3, 0);
+	}
+
+	if (currentSceneState == SceneState::Fractal)
+		return; //skip the rest of this
 
 	//---Refraction---
 	{
@@ -413,6 +454,7 @@ void Renderer::StandardSceneRender(const float  color[4], Camera* camera, int li
 		}
 	}
 
+
 	//draw particles
 	{
 		//bind the buffers
@@ -437,6 +479,8 @@ void Renderer::StandardSceneRender(const float  color[4], Camera* camera, int li
 	// Draw the light sources
 	context->OMSetRenderTargets(1, backBufferRTV.GetAddressOf(), depthBufferDSV.Get());
 	DrawPointLights(camera, lightCount);
+
+
 }
 
 Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Renderer::GetSceneColorsSRV()

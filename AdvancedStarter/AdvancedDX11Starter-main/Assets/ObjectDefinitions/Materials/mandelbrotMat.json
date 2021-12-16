@@ -1,0 +1,21 @@
+{
+    "name": "mandelbrotMat",
+    "color": [
+        1.0,
+        1.0,
+        1.0,
+        1.0
+    ],
+    "textures": {
+        "albedo": "bronze_albedo.png",
+        "normal": "bronze_normals.png",
+        "rough":  "bronze_roughness.png",
+        "metal":  "bronze_metal.png"
+    },
+    "uvScale": [
+        2.0,
+        2.0
+    ],
+    "vertexShader": "FractalVS.cso",
+    "pixelShader": "FractalPS.cso"
+}
