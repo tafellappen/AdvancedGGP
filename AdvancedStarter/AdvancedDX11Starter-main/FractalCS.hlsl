@@ -49,8 +49,8 @@ float Mandelbrot(float2 complexPlanePosition, float scale, float2 center)
     // the actual mandelbrot math code is based on the GLSL at this link: http://nuclear.mutantstargoat.com/articles/sdr_fract/
     //float2 center = float2(-.0f, 0.0f);
     int maxIter = 5000;
-    float scaleDefault = 1.0f;
-    scale += scaleDefault;
+    //float scaleDefault = 1.0f;
+    //scale += scaleDefault;
 
     float2 z;
     float2 c;
@@ -81,8 +81,10 @@ void main( uint3 threadID : SV_DispatchThreadID )
     //float relativeY
 
     float2 complexPlanePosition = float2(
-        MapValues(threadID.x, 0.0f, width, -2.0f, 2.0f),
-        MapValues(threadID.y, 0.0f, height, -1.0f, 1.0f)
+        MapValues(threadID.x, 0.0f, width, -aspectRatio.x, aspectRatio.x),
+        MapValues(threadID.y, 0.0f, height, -aspectRatio.y, aspectRatio.y)
+        //MapValues(threadID.x, 0.0f, width, -2.0f, 2.0f),
+        //MapValues(threadID.y, 0.0f, height, -1.0f, 1.0f)
         );
     /*MapValues(threadID.x, 0.0f, width, -aspectRatio.x, aspectRatio.x),
         MapValues(threadID.y, 0.0f, height, -aspectRatio.y, aspectRatio.y)*/

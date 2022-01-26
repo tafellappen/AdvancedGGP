@@ -13,9 +13,24 @@
 // this could be modified slightly to generate mandelbrot renders of arbitrary size
 //		"i have a 16k resolution render of the mandelbrot set" weird flex but ok
 // i actually want to be able to save the images generated from this at some point
-// left off at about 50 minutes in lecture
 //-------------------------------
 
+//struct for fractal space zoom - where the screen is in fractal space
+struct FractalSpaceInfo 
+{
+	DirectX::XMFLOAT2 screenCenterPosition;
+	float zoomDepth;
+
+	void MoveScreenPos(float x, float y) {
+		screenCenterPosition.x += x;
+		screenCenterPosition.y += y;
+	};
+
+	void Zoom(float increase)
+	{
+		zoomDepth += increase;
+	};
+};
 
 //class to manage the data used to compute the Mandelbrot set
 class Mandelbrot
@@ -43,7 +58,7 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
 	Camera* camera;
 	DirectX::XMFLOAT3 initialCamPosition;
-
+	FractalSpaceInfo fractalSpaceInfo;
 
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> computeTextureSRV;
@@ -56,12 +71,16 @@ private:
 	float camZdifference;
 
 	
-	Transform transform;
+	//Transform transform;
 	float movementSpeed;
-	DirectX::XMFLOAT2 aspectRatio;
-	DirectX::XMFLOAT2 complexExtents;
-	DirectX::XMFLOAT2 screenCenter;
-	float zoom;
+	float aspectRatio;
+	DirectX::XMFLOAT2 complexExtents; //how far the edges of the screen are in complex plane, at the current zoom level
+	DirectX::XMFLOAT2 complexMax; //complex plane position of the bottom left of the screen
+	DirectX::XMFLOAT2 complexMin; //complex plane position of the top right of the screen
+	//DirectX::XMFLOAT2 screenCenter;
+	//float zoom;
+	const float STARTING_ZOOM = 1.0;
+	const float STARTING_WIDTH_EXTENTS = 2.0; //extents from the origin
 
 	SimpleComputeShader* fractalCS;
 	//SimpleVertexShader* fractalVS;
@@ -85,13 +104,18 @@ private:
 	// 	   i really hope that doesnt make for a really stupid tradeoff later on
 	// 	   but theoretically the way im doing the mapping here should encapsulate this method enough that I dont have to change any other logic here just because i stopped using the camera position
 	//plan for now is just take x and z axes of camera. This may backfire if user switches rotation in the other scene though
-	void MapWorldToComplex(); 
+	void MapWorldToComplex(); //this can almost certainly be removed
 	void ResetCamera(); //leave this idea here, it may be useful to have this if something goes wrong. would be funny if this went wrong too though. 
 
 	//helpers
+	void FindComplexVisibleExtents();
+	float MapValues(float value, float min1, float max1, float min2, float max2);
+
 	void CreateComputeShaderTexture();
 	void RetreiveShaders();
 	void InitRenderStates();
+
+
 };
 
 //scale  = cam current z minus cam previous z
