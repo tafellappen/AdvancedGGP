@@ -235,10 +235,6 @@ void Renderer::Render(Camera* camera, int lightCount, float totalTime, SceneStat
 	context->PSSetShaderResources(0, 16, nullSRVs);
 }
 
-void Renderer::FractalRender(const float color[4], Camera* camera, float totalTime)
-{
-}
-
 
 void Renderer::StandardSceneRender(const float  color[4], Camera* camera, int lightCount, float totalTime, SceneState currentSceneState)
 {
@@ -272,6 +268,28 @@ void Renderer::StandardSceneRender(const float  color[4], Camera* camera, int li
 		psPerFrameData.TotalSpecIBLMipLevels = sky->GetMipLevelCount();
 		psPerFrameData.AmbientNonPBR = ambientNonPBR;
 		context->UpdateSubresource(psPerFrameConstantBuffer.Get(), 0, 0, &psPerFrameData, 0, 0);
+	}
+
+	//fractal
+	if (currentSceneState == SceneState::Fractal)
+	{
+		AssetManager& assets = AssetManager::GetInstance();
+		targets[0] = backBufferRTV.Get();
+		context->OMSetRenderTargets(1, targets, 0);
+		//context->OMSetBlendState(particleBlendAdditive.Get(), 0, 0xFFFFFFFF);
+		//context->OMSetDepthStencilState(particleDepthState.Get(), 0); //i need to figure out what the heck that blend state is supposed to be too
+
+
+		SimplePixelShader* ps = assets.GetPixelShader("FractalPS.cso");
+		ps->SetShader();
+		ps->SetShaderResourceView("Pixels", mandelbrot->GetSRV());
+		ps->CopyAllBufferData();
+
+		context->OMSetBlendState(0, 0, 0xFFFFFFFF);
+		context->OMSetDepthStencilState(0, 0);
+		context->Draw(3, 0);
+
+		return; //skip the rest of this render
 	}
 
 	std::vector<GameEntity*> refractiveEntities;
@@ -338,26 +356,7 @@ void Renderer::StandardSceneRender(const float  color[4], Camera* camera, int li
 		context->Draw(3, 0);
 	}
 
-	//fractal
-	{
-		targets[0] = backBufferRTV.Get();
-		context->OMSetRenderTargets(1, targets, 0);
-		//context->OMSetBlendState(particleBlendAdditive.Get(), 0, 0xFFFFFFFF);
-		//context->OMSetDepthStencilState(particleDepthState.Get(), 0); //i need to figure out what the heck that blend state is supposed to be too
 
-
-		SimplePixelShader* ps = assets.GetPixelShader("FractalPS.cso");
-		ps->SetShader();
-		ps->SetShaderResourceView("Pixels", mandelbrot->GetSRV());
-		ps->CopyAllBufferData();
-
-		context->OMSetBlendState(0, 0, 0xFFFFFFFF);
-		context->OMSetDepthStencilState(0, 0);
-		context->Draw(3, 0);
-	}
-
-	if (currentSceneState == SceneState::Fractal)
-		return; //skip the rest of this
 
 	//---Refraction---
 	{
