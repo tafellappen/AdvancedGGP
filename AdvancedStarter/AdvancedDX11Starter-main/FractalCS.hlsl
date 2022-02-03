@@ -9,7 +9,7 @@ cbuffer data : register(b0)
     float scale;
     float2 center;
     float2 aspectRatio;
-	//float complexExtents;
+    int maxIter;
 }
 
 //https://gamedev.stackexchange.com/questions/147890/is-there-an-hlsl-equivalent-to-glsls-map-function
@@ -24,7 +24,7 @@ float MapValues(float value, float min1, float max1, float min2, float max2)
     return perc * (max2 - min2) + min2;
 }
 
-float Mandelbrot(float2 complexPlanePosition, float scale, float2 center)
+float Mandelbrot(float2 complexPlanePosition, float scale, float2 center, int maxIter)
 {
     //float k = 0.0009765625;							// this is simply 1/1024, used to project 1024x1024 texture space to a 2x2 fractal space
     //double dx, dy;
@@ -48,13 +48,13 @@ float Mandelbrot(float2 complexPlanePosition, float scale, float2 center)
 
     // the actual mandelbrot math code is based on the GLSL at this link: http://nuclear.mutantstargoat.com/articles/sdr_fract/
     //float2 center = float2(-.0f, 0.0f);
-    int maxIter = 5000;
+    //int maxIter = 5000;
     //float scaleDefault = 1.0f;
     //scale += scaleDefault;
 
     float2 z;
     float2 c;
-
+    //scale = 0.0009765625;
     c.x = (complexPlanePosition.x) * scale - center.x;
     c.y = (complexPlanePosition.y) * scale - center.y;
 
@@ -81,14 +81,14 @@ void main( uint3 threadID : SV_DispatchThreadID )
     //float relativeY
 
     float2 complexPlanePosition = float2(
-        MapValues(threadID.x, 0.0f, width, -aspectRatio.x, aspectRatio.x),
+        MapValues(threadID.x, 0.0f, width, -aspectRatio.x * 2.0f, aspectRatio.x * 2.0f), //i think these two are what i want, but the hardcoded numbers are a known working for now
         MapValues(threadID.y, 0.0f, height, -aspectRatio.y, aspectRatio.y)
         //MapValues(threadID.x, 0.0f, width, -2.0f, 2.0f),
         //MapValues(threadID.y, 0.0f, height, -1.0f, 1.0f)
         );
     /*MapValues(threadID.x, 0.0f, width, -aspectRatio.x, aspectRatio.x),
         MapValues(threadID.y, 0.0f, height, -aspectRatio.y, aspectRatio.y)*/
-	float iterations = Mandelbrot(complexPlanePosition, scale, center);
+	float iterations = Mandelbrot(complexPlanePosition, scale, center, maxIter);
 
 	// Store in the texture at [x,y]
 	//outputTexture[threadID.xy] = float4(0, 0, 1, 1);

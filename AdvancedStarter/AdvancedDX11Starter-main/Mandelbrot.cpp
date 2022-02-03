@@ -18,8 +18,8 @@ Mandelbrot::Mandelbrot(
 	this->camera = camera;
 	this->material = material;
 
-	this->fractalSpaceInfo.screenCenterPosition = DirectX::XMFLOAT2(0, 0);
-	this->fractalSpaceInfo.zoomDepth = STARTING_ZOOM;
+	this->fractalPlaneInfo.screenMidPosition = DirectX::XMFLOAT2(0, 0);
+	this->fractalPlaneInfo.scale = STARTING_SCALE;
 
 	//transform = Transform();
 	movementSpeed = 0.5f;
@@ -73,14 +73,15 @@ void Mandelbrot::Update(float dt)
 	if (input.KeyDown(VK_CONTROL)) { speed *= 0.1f; }
 
 	// Movement
-	if (input.KeyDown('W')) { fractalSpaceInfo.Zoom(speed); }
-	if (input.KeyDown('S')) { fractalSpaceInfo.Zoom(-speed); }
-	if (input.KeyDown('A')) { fractalSpaceInfo.MoveScreenPos(speed, 0); }
-	if (input.KeyDown('D')) { fractalSpaceInfo.MoveScreenPos(-speed, 0); }
-	if (input.KeyDown('X')) { fractalSpaceInfo.MoveScreenPos(0, -speed); }
-	if (input.KeyDown(' ')) { fractalSpaceInfo.MoveScreenPos(0, speed); }
+	if (input.KeyDown('X')) { fractalPlaneInfo.Zoom(-speed); }
+	if (input.KeyDown(' ')) { fractalPlaneInfo.Zoom(speed); }
+	if (input.KeyDown('W')) { fractalPlaneInfo.MoveScreenPos(0, speed); }
+	if (input.KeyDown('S')) { fractalPlaneInfo.MoveScreenPos(0, -speed); }
+	if (input.KeyDown('A')) { fractalPlaneInfo.MoveScreenPos(speed, 0); }
+	if (input.KeyDown('D')) { fractalPlaneInfo.MoveScreenPos(-speed, 0); }
 	
-	std::cout << fractalSpaceInfo.zoomDepth << std::endl;
+	//std::cout << fractalPlaneInfo.scale << std::endl;
+	std::cout << speed << std::endl;
 	//screenCenter = DirectX::XMFLOAT2(fractalSpaceInfo.screenCenterPosition.x, fractalSpaceInfo.screenCenterPosition.y);
 
 }
@@ -132,9 +133,10 @@ void Mandelbrot::RunComputeShader()
 
 	fractalCS->SetFloat("height", windowHeight);
 	fractalCS->SetFloat("width", windowWidth);
-	fractalCS->SetFloat("scale", fractalSpaceInfo.zoomDepth);
-	fractalCS->SetFloat2("center", fractalSpaceInfo.screenCenterPosition);
-	fractalCS->SetFloat2("complexViewHeightWidth", aspectRatio);
+	fractalCS->SetFloat("scale", fractalPlaneInfo.scale);
+	fractalCS->SetFloat2("center", fractalPlaneInfo.screenMidPosition);
+	fractalCS->SetFloat2("aspectRatio", aspectRatio);
+	fractalCS->SetInt("maxIter", 5000);
 	fractalCS->CopyAllBufferData();
 	
 	// Dispatch the compute shader
@@ -154,25 +156,26 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Mandelbrot::GetSRV()
 	return computeTextureSRV;
 }
 
-void Mandelbrot::MapWorldToComplex()
-{
-	DirectX::XMFLOAT3 currentCamPos = camera->GetTransform()->GetPosition();
-	camZdifference = initialCamPosition.z - currentCamPos.z;
+//void Mandelbrot::MapWorldToComplex()
+//{
+//	DirectX::XMFLOAT3 currentCamPos = camera->GetTransform()->GetPosition();
+//	camZdifference = initialCamPosition.z - currentCamPos.z;
+//
+//	//DirectX::XMVECTOR camTotalDistanceMoved = DirectX::XMLoadFloat3(&initialCamPosition) - DirectX::XMLoadFloat3(&currentCamPos);
+//}
 
-	//DirectX::XMVECTOR camTotalDistanceMoved = DirectX::XMLoadFloat3(&initialCamPosition) - DirectX::XMLoadFloat3(&currentCamPos);
-}
-
-void Mandelbrot::FindComplexVisibleExtents()
-{
-	complexMax = DirectX::XMFLOAT2(
-		STARTING_WIDTH_EXTENTS / fractalSpaceInfo.zoomDepth
-	//complexExtents = DirectX::XMFLOAT2()
-}
+//void Mandelbrot::FindComplexVisibleExtents()
+//{
+//	fractalPlaneInfo.complexMax = DirectX::XMFLOAT2(
+//		STARTING_WIDTH_EXTENTS / fractalSpaceInfo.zoomDepth,
+//
+//	//complexExtents = DirectX::XMFLOAT2()
+//}
 
 void Mandelbrot::PostResize(unsigned int windowWidth, unsigned int windowHeight)
 {
-	screenCenter = DirectX::XMFLOAT2(windowWidth / 2, windowHeight / 2);
-	aspectRatio = windowWidth / windowHeight;
+	DirectX::XMFLOAT2 windowMiddle = DirectX::XMFLOAT2(windowWidth / 2, windowHeight / 2);
+	aspectRatio = DirectX::XMFLOAT2(1, windowWidth / windowHeight);
 	CreateComputeShaderTexture();
 }
 

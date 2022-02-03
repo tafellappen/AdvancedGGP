@@ -16,19 +16,30 @@
 //-------------------------------
 
 //struct for fractal space zoom - where the screen is in fractal space
-struct FractalSpaceInfo 
+struct FractalPlaneInfo 
 {
-	DirectX::XMFLOAT2 screenCenterPosition;
-	float zoomDepth;
+	DirectX::XMFLOAT2 screenMidPosition; //complex plane position of the middle pixel of the screen 
+	DirectX::XMFLOAT2 complexMax; //complex plane position of the bottom left of the screen
+	DirectX::XMFLOAT2 complexMin; //complex plane position of the top right of the screen
+	float scale; 
+	//float zoomCount; //yes, a float. Want to be allowed values between integers here for more flexibility
 
 	void MoveScreenPos(float x, float y) {
-		screenCenterPosition.x += x;
-		screenCenterPosition.y += y;
+		screenMidPosition.x += x * scale;//scaling the movement by the same amount as the image itself
+		screenMidPosition.y += y * scale;
 	};
 
-	void Zoom(float increase)
+	void Zoom(float step)
 	{
-		zoomDepth += increase;
+		scale /= step + 1;
+		//movementspeed
+		//math is soup i am a fork
+		//float diffX = ((complexMax.x - complexMin.x) / 2) / step;
+		//complexMin.x = screenMidPosition.x - diffX;
+		//complexMax.x = screenMidPosition.x + diffX;
+		//float diffY = ((complexMax.y - complexMin.y) / 2) / step;
+		//complexMin.y = screenMidPosition.y - diffY;
+		//complexMax.y = screenMidPosition.y + diffY;
 	};
 };
 
@@ -57,30 +68,18 @@ private:
 	Microsoft::WRL::ComPtr<ID3D11Device> device;
 	Microsoft::WRL::ComPtr<ID3D11DeviceContext> context;
 	Camera* camera;
-	DirectX::XMFLOAT3 initialCamPosition;
-	FractalSpaceInfo fractalSpaceInfo;
+	FractalPlaneInfo fractalPlaneInfo;
 
 
 	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> computeTextureSRV;
 	Microsoft::WRL::ComPtr<ID3D11UnorderedAccessView> computeTextureUAV;
 	unsigned int windowWidth;
 	unsigned int windowHeight;
-
-	float camXdifference;
-	float camYdifference;
-	float camZdifference;
-
+	DirectX::XMFLOAT2 aspectRatio;
 	
-	//Transform transform;
 	float movementSpeed;
-	float aspectRatio;
-	DirectX::XMFLOAT2 complexExtents; //how far the edges of the screen are in complex plane, at the current zoom level
-	DirectX::XMFLOAT2 complexMax; //complex plane position of the bottom left of the screen
-	DirectX::XMFLOAT2 complexMin; //complex plane position of the top right of the screen
-	//DirectX::XMFLOAT2 screenCenter;
-	//float zoom;
-	const float STARTING_ZOOM = 1.0;
-	const float STARTING_WIDTH_EXTENTS = 2.0; //extents from the origin
+	const float STARTING_SCALE = 1.0;
+	//const float STARTING_WIDTH_EXTENTS = 2.0; //extents from the origin
 
 	SimpleComputeShader* fractalCS;
 	//SimpleVertexShader* fractalVS;
