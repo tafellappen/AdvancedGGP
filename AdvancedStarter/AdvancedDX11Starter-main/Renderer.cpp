@@ -152,6 +152,8 @@ void Renderer::PostResize(
 	this->windowWidth = windowWidth;
 	this->windowHeight = windowHeight;
 
+	mandelbrot->PostResize(windowWidth, windowHeight);
+
 	//render target views
 	sceneColorsRTV.Reset();
 	sceneNormalsRTV.Reset();

@@ -13,8 +13,8 @@ Mandelbrot::Mandelbrot(
 {
 	this->device = device;
 	this->context = context;
-	this->windowWidth = windowWidth;
-	this->windowHeight = windowHeight;
+	//this->windowWidth = windowWidth;
+	//this->windowHeight = windowHeight;
 	this->camera = camera;
 	this->material = material;
 
@@ -55,7 +55,8 @@ void Mandelbrot::Update(float dt)
 	if (input.KeyDown('A')) { fractalPlaneInfo.MoveScreenPos(speed, 0); }
 	if (input.KeyDown('D')) { fractalPlaneInfo.MoveScreenPos(-speed, 0); }
 	
-	//std::cout << fractalPlaneInfo.scale << std::endl;
+	//std::cout << windowWidth << ", " << windowHeight << std::endl;
+	//std::cout << aspectRatio.x << ", " << aspectRatio.y << std::endl;
 	//std::cout << speed << std::endl;
 	//screenCenter = DirectX::XMFLOAT2(fractalSpaceInfo.screenCenterPosition.x, fractalSpaceInfo.screenCenterPosition.y);
 
@@ -114,6 +115,7 @@ void Mandelbrot::RunComputeShader()
 	// Dispatch the compute shader
 	fractalCS->DispatchByThreads(windowWidth, windowHeight, 1);
 
+
 	// Unbind the texture so we can use it later in draw
 	fractalCS->SetUnorderedAccessView("outputTexture", 0);
 }
@@ -131,8 +133,16 @@ Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> Mandelbrot::GetSRV()
 
 void Mandelbrot::PostResize(unsigned int windowWidth, unsigned int windowHeight)
 {
+	this->windowWidth = windowWidth;
+	this->windowHeight = windowHeight;
+	std::cout << aspectRatio.x << ", " << aspectRatio.y << std::endl;
 	DirectX::XMFLOAT2 windowMiddle = DirectX::XMFLOAT2(windowWidth / 2, windowHeight / 2);
-	aspectRatio = DirectX::XMFLOAT2(1, windowWidth / windowHeight);
+	aspectRatio = DirectX::XMFLOAT2(1, static_cast<float>(windowWidth) / static_cast<float>(windowHeight));
+
+	std::cout << windowWidth << "/" << windowHeight << std::endl;
+	std::cout << windowWidth / windowHeight << std::endl;
+
+
 	CreateComputeShaderTexture();
 }
 

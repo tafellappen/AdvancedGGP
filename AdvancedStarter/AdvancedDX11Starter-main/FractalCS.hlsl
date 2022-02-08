@@ -62,7 +62,7 @@ float Mandelbrot(float2 complexPlanePosition, float scale, float2 center, int ma
     z = c;
     for (i = 0; i < maxIter; i++) {
         float x = (z.x * z.x - z.y * z.y) + c.x;
-        float y = (z.y * z.x + z.x * z.y) + c.y;
+        float y = (2 * z.x * z.y) + c.y;
 
         if ((x * x + y * y) > 4.0)
             break;
@@ -77,11 +77,9 @@ float Mandelbrot(float2 complexPlanePosition, float scale, float2 center, int ma
 [numthreads(8, 8, 1)]
 void main( uint3 threadID : SV_DispatchThreadID )
 {
-    //float relativeX
-    //float relativeY
 
     float2 complexPlanePosition = float2(
-        MapValues(threadID.x, 0.0f, width, -aspectRatio.x * 2.0f, aspectRatio.x * 2.0f), //i think these two are what i want, but the hardcoded numbers are a known working for now
+        MapValues(threadID.x, 0.0f, width, -aspectRatio.x, aspectRatio.x), //i think these two are what i want, but the hardcoded numbers are a known working for now
         MapValues(threadID.y, 0.0f, height, -aspectRatio.y, aspectRatio.y)
         //MapValues(threadID.x, 0.0f, width, -2.0f, 2.0f),
         //MapValues(threadID.y, 0.0f, height, -1.0f, 1.0f)
