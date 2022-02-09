@@ -344,86 +344,86 @@ void Game::LoadAssetsAndCreateEntities()
 	materials.push_back(roughMatPBR);
 	materials.push_back(woodMatPBR);
 
+	assetMngr.CreateEntities();
 
+	//// === Create the PBR entities =====================================
+	//GameEntity* cobSpherePBR = new GameEntity(sphereMesh, cobbleMat2xPBR);
+	//cobSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	//cobSpherePBR->GetTransform()->SetPosition(-6, 2, 0);
+	//cobSpherePBR->GetMaterial()->SetRefractive(true); //i hate this
 
-	// === Create the PBR entities =====================================
-	GameEntity* cobSpherePBR = new GameEntity(sphereMesh, cobbleMat2xPBR);
-	cobSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	cobSpherePBR->GetTransform()->SetPosition(-6, 2, 0);
-	cobSpherePBR->GetMaterial()->SetRefractive(true); //i hate this
+	//GameEntity* floorSpherePBR = new GameEntity(sphereMesh, floorMatPBR);
+	//floorSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	//floorSpherePBR->GetTransform()->SetPosition(-4, 2, 0);
+	//floorSpherePBR->GetMaterial()->SetRefractive(true); //i hate this
 
-	GameEntity* floorSpherePBR = new GameEntity(sphereMesh, floorMatPBR);
-	floorSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	floorSpherePBR->GetTransform()->SetPosition(-4, 2, 0);
-	floorSpherePBR->GetMaterial()->SetRefractive(true); //i hate this
+	//GameEntity* paintSpherePBR = new GameEntity(sphereMesh, paintMatPBR);
+	//paintSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	//paintSpherePBR->GetTransform()->SetPosition(-2, 2, 0);
 
-	GameEntity* paintSpherePBR = new GameEntity(sphereMesh, paintMatPBR);
-	paintSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	paintSpherePBR->GetTransform()->SetPosition(-2, 2, 0);
+	//GameEntity* scratchSpherePBR = new GameEntity(sphereMesh, scratchedMatPBR);
+	//scratchSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	//scratchSpherePBR->GetTransform()->SetPosition(0, 2, 0);
 
-	GameEntity* scratchSpherePBR = new GameEntity(sphereMesh, scratchedMatPBR);
-	scratchSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	scratchSpherePBR->GetTransform()->SetPosition(0, 2, 0);
+	//GameEntity* bronzeSpherePBR = new GameEntity(sphereMesh, bronzeMatPBR);
+	//bronzeSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	//bronzeSpherePBR->GetTransform()->SetPosition(2, 2, 0);
 
-	GameEntity* bronzeSpherePBR = new GameEntity(sphereMesh, bronzeMatPBR);
-	bronzeSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	bronzeSpherePBR->GetTransform()->SetPosition(2, 2, 0);
+	//GameEntity* roughSpherePBR = new GameEntity(sphereMesh, roughMatPBR);
+	//roughSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	//roughSpherePBR->GetTransform()->SetPosition(4, 2, 0);
 
-	GameEntity* roughSpherePBR = new GameEntity(sphereMesh, roughMatPBR);
-	roughSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	roughSpherePBR->GetTransform()->SetPosition(4, 2, 0);
+	//GameEntity* woodSpherePBR = new GameEntity(sphereMesh, woodMatPBR);
+	//woodSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	//woodSpherePBR->GetTransform()->SetPosition(6, 2, 0);
 
-	GameEntity* woodSpherePBR = new GameEntity(sphereMesh, woodMatPBR);
-	woodSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	woodSpherePBR->GetTransform()->SetPosition(6, 2, 0);
+	//entities.push_back(cobSpherePBR);
+	//entities.push_back(floorSpherePBR);
+	//entities.push_back(paintSpherePBR);
+	//entities.push_back(scratchSpherePBR);
+	//entities.push_back(bronzeSpherePBR);
+	//entities.push_back(roughSpherePBR);
+	//entities.push_back(woodSpherePBR);
 
-	entities.push_back(cobSpherePBR);
-	entities.push_back(floorSpherePBR);
-	entities.push_back(paintSpherePBR);
-	entities.push_back(scratchSpherePBR);
-	entities.push_back(bronzeSpherePBR);
-	entities.push_back(roughSpherePBR);
-	entities.push_back(woodSpherePBR);
+	//// Create the non-PBR entities ==============================
+	//GameEntity* cobSphere = new GameEntity(sphereMesh, cobbleMat2x);
+	//cobSphere->GetTransform()->SetScale(2, 2, 2);
+	//cobSphere->GetTransform()->SetPosition(-6, -2, 0);
+	////cobSphere->GetMaterial()->SetRefractive(true); //i hate this so much
 
-	// Create the non-PBR entities ==============================
-	GameEntity* cobSphere = new GameEntity(sphereMesh, cobbleMat2x);
-	cobSphere->GetTransform()->SetScale(2, 2, 2);
-	cobSphere->GetTransform()->SetPosition(-6, -2, 0);
-	//cobSphere->GetMaterial()->SetRefractive(true); //i hate this so much
+	//GameEntity* floorSphere = new GameEntity(sphereMesh, floorMat);
+	//floorSphere->GetTransform()->SetScale(2, 2, 2);
+	//floorSphere->GetTransform()->SetPosition(-4, -2, 0);
 
-	GameEntity* floorSphere = new GameEntity(sphereMesh, floorMat);
-	floorSphere->GetTransform()->SetScale(2, 2, 2);
-	floorSphere->GetTransform()->SetPosition(-4, -2, 0);
+	//GameEntity* paintSphere = new GameEntity(sphereMesh, paintMat);
+	//paintSphere->GetTransform()->SetScale(2, 2, 2);
+	//paintSphere->GetTransform()->SetPosition(-2, -2, 0);
 
-	GameEntity* paintSphere = new GameEntity(sphereMesh, paintMat);
-	paintSphere->GetTransform()->SetScale(2, 2, 2);
-	paintSphere->GetTransform()->SetPosition(-2, -2, 0);
+	//GameEntity* scratchSphere = new GameEntity(sphereMesh, scratchedMat);
+	//scratchSphere->GetTransform()->SetScale(2, 2, 2);
+	//scratchSphere->GetTransform()->SetPosition(0, -2, 0);
 
-	GameEntity* scratchSphere = new GameEntity(sphereMesh, scratchedMat);
-	scratchSphere->GetTransform()->SetScale(2, 2, 2);
-	scratchSphere->GetTransform()->SetPosition(0, -2, 0);
+	//GameEntity* bronzeSphere = new GameEntity(sphereMesh, bronzeMat);
+	//bronzeSphere->GetTransform()->SetScale(2, 2, 2);
+	//bronzeSphere->GetTransform()->SetPosition(2, -2, 0);
 
-	GameEntity* bronzeSphere = new GameEntity(sphereMesh, bronzeMat);
-	bronzeSphere->GetTransform()->SetScale(2, 2, 2);
-	bronzeSphere->GetTransform()->SetPosition(2, -2, 0);
+	//GameEntity* roughSphere = new GameEntity(sphereMesh, roughMat);
+	//roughSphere->GetTransform()->SetScale(2, 2, 2);
+	//roughSphere->GetTransform()->SetPosition(4, -2, 0);
 
-	GameEntity* roughSphere = new GameEntity(sphereMesh, roughMat);
-	roughSphere->GetTransform()->SetScale(2, 2, 2);
-	roughSphere->GetTransform()->SetPosition(4, -2, 0);
+	//GameEntity* woodSphere = new GameEntity(sphereMesh, woodMat);
+	//woodSphere->GetTransform()->SetScale(2, 2, 2);
+	//woodSphere->GetTransform()->SetPosition(6, -2, 0);
 
-	GameEntity* woodSphere = new GameEntity(sphereMesh, woodMat);
-	woodSphere->GetTransform()->SetScale(2, 2, 2);
-	woodSphere->GetTransform()->SetPosition(6, -2, 0);
+	//entities.push_back(cobSphere);
+	//entities.push_back(floorSphere);
+	//entities.push_back(paintSphere);
+	//entities.push_back(scratchSphere);
+	//entities.push_back(bronzeSphere);
+	//entities.push_back(roughSphere);
+	//entities.push_back(woodSphere);
 
-	entities.push_back(cobSphere);
-	entities.push_back(floorSphere);
-	entities.push_back(paintSphere);
-	entities.push_back(scratchSphere);
-	entities.push_back(bronzeSphere);
-	entities.push_back(roughSphere);
-	entities.push_back(woodSphere);
-
-
+	this->entities = *assetMngr.GetEntities();
 	//plain material entites to show IBL obviously
 	Material* solidMetalMatPBR1 = assetMngr.GetMaterial("solidMetalMatPBR1");
 	Material* solidMetalMatPBR2 = assetMngr.GetMaterial("solidMetalMatPBR2");
@@ -835,17 +835,7 @@ void Game::Draw(float deltaTime, float totalTime)
 {
 	mandelbrot->RunComputeShader();
 	renderer->Render(camera, lightCount, totalTime, currentSceneState);
-	//can get rid of this switch i think???? 
-	switch (currentSceneState)
-	{
-	case SceneState::Main:
-		break;
-	case SceneState::Fractal:
 
-		break;
-	default:
-		break;
-	}
 }
 
 

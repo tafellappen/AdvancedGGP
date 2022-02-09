@@ -135,12 +135,12 @@ void Mandelbrot::PostResize(unsigned int windowWidth, unsigned int windowHeight)
 {
 	this->windowWidth = windowWidth;
 	this->windowHeight = windowHeight;
-	std::cout << aspectRatio.x << ", " << aspectRatio.y << std::endl;
+	//std::cout << aspectRatio.x << ", " << aspectRatio.y << std::endl;
 	DirectX::XMFLOAT2 windowMiddle = DirectX::XMFLOAT2(windowWidth / 2, windowHeight / 2);
-	aspectRatio = DirectX::XMFLOAT2(1, static_cast<float>(windowWidth) / static_cast<float>(windowHeight));
+	aspectRatio = DirectX::XMFLOAT2(1, static_cast<float>(windowHeight) / static_cast<float>(windowWidth));
 
-	std::cout << windowWidth << "/" << windowHeight << std::endl;
-	std::cout << windowWidth / windowHeight << std::endl;
+	//std::cout << windowWidth << "/" << windowHeight << std::endl;
+	//std::cout << windowWidth / windowHeight << std::endl;
 
 
 	CreateComputeShaderTexture();

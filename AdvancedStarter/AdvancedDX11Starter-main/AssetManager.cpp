@@ -224,6 +224,88 @@ void AssetManager::LoadAllAssets()
 
 }
 
+void AssetManager::CreateEntities()
+{
+	Mesh* sphereMesh = meshes["sphereMesh"];
+	// === Create the PBR entities =====================================
+	GameEntity* cobSpherePBR = new GameEntity(sphereMesh, materials["cobbleMat2xPBR"]);
+	cobSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	cobSpherePBR->GetTransform()->SetPosition(-6, 2, 0);
+	cobSpherePBR->GetMaterial()->SetRefractive(true); //i hate this
+
+	GameEntity* floorSpherePBR = new GameEntity(sphereMesh, materials["floorMatPBR"]);
+	floorSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	floorSpherePBR->GetTransform()->SetPosition(-4, 2, 0);
+	floorSpherePBR->GetMaterial()->SetRefractive(true); //i hate this
+
+	GameEntity* paintSpherePBR = new GameEntity(sphereMesh, materials["paintMatPBR"]);
+	paintSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	paintSpherePBR->GetTransform()->SetPosition(-2, 2, 0);
+
+	GameEntity* scratchSpherePBR = new GameEntity(sphereMesh, materials["scratchedMatPBR"]);
+	scratchSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	scratchSpherePBR->GetTransform()->SetPosition(0, 2, 0);
+
+	GameEntity* bronzeSpherePBR = new GameEntity(sphereMesh, materials["bronzeMatPBR"]);
+	bronzeSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	bronzeSpherePBR->GetTransform()->SetPosition(2, 2, 0);
+
+	GameEntity* roughSpherePBR = new GameEntity(sphereMesh, materials["roughMatPBR"]);
+	roughSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	roughSpherePBR->GetTransform()->SetPosition(4, 2, 0);
+
+	GameEntity* woodSpherePBR = new GameEntity(sphereMesh, materials["woodMatPBR"]);
+	woodSpherePBR->GetTransform()->SetScale(2, 2, 2);
+	woodSpherePBR->GetTransform()->SetPosition(6, 2, 0);
+
+	entities.push_back(cobSpherePBR);
+	entities.push_back(floorSpherePBR);
+	entities.push_back(paintSpherePBR);
+	entities.push_back(scratchSpherePBR);
+	entities.push_back(bronzeSpherePBR);
+	entities.push_back(roughSpherePBR);
+	entities.push_back(woodSpherePBR);
+
+	// Create the non-PBR entities ==============================
+	GameEntity* cobSphere = new GameEntity(sphereMesh, materials["cobbleMat2x"]);
+	cobSphere->GetTransform()->SetScale(2, 2, 2);
+	cobSphere->GetTransform()->SetPosition(-6, -2, 0);
+	//cobSphere->GetMaterial()->SetRefractive(true); //i hate this so much
+
+	GameEntity* floorSphere = new GameEntity(sphereMesh, materials["floorMat"]);
+	floorSphere->GetTransform()->SetScale(2, 2, 2);
+	floorSphere->GetTransform()->SetPosition(-4, -2, 0);
+
+	GameEntity* paintSphere = new GameEntity(sphereMesh, materials["paintMat"]);
+	paintSphere->GetTransform()->SetScale(2, 2, 2);
+	paintSphere->GetTransform()->SetPosition(-2, -2, 0);
+
+	GameEntity* scratchSphere = new GameEntity(sphereMesh, materials["scratchedMat"]);
+	scratchSphere->GetTransform()->SetScale(2, 2, 2);
+	scratchSphere->GetTransform()->SetPosition(0, -2, 0);
+
+	GameEntity* bronzeSphere = new GameEntity(sphereMesh, materials["bronzeMat"]);
+	bronzeSphere->GetTransform()->SetScale(2, 2, 2);
+	bronzeSphere->GetTransform()->SetPosition(2, -2, 0);
+
+	GameEntity* roughSphere = new GameEntity(sphereMesh, materials["roughMat"]);
+	roughSphere->GetTransform()->SetScale(2, 2, 2);
+	roughSphere->GetTransform()->SetPosition(4, -2, 0);
+
+	GameEntity* woodSphere = new GameEntity(sphereMesh, materials["woodMat"]);
+	woodSphere->GetTransform()->SetScale(2, 2, 2);
+	woodSphere->GetTransform()->SetPosition(6, -2, 0);
+
+	entities.push_back(cobSphere);
+	entities.push_back(floorSphere);
+	entities.push_back(paintSphere);
+	entities.push_back(scratchSphere);
+	entities.push_back(bronzeSphere);
+	entities.push_back(roughSphere);
+	entities.push_back(woodSphere);
+
+}
+
 //it may be word having these also return the pointer to the shader, since it would be nice to have the loading and "shortening" all in one
 void AssetManager::LoadVertexShader(std::wstring filepath, std::string shaderName)
 {
@@ -281,4 +363,9 @@ SimpleComputeShader* AssetManager::GetComputeShader(std::string name)
 Sky* AssetManager::GetSky()
 {
 	return sky;
+}
+
+std::vector<GameEntity*>* AssetManager::GetEntities()
+{
+	return &entities;
 }
