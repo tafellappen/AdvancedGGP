@@ -296,168 +296,13 @@ void Game::LoadAssetsAndCreateEntities()
 
 	// Grab the meshes from the asset manager
 	Mesh* sphereMesh = assetMngr.GetMesh("sphere.obj");
-	Mesh* helixMesh = assetMngr.GetMesh("helix.obj");
-	Mesh* cubeMesh = assetMngr.GetMesh("cube.obj");
-	Mesh* coneMesh = assetMngr.GetMesh("cone.obj");
 
-	meshes.push_back(sphereMesh);
-	meshes.push_back(helixMesh);
-	meshes.push_back(cubeMesh);
-	meshes.push_back(coneMesh);
 
 
 	// grab the sky from the asset manager
 	sky = assetMngr.GetSky();
-
-
-	// grab basic materials from asset manager
-	Material* cobbleMat2x  = assetMngr.GetMaterial("cobbleMat2x");
-	Material* floorMat =     assetMngr.GetMaterial("floorMat");
-	Material* paintMat =     assetMngr.GetMaterial("paintMat");
-	Material* scratchedMat = assetMngr.GetMaterial("scratchedMat");
-	Material* bronzeMat =    assetMngr.GetMaterial("bronzeMat");
-	Material* roughMat =     assetMngr.GetMaterial("roughMat");
-	Material* woodMat =      assetMngr.GetMaterial("woodMat");
-
-	materials.push_back(cobbleMat2x);
-	materials.push_back(floorMat);
-	materials.push_back(paintMat);
-	materials.push_back(scratchedMat);
-	materials.push_back(bronzeMat);
-	materials.push_back(roughMat);
-	materials.push_back(woodMat);
-
-	// grab PBR materials from asset manager
-	Material* cobbleMat2xPBR =  assetMngr.GetMaterial("cobbleMat2xPBR");
-	Material* floorMatPBR =     assetMngr.GetMaterial("floorMatPBR");
-	Material* paintMatPBR =     assetMngr.GetMaterial("paintMatPBR");
-	Material* scratchedMatPBR = assetMngr.GetMaterial("scratchedMatPBR");
-	Material* bronzeMatPBR =    assetMngr.GetMaterial("bronzeMatPBR");
-	Material* roughMatPBR =     assetMngr.GetMaterial("roughMatPBR");
-	Material* woodMatPBR =      assetMngr.GetMaterial("woodMatPBR");
-
-	materials.push_back(cobbleMat2xPBR);
-	materials.push_back(floorMatPBR);
-	materials.push_back(paintMatPBR);
-	materials.push_back(scratchedMatPBR);
-	materials.push_back(bronzeMatPBR);
-	materials.push_back(roughMatPBR);
-	materials.push_back(woodMatPBR);
-
 	assetMngr.CreateEntities();
-
-	//// === Create the PBR entities =====================================
-	//GameEntity* cobSpherePBR = new GameEntity(sphereMesh, cobbleMat2xPBR);
-	//cobSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	//cobSpherePBR->GetTransform()->SetPosition(-6, 2, 0);
-	//cobSpherePBR->GetMaterial()->SetRefractive(true); //i hate this
-
-	//GameEntity* floorSpherePBR = new GameEntity(sphereMesh, floorMatPBR);
-	//floorSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	//floorSpherePBR->GetTransform()->SetPosition(-4, 2, 0);
-	//floorSpherePBR->GetMaterial()->SetRefractive(true); //i hate this
-
-	//GameEntity* paintSpherePBR = new GameEntity(sphereMesh, paintMatPBR);
-	//paintSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	//paintSpherePBR->GetTransform()->SetPosition(-2, 2, 0);
-
-	//GameEntity* scratchSpherePBR = new GameEntity(sphereMesh, scratchedMatPBR);
-	//scratchSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	//scratchSpherePBR->GetTransform()->SetPosition(0, 2, 0);
-
-	//GameEntity* bronzeSpherePBR = new GameEntity(sphereMesh, bronzeMatPBR);
-	//bronzeSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	//bronzeSpherePBR->GetTransform()->SetPosition(2, 2, 0);
-
-	//GameEntity* roughSpherePBR = new GameEntity(sphereMesh, roughMatPBR);
-	//roughSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	//roughSpherePBR->GetTransform()->SetPosition(4, 2, 0);
-
-	//GameEntity* woodSpherePBR = new GameEntity(sphereMesh, woodMatPBR);
-	//woodSpherePBR->GetTransform()->SetScale(2, 2, 2);
-	//woodSpherePBR->GetTransform()->SetPosition(6, 2, 0);
-
-	//entities.push_back(cobSpherePBR);
-	//entities.push_back(floorSpherePBR);
-	//entities.push_back(paintSpherePBR);
-	//entities.push_back(scratchSpherePBR);
-	//entities.push_back(bronzeSpherePBR);
-	//entities.push_back(roughSpherePBR);
-	//entities.push_back(woodSpherePBR);
-
-	//// Create the non-PBR entities ==============================
-	//GameEntity* cobSphere = new GameEntity(sphereMesh, cobbleMat2x);
-	//cobSphere->GetTransform()->SetScale(2, 2, 2);
-	//cobSphere->GetTransform()->SetPosition(-6, -2, 0);
-	////cobSphere->GetMaterial()->SetRefractive(true); //i hate this so much
-
-	//GameEntity* floorSphere = new GameEntity(sphereMesh, floorMat);
-	//floorSphere->GetTransform()->SetScale(2, 2, 2);
-	//floorSphere->GetTransform()->SetPosition(-4, -2, 0);
-
-	//GameEntity* paintSphere = new GameEntity(sphereMesh, paintMat);
-	//paintSphere->GetTransform()->SetScale(2, 2, 2);
-	//paintSphere->GetTransform()->SetPosition(-2, -2, 0);
-
-	//GameEntity* scratchSphere = new GameEntity(sphereMesh, scratchedMat);
-	//scratchSphere->GetTransform()->SetScale(2, 2, 2);
-	//scratchSphere->GetTransform()->SetPosition(0, -2, 0);
-
-	//GameEntity* bronzeSphere = new GameEntity(sphereMesh, bronzeMat);
-	//bronzeSphere->GetTransform()->SetScale(2, 2, 2);
-	//bronzeSphere->GetTransform()->SetPosition(2, -2, 0);
-
-	//GameEntity* roughSphere = new GameEntity(sphereMesh, roughMat);
-	//roughSphere->GetTransform()->SetScale(2, 2, 2);
-	//roughSphere->GetTransform()->SetPosition(4, -2, 0);
-
-	//GameEntity* woodSphere = new GameEntity(sphereMesh, woodMat);
-	//woodSphere->GetTransform()->SetScale(2, 2, 2);
-	//woodSphere->GetTransform()->SetPosition(6, -2, 0);
-
-	//entities.push_back(cobSphere);
-	//entities.push_back(floorSphere);
-	//entities.push_back(paintSphere);
-	//entities.push_back(scratchSphere);
-	//entities.push_back(bronzeSphere);
-	//entities.push_back(roughSphere);
-	//entities.push_back(woodSphere);
-
 	this->entities = *assetMngr.GetEntities();
-	//plain material entites to show IBL obviously
-	Material* solidMetalMatPBR1 = assetMngr.GetMaterial("solidMetalMatPBR1");
-	Material* solidMetalMatPBR2 = assetMngr.GetMaterial("solidMetalMatPBR2");
-	Material* solidMetalMatPBR3 = assetMngr.GetMaterial("solidMetalMatPBR3");
-	Material* solidMetalMatPBR4 = assetMngr.GetMaterial("solidMetalMatPBR4");
-	Material* solidMetalMatPBR5 = assetMngr.GetMaterial("solidMetalMatPBR5");
-
-
-	GameEntity* solidMetalSphere1 = new GameEntity(sphereMesh, solidMetalMatPBR1);
-	GameEntity* solidMetalSphere2 = new GameEntity(sphereMesh, solidMetalMatPBR2);
-	GameEntity* solidMetalSphere3 = new GameEntity(sphereMesh, solidMetalMatPBR3);
-	GameEntity* solidMetalSphere4 = new GameEntity(sphereMesh, solidMetalMatPBR4);
-	GameEntity* solidMetalSphere5 = new GameEntity(sphereMesh, solidMetalMatPBR5);
-
-	solidMetalSphere1->GetTransform()->SetScale(1, 1, 1);
-	solidMetalSphere1->GetTransform()->SetPosition(6, 0, 0);
-
-	solidMetalSphere2->GetTransform()->SetScale(1, 1, 1);
-	solidMetalSphere2->GetTransform()->SetPosition(4, 0, 0);
-
-	solidMetalSphere3->GetTransform()->SetScale(1, 1, 1);
-	solidMetalSphere3->GetTransform()->SetPosition(2, 0, 0);
-
-	solidMetalSphere4->GetTransform()->SetScale(1, 1, 1);
-	solidMetalSphere4->GetTransform()->SetPosition(0, 0, 0);
-
-	solidMetalSphere5->GetTransform()->SetScale(1, 1, 1);
-	solidMetalSphere5->GetTransform()->SetPosition(-2, 0, 0);
-
-	entities.push_back(solidMetalSphere1);
-	entities.push_back(solidMetalSphere2);
-	entities.push_back(solidMetalSphere3);
-	entities.push_back(solidMetalSphere4);
-	entities.push_back(solidMetalSphere5);
 
 	
 
@@ -472,7 +317,7 @@ void Game::LoadAssetsAndCreateEntities()
 	// Create material for mandelbrot
 	Material* mandelMaterial = assetMngr.GetMaterial("mandelbrotMat");
 	//mandelMaterial->AddPSSampler("BasicSampler", samplerOptions);
-	materials.push_back(mandelMaterial);
+	//materials.push_back(mandelMaterial);
 
 	//initialize mandelbrot data
 	mandelbrot = std::make_shared<Mandelbrot>(
@@ -489,41 +334,44 @@ void Game::LoadAssetsAndCreateEntities()
 
 void Game::CreateParticleEmitters()
 {
-	//grab assets from asset manager
+	////grab assets from asset manager
+	//AssetManager& assetMngr = AssetManager::GetInstance();
+	////std::shared_ptr<SimpleVertexShader> vs = std::make_shared<SimpleVertexShader>(assetMngr.GetVertexShader("ParticleVS.cso"));
+	////std::shared_ptr<SimplePixelShader> ps = std::make_shared<SimplePixelShader>(assetMngr.GetPixelShader("ParticlePS.cso"));
+	//SimpleVertexShader* vs = assetMngr.GetVertexShader("ParticleVS.cso");
+	//SimplePixelShader* ps = assetMngr.GetPixelShader("ParticlePS.cso");
+
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture1 = assetMngr.GetTexture("dirt_03.png");
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2 = assetMngr.GetTexture("light_03.png");
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture3 = assetMngr.GetTexture("twirl_03.png");
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture4 = assetMngr.GetTexture("star_07.png");
+	//Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture5 = assetMngr.GetTexture("spark_02.png");
+
+	//std::shared_ptr<Emitter> emit1 = std::make_shared<Emitter>(2, 10, 500, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vs, ps, device, context, texture1);
+	//std::shared_ptr<Emitter> emit2 = std::make_shared<Emitter>(5, 15, 500, XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f), vs, ps, device, context, texture2);
+	//std::shared_ptr<Emitter> emit3 = std::make_shared<Emitter>(6, 18, 500, XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f), vs, ps, device, context, texture3);
+	//std::shared_ptr<Emitter> emit4 = std::make_shared<Emitter>(8, 5, 500, XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f), vs, ps, device, context, texture4);
+	//std::shared_ptr<Emitter> emit5 = std::make_shared<Emitter>(10, 30, 600, XMFLOAT4(0.0f, 1.0f, 0.5f, 1.0f), vs, ps, device, context, texture5);
+	////place the emitters
+	//emit1->GetTransform()->SetPosition(0.0f, 4.0f, 0.0f);
+	//emit2->GetTransform()->SetPosition(2.0f, 5.0f, 0.0f);
+	//emit3->GetTransform()->SetPosition(-2.0f, 5.0f, 0.0f);
+	//emit4->GetTransform()->SetPosition(3.0f, 3.0f, -3.0f);
+	//emit5->GetTransform()->SetPosition(-3.0f, 3.0f, -3.0f);	
+
+	//emit2->SetRectBounds(5.0f, 5.0f, 5.0f);
+	//emit3->SetRectBounds(5.0f, 5.0f, 0.0f);
+	//emit4->SetRectBounds(5.0f, 0.0f, 5.0f);
+	//emit5->SetRectBounds(9.0f, 0.0f, 0.0f);
+
+	//particleEmitters.push_back(emit1);
+	//particleEmitters.push_back(emit2);
+	//particleEmitters.push_back(emit3);
+	//particleEmitters.push_back(emit4);
+	//particleEmitters.push_back(emit5);
 	AssetManager& assetMngr = AssetManager::GetInstance();
-	//std::shared_ptr<SimpleVertexShader> vs = std::make_shared<SimpleVertexShader>(assetMngr.GetVertexShader("ParticleVS.cso"));
-	//std::shared_ptr<SimplePixelShader> ps = std::make_shared<SimplePixelShader>(assetMngr.GetPixelShader("ParticlePS.cso"));
-	SimpleVertexShader* vs = assetMngr.GetVertexShader("ParticleVS.cso");
-	SimplePixelShader* ps = assetMngr.GetPixelShader("ParticlePS.cso");
-
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture1 = assetMngr.GetTexture("dirt_03.png");
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2 = assetMngr.GetTexture("light_03.png");
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture3 = assetMngr.GetTexture("twirl_03.png");
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture4 = assetMngr.GetTexture("star_07.png");
-	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture5 = assetMngr.GetTexture("spark_02.png");
-
-	std::shared_ptr<Emitter> emit1 = std::make_shared<Emitter>(2, 10, 500, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vs, ps, device, context, texture1);
-	std::shared_ptr<Emitter> emit2 = std::make_shared<Emitter>(5, 15, 500, XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f), vs, ps, device, context, texture2);
-	std::shared_ptr<Emitter> emit3 = std::make_shared<Emitter>(6, 18, 500, XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f), vs, ps, device, context, texture3);
-	std::shared_ptr<Emitter> emit4 = std::make_shared<Emitter>(8, 5, 500, XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f), vs, ps, device, context, texture4);
-	std::shared_ptr<Emitter> emit5 = std::make_shared<Emitter>(10, 30, 600, XMFLOAT4(0.0f, 1.0f, 0.5f, 1.0f), vs, ps, device, context, texture5);
-	//place the emitters
-	emit1->GetTransform()->SetPosition(0.0f, 4.0f, 0.0f);
-	emit2->GetTransform()->SetPosition(2.0f, 5.0f, 0.0f);
-	emit3->GetTransform()->SetPosition(-2.0f, 5.0f, 0.0f);
-	emit4->GetTransform()->SetPosition(3.0f, 3.0f, -3.0f);
-	emit5->GetTransform()->SetPosition(-3.0f, 3.0f, -3.0f);	
-
-	emit2->SetRectBounds(5.0f, 5.0f, 5.0f);
-	emit3->SetRectBounds(5.0f, 5.0f, 0.0f);
-	emit4->SetRectBounds(5.0f, 0.0f, 5.0f);
-	emit5->SetRectBounds(9.0f, 0.0f, 0.0f);
-
-	particleEmitters.push_back(emit1);
-	particleEmitters.push_back(emit2);
-	particleEmitters.push_back(emit3);
-	particleEmitters.push_back(emit4);
-	particleEmitters.push_back(emit5);
+	assetMngr.CreateParticleEmitters();
+	particleEmitters = assetMngr.GetEmitters();
 
 
 }

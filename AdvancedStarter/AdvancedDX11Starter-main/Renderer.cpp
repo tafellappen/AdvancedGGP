@@ -46,7 +46,7 @@ Renderer::Renderer(
 	this->windowWidth = windowWidth;
 	this->windowHeight = windowHeight;
 	this->sky = sky;
-	this->entities = entities;
+	//this->entities = entities;
 	this->lights = lights;
 
 	this->particleEmitters = particleEmitters;
@@ -66,6 +66,8 @@ Renderer::Renderer(
 	// Note: We're assuming ALL entity/material per-frame buffers are identical!
 	//       And that they're all called "perFrame"
 	AssetManager& assets = AssetManager::GetInstance();
+
+	this->entities = *assets.GetEntities();
 
 	SimplePixelShader* ps = assets.GetPixelShader("PixelShaderPBR.cso");
 	SimplePixelShader* mandelPS = assets.GetPixelShader("FractalPS.cso");

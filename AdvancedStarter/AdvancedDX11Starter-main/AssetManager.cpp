@@ -226,7 +226,14 @@ void AssetManager::LoadAllAssets()
 
 void AssetManager::CreateEntities()
 {
-	Mesh* sphereMesh = meshes["sphereMesh"];
+	//TODO: want to make this defined by json too
+
+	Mesh* sphereMesh = meshes["sphere.obj"];
+	Mesh* helixMesh = meshes["helix.obj"];
+	Mesh* cubeMesh = meshes["cube.obj"];
+	Mesh* coneMesh = meshes["cone.obj"];
+
+
 	// === Create the PBR entities =====================================
 	GameEntity* cobSpherePBR = new GameEntity(sphereMesh, materials["cobbleMat2xPBR"]);
 	cobSpherePBR->GetTransform()->SetScale(2, 2, 2);
@@ -304,6 +311,82 @@ void AssetManager::CreateEntities()
 	entities.push_back(roughSphere);
 	entities.push_back(woodSphere);
 
+	Material* solidMetalMatPBR1 = materials["solidMetalMatPBR1"];
+	Material* solidMetalMatPBR2 = materials["solidMetalMatPBR2"];
+	Material* solidMetalMatPBR3 = materials["solidMetalMatPBR3"];
+	Material* solidMetalMatPBR4 = materials["solidMetalMatPBR4"];
+	Material* solidMetalMatPBR5 = materials["solidMetalMatPBR5"];
+
+
+	GameEntity* solidMetalSphere1 = new GameEntity(sphereMesh, solidMetalMatPBR1);
+	GameEntity* solidMetalSphere2 = new GameEntity(sphereMesh, solidMetalMatPBR2);
+	GameEntity* solidMetalSphere3 = new GameEntity(sphereMesh, solidMetalMatPBR3);
+	GameEntity* solidMetalSphere4 = new GameEntity(sphereMesh, solidMetalMatPBR4);
+	GameEntity* solidMetalSphere5 = new GameEntity(sphereMesh, solidMetalMatPBR5);
+
+	solidMetalSphere1->GetTransform()->SetScale(1, 1, 1);
+	solidMetalSphere1->GetTransform()->SetPosition(6, 0, 0);
+
+	solidMetalSphere2->GetTransform()->SetScale(1, 1, 1);
+	solidMetalSphere2->GetTransform()->SetPosition(4, 0, 0);
+
+	solidMetalSphere3->GetTransform()->SetScale(1, 1, 1);
+	solidMetalSphere3->GetTransform()->SetPosition(2, 0, 0);
+
+	solidMetalSphere4->GetTransform()->SetScale(1, 1, 1);
+	solidMetalSphere4->GetTransform()->SetPosition(0, 0, 0);
+
+	solidMetalSphere5->GetTransform()->SetScale(1, 1, 1);
+	solidMetalSphere5->GetTransform()->SetPosition(-2, 0, 0);
+
+	entities.push_back(solidMetalSphere1);
+	entities.push_back(solidMetalSphere2);
+	entities.push_back(solidMetalSphere3);
+	entities.push_back(solidMetalSphere4);
+	entities.push_back(solidMetalSphere5);
+
+	std::cout << "Created entities" << std::endl;
+}
+
+void AssetManager::CreateParticleEmitters()
+{
+
+	//std::shared_ptr<SimpleVertexShader> vs = std::make_shared<SimpleVertexShader>(assetMngr.GetVertexShader("ParticleVS.cso"));
+	//std::shared_ptr<SimplePixelShader> ps = std::make_shared<SimplePixelShader>(assetMngr.GetPixelShader("ParticlePS.cso"));
+	SimpleVertexShader* vs = vertexShaders["ParticleVS.cso"];
+	SimplePixelShader* ps = pixelShaders["ParticlePS.cso"];
+
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture1 = textures["dirt_03.png"];
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture2 = textures["light_03.png"];
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture3 = textures["twirl_03.png"];
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture4 = textures["star_07.png"];
+	Microsoft::WRL::ComPtr<ID3D11ShaderResourceView> texture5 = textures["spark_02.png"];
+
+	std::shared_ptr<Emitter> emit1 = std::make_shared<Emitter>(2, 10, 500, XMFLOAT4(1.0f, 1.0f, 1.0f, 1.0f), vs, ps, device, context, texture1);
+	std::shared_ptr<Emitter> emit2 = std::make_shared<Emitter>(5, 15, 500, XMFLOAT4(0.0f, 1.0f, 1.0f, 1.0f), vs, ps, device, context, texture2);
+	std::shared_ptr<Emitter> emit3 = std::make_shared<Emitter>(6, 18, 500, XMFLOAT4(1.0f, 0.0f, 1.0f, 1.0f), vs, ps, device, context, texture3);
+	std::shared_ptr<Emitter> emit4 = std::make_shared<Emitter>(8, 5, 500, XMFLOAT4(1.0f, 1.0f, 0.0f, 1.0f), vs, ps, device, context, texture4);
+	std::shared_ptr<Emitter> emit5 = std::make_shared<Emitter>(10, 30, 600, XMFLOAT4(0.0f, 1.0f, 0.5f, 1.0f), vs, ps, device, context, texture5);
+	//place the emitters
+	emit1->GetTransform()->SetPosition(0.0f, 4.0f, 0.0f);
+	emit2->GetTransform()->SetPosition(2.0f, 5.0f, 0.0f);
+	emit3->GetTransform()->SetPosition(-2.0f, 5.0f, 0.0f);
+	emit4->GetTransform()->SetPosition(3.0f, 3.0f, -3.0f);
+	emit5->GetTransform()->SetPosition(-3.0f, 3.0f, -3.0f);
+
+	emit2->SetRectBounds(5.0f, 5.0f, 5.0f);
+	emit3->SetRectBounds(5.0f, 5.0f, 0.0f);
+	emit4->SetRectBounds(5.0f, 0.0f, 5.0f);
+	emit5->SetRectBounds(9.0f, 0.0f, 0.0f);
+
+	particleEmitters.push_back(emit1);
+	particleEmitters.push_back(emit2);
+	particleEmitters.push_back(emit3);
+	particleEmitters.push_back(emit4);
+	particleEmitters.push_back(emit5);
+
+
+	std::cout << "Created particle emitters" << std::endl;
 }
 
 //it may be word having these also return the pointer to the shader, since it would be nice to have the loading and "shortening" all in one
@@ -368,4 +451,9 @@ Sky* AssetManager::GetSky()
 std::vector<GameEntity*>* AssetManager::GetEntities()
 {
 	return &entities;
+}
+
+std::vector<std::shared_ptr<Emitter>> AssetManager::GetEmitters()
+{
+	return particleEmitters;
 }

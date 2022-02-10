@@ -11,6 +11,7 @@
 #include "Mesh.h"
 #include "GameEntity.h"
 #include "Sky.h"
+#include "Emitter.h"
 
 #include "SimpleShader.h"
 #include "DXCore.h"
@@ -52,6 +53,7 @@ public:
 	);
 	void LoadAllAssets();
 	void CreateEntities();
+	void CreateParticleEmitters();
 	void LoadVertexShader(std::wstring filepath, std::string shaderName);
 	void LoadPixelShader(std::wstring filepath, std::string shaderName);
 	void LoadComputeShader(std::wstring filepath, std::string shaderName);
@@ -65,7 +67,9 @@ public:
 	SimplePixelShader* GetPixelShader(std::string name);
 	SimpleComputeShader* GetComputeShader(std::string name);
 	Sky* GetSky();
+
 	std::vector<GameEntity*>* GetEntities();
+	std::vector<std::shared_ptr<Emitter>> GetEmitters();
 
 private:
 	Microsoft::WRL::ComPtr<ID3D11Device>		device;
@@ -86,6 +90,7 @@ private:
 	std::unordered_map<std::string, SimpleComputeShader*> computeShaders;
 
 	std::vector<GameEntity*> entities;
+	std::vector<std::shared_ptr<Emitter>> particleEmitters;
 
 	Sky* sky;
 
